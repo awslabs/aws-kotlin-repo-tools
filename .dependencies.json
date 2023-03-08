@@ -1,10 +1,10 @@
 {
-  "org.jetbrains.kotlinx:atomicfu": { "packageName": "Atomicfu", "packageVersion": "0.19.0" },
-  "io.github.microutils:kotlin-logging": { "packageName": "Maven-io-github-microutils_kotlin-logging", "packageVersion": "3.0.0" },
-  "com.squareup.okio:okio": { "packageName": "Okio", "packageVersion": "3.3.0" },
-  "org.jetbrains.kotlinx:kotlinx-coroutines-core": { "packageName": "KotlinxCoroutinesCore", "packageVersion": "1.6.x" },
-  "com.squareup.okhttp3:okhttp": { "packageName": "OkHttp3", "packageVersion": "5.x" },
-  "com.squareup.okhttp3:okhttp-coroutines": { "packageName": "OkHttp3Coroutines", "packageVersion": "5.x" },
-  "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8": { "packageName": "KotlinxCoroutinesJdk8", "packageVersion": "1.6.x" },
-  "software.amazon.awssdk.crt:aws-crt": { "packageName": "Aws-crt-java", "packageVersion": "1.0.x" }
+  "org.jetbrains.kotlinx:atomicfu:0.19.0": { "packageName": "Atomicfu", "packageVersion": "0.19.0" },
+  "io.github.microutils:kotlin-logging:3.0.0": { "packageName": "Maven-io-github-microutils_kotlin-logging", "packageVersion": "3.0.0" },
+  "com.squareup.okio:okio:3.3.0": { "packageName": "Okio", "packageVersion": "3.3.0" },
+  "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4": { "packageName": "KotlinxCoroutinesCore", "packageVersion": "1.6.x" },
+  "com.squareup.okhttp3:okhttp:5.0.0-alpha.11": { "packageName": "OkHttp3", "packageVersion": "5.x" },
+  "com.squareup.okhttp3:okhttp-coroutines:5.0.0-alpha.11": { "packageName": "OkHttp3Coroutines", "packageVersion": "5.x" },
+  "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4": { "packageName": "KotlinxCoroutinesJdk8", "packageVersion": "1.6.x" },
+  "software.amazon.awssdk.crt:aws-crt:0.21.7": { "packageName": "Aws-crt-java", "packageVersion": "1.0.x" }
 }
