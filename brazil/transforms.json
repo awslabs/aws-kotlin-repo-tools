@@ -27,7 +27,7 @@
       "aws.sdk.kotlin.crt:aws-crt-kotlin-android"
     ],
     "rename": {
-      "aws.sdk.kotlin.crt.aws-crt-kotlin": "AwsCrtKotlin"
+      "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
     }
   }
 }
