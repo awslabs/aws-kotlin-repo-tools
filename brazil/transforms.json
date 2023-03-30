@@ -2,12 +2,12 @@
   "dependencies": {
     "com.squareup.okhttp3:okhttp-coroutines-jvm:5.0.0-alpha.11": "OkHttp3CoroutinesJvm-5.x",
     "com.squareup.okhttp3:okhttp-coroutines:5.0.0-alpha.11": "OkHttp3Coroutines-5.x",
-    "com.squareup.okhttp3:okhttp-jvm:5.0.0-alpha.11": "OkHttp3-5.x",
+    "com.squareup.okhttp3:okhttp-jvm:5.0.0-alpha.11": "OkHttp3Jvm-5.x",
     "com.squareup.okhttp3:okhttp:5.0.0-alpha.11": "OkHttp3-5.x",
     "com.squareup.okio:okio-jvm:3.3.0": "OkioJvm-3.x",
-    "com.squareup.okio:okio:3.3.0": "Okio-3.3.0",
-    "io.github.microutils:kotlin-logging-jvm:3.0.0": "KotlinLoggingJvm-3.x",
-    "io.github.microutils:kotlin-logging:3.0.0": "Maven-io-github-microutils_kotlin-logging-3.0.0",
+    "com.squareup.okio:okio:3.3.0": "Okio-3.x",
+    "io.github.microutils:kotlin-logging-jvm:3.0.0": "Maven-io-github-microutils_kotlin-logging-jvm-3.x",
+    "io.github.microutils:kotlin-logging:3.0.0": "Maven-io-github-microutils_kotlin-logging-3.x",
     "org.jetbrains.kotlin:kotlin-stdlib-common:1.8.10": "KotlinStdlibCommon-1.8.x",
     "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10": "KotlinStdlibJdk8-1.8.x",
     "org.jetbrains.kotlin:kotlin-stdlib:1.8.10": "KotlinStdlib-1.8.x",
@@ -17,5 +17,17 @@
     "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4": "KotlinxCoroutinesCore-1.6.x",
     "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4": "KotlinxCoroutinesJdk8-1.6.x",
     "software.amazon.awssdk.crt:aws-crt:0.21.7": "Aws-crt-java-1.0.x"
+  },
+  "packageHandlingRules": {
+    "ignore": [
+      "aws.sdk.kotlin:testing",
+      "aws.smithy.kotlin:http-test",
+      "aws.smithy.kotlin:smithy-test",
+      "aws.smithy.kotlin:testing",
+      "aws.sdk.kotlin.crt:aws-crt-kotlin-android"
+    ],
+    "rename": {
+      "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
+    }
   }
 }
