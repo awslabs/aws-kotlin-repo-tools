@@ -37,6 +37,12 @@ val Project.hasApple: Boolean get() = hasNative || hasJvmAndNative || files.any 
 val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "windows" }
 
 
+/**
+ * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
+ * subproject that is just a container for other projects but isn't a KMP project itself).
+ */
+val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs
+
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
     val kmpExtensionClass =
