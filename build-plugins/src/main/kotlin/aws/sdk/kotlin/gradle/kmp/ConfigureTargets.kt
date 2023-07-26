@@ -50,15 +50,15 @@ fun Project.configureKmpTargets() {
     subprojects {
         val subproject = this
         subproject.pluginManager.withPlugin("kotlin-multiplatform") {
-            val kotlin = subproject.extensions.findByType(kmpExtensionClass)
-            if (kotlin == null) {
+            val kmpExt = subproject.extensions.findByType(kmpExtensionClass)
+            if (kmpExt == null) {
                 logger.info("$name: skipping KMP configuration because multiplatform plugin has not been configured properly")
                 return@withPlugin
             }
 
             // configure the target hierarchy, this does not actually enable the targets, just their relationships
             // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
-            kotlin.targetHierarchy.default {
+            kmpExt.targetHierarchy.default {
                 if (hasJvmAndNative) {
                     group("jvmAndNative"){
                         withJvm()
@@ -82,29 +82,27 @@ fun Project.configureKmpTargets() {
             }
 
             // enable targets
-            configureCommon(kotlin)
+            configureCommon(kmpExt)
 
             if (hasJvm) {
-                configureJvm(kotlin)
+                configureJvm(kmpExt)
             }
 
-            // TODO - common and jvm only flag
-
-            with(kotlin) {
+            withIf(!COMMON_JVM_ONLY, kmpExt) {
                 if (hasJs) {
                     // FIXME - configure JS
-                    // js(KotlinJsCompilerType.IR){
-                    //     nodejs()
-                    // }
+                    js(KotlinJsCompilerType.IR){
+                        nodejs()
+                    }
                 }
 
-                // if (hasApple) {
-                //     macosX64()
-                //     macosArm64()
-                //     ios()
-                //     watchos()
-                //     tvos()
-                // }
+                if (hasApple) {
+                    macosX64()
+                    macosArm64()
+                    ios()
+                    watchos()
+                    tvos()
+                }
 
                 if (hasLinux) {
                     linuxX64()
@@ -115,22 +113,23 @@ fun Project.configureKmpTargets() {
                     mingwX64()
                 }
 
-                // if (hasDesktop) {
-                //     linuxX64()
-                //     linuxArm64()
-                //     mingwX64()
-                //     macosX64()
-                //     macosArm64()
-                // }
+                if (hasDesktop) {
+                    linuxX64()
+                    linuxArm64()
+                    mingwX64()
+                    macosX64()
+                    macosArm64()
+                }
 
-                configureSourceSetsConvention()
             }
+
+            kmpExt.configureSourceSetsConvention()
         }
     }
 }
 
-internal fun Project.configureCommon(kotlin: KotlinMultiplatformExtension) {
-    with(kotlin) {
+internal fun Project.configureCommon(kmpExt: KotlinMultiplatformExtension) {
+    with(kmpExt) {
         sourceSets.named("commonMain") {
             // TODO - common deps?
         }
@@ -143,9 +142,9 @@ internal fun Project.configureCommon(kotlin: KotlinMultiplatformExtension) {
     }
 }
 
-internal fun Project.configureJvm(kotlin: KotlinMultiplatformExtension) {
-    kotlin.jvm()
-    with(kotlin) {
+internal fun Project.configureJvm(kmpExt: KotlinMultiplatformExtension) {
+    with(kmpExt) {
+        jvm()
         sourceSets.named("jvmMain"){
             dependencies {
                 api(kotlin("stdlib"))
@@ -187,5 +186,11 @@ internal fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
         this.kotlin.srcDir("$platform/$srcDir")
         resources.srcDir("$platform/${resourcesPrefix}resources")
         languageSettings.progressiveMode = true
+    }
+}
+
+internal inline fun <T> withIf(condition: Boolean, receiver: T, block: T.() -> Unit): Unit {
+    if (condition) {
+        receiver.block()
     }
 }
