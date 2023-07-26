@@ -88,10 +88,10 @@ fun Project.configureKmpTargets() {
             }
 
             // enable targets
-            configureCommon(kmpExt)
+            configureCommon()
 
             if (hasJvm) {
-                configureJvm(kmpExt)
+                configureJvm()
             }
 
             withIf(!COMMON_JVM_ONLY, kmpExt) {
@@ -134,8 +134,8 @@ fun Project.configureKmpTargets() {
     }
 }
 
-internal fun Project.configureCommon(kmpExt: KotlinMultiplatformExtension) {
-    with(kmpExt) {
+fun Project.configureCommon() {
+    kotlin {
         sourceSets.named("commonTest") {
             dependencies {
                 implementation(kotlin("test"))
@@ -145,8 +145,8 @@ internal fun Project.configureCommon(kmpExt: KotlinMultiplatformExtension) {
     }
 }
 
-internal fun Project.configureJvm(kmpExt: KotlinMultiplatformExtension) {
-    with(kmpExt) {
+fun Project.configureJvm() {
+    kotlin {
         jvm()
         sourceSets.named("jvmMain"){
             dependencies {
@@ -175,8 +175,7 @@ internal fun Project.configureJvm(kmpExt: KotlinMultiplatformExtension) {
 }
 
 
-internal fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
-    explicitApi()
+fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
     sourceSets.all {
         val srcDir = if (name.endsWith("Main")) "src" else "test"
         val resourcesPrefix = if (name.endsWith("Test")) "test-" else ""
