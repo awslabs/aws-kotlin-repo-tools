@@ -18,5 +18,6 @@ val Project.kotlin: KotlinMultiplatformExtension get() = the()
 
 public fun <T> ExtraPropertiesExtension.getOrNull(name: String): T? {
     if (!has(name)) return null
+    @Suppress("UNCHECKED_CAST")
     return get(name) as? T
 }
