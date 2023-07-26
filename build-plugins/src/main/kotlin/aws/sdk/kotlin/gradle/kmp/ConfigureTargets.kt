@@ -136,13 +136,10 @@ fun Project.configureKmpTargets() {
 
 internal fun Project.configureCommon(kmpExt: KotlinMultiplatformExtension) {
     with(kmpExt) {
-        sourceSets.named("commonMain") {
-            // TODO - common deps?
-        }
-
         sourceSets.named("commonTest") {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(kotlin("test-annotations-common"))
             }
         }
     }
@@ -154,7 +151,6 @@ internal fun Project.configureJvm(kmpExt: KotlinMultiplatformExtension) {
         sourceSets.named("jvmMain"){
             dependencies {
                 api(kotlin("stdlib"))
-                // TODO - coroutines
             }
 
         }
@@ -162,8 +158,6 @@ internal fun Project.configureJvm(kmpExt: KotlinMultiplatformExtension) {
         sourceSets.named("jvmTest"){
             dependencies {
                 implementation(kotlin("test-junit5"))
-                // TODO - junit jupiter, coroutines-debug, kotest-assertions-core-jvm
-
             }
         }
     }
