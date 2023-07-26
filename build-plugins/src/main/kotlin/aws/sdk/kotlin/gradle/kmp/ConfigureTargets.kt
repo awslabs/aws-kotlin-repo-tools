@@ -1,7 +1,6 @@
 package aws.sdk.kotlin.gradle.kmp
 
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -20,27 +19,11 @@ internal fun <T> Project.tryGetClass(className: String): Class<T>? {
     }
 }
 
-private const val EXTRA_SRC_SET_ROOT_PROP = "aws.sdk.kotlin.additionalSourceSetRoot"
-
-/**
- * Extension to add a user defined name for auto-detecting a common source set root
- */
-public fun Project.addCommonSourceSetRoot(name: String) {
-    extra.set(EXTRA_SRC_SET_ROOT_PROP, name)
-}
-
-public fun <T> ExtraPropertiesExtension.getOrNull(name: String): T? {
-    if (!has(name)) return null
-    return get(name) as? T
-}
-
-
 val Project.files: Array<File> get() = project.projectDir.listFiles() ?: emptyArray()
 
 val Project.hasCommon: Boolean get() = files.any {
-    val userDefinedCommon = extra.getOrNull<String>(EXTRA_SRC_SET_ROOT_PROP) ?: ""
-    val hasMatchingUserDefinedCommon = it.name == userDefinedCommon
-    it.name == "common" || hasMatchingUserDefinedCommon
+    // FIXME - this is somewhat specific to aws-sdk-kotlin to consider "generated-src" a common sourceSet root
+    it.name == "common" || it.name == "generated-src"
 }
 
 // always configured with common
