@@ -1,6 +1,7 @@
 package aws.sdk.kotlin.gradle.kmp
 
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
@@ -9,7 +10,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 import java.io.File
 
-fun <T> Project.tryGetClass(className: String): Class<T>? {
+internal fun <T> Project.tryGetClass(className: String): Class<T>? {
     val classLoader = buildscript.classLoader
     return try {
         @Suppress("UNCHECKED_CAST")
@@ -19,10 +20,28 @@ fun <T> Project.tryGetClass(className: String): Class<T>? {
     }
 }
 
+private const val EXTRA_SRC_SET_ROOT_PROP = "aws.sdk.kotlin.additionalSourceSetRoot"
+
+/**
+ * Extension to add a user defined name for auto-detecting a common source set root
+ */
+public fun Project.addCommonSourceSetRoot(name: String) {
+    extra.set(EXTRA_SRC_SET_ROOT_PROP, name)
+}
+
+public fun <T> ExtraPropertiesExtension.getOrNull(name: String): T? {
+    if (!has(name)) return null
+    return get(name) as? T
+}
+
 
 val Project.files: Array<File> get() = project.projectDir.listFiles() ?: emptyArray()
 
-val Project.hasCommon: Boolean get() = files.any { it.name == "common" }
+val Project.hasCommon: Boolean get() = files.any {
+    val userDefinedCommon = extra.getOrNull<String>(EXTRA_SRC_SET_ROOT_PROP) ?: ""
+    val hasMatchingUserDefinedCommon = it.name == userDefinedCommon
+    it.name == "common" || hasMatchingUserDefinedCommon
+}
 
 // always configured with common
 val Project.hasJvm: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "jvm" }
@@ -37,11 +56,12 @@ val Project.hasApple: Boolean get() = hasNative || hasJvmAndNative || files.any 
 val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "windows" }
 
 
+
 /**
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs
+public val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
