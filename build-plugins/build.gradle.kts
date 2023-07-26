@@ -23,6 +23,8 @@ dependencies {
     implementation(kotlin("gradle-plugin", "1.8.22"))
 }
 
+group = "aws.sdk.kotlin"
+
 gradlePlugin {
     plugins {
         val awsKotlinRepoToolsPlugin by creating {
