@@ -61,11 +61,9 @@ fun Project.configureKmpTargets() {
         subproject.pluginManager.withPlugin("kotlin-multiplatform") {
             val kmpExt = subproject.extensions.findByType(kmpExtensionClass)
             if (kmpExt == null) {
-                println("no KMP ext for ${subproject.name}")
                 logger.info("$name: skipping KMP configuration because multiplatform plugin has not been configured properly")
                 return@withPlugin
             }
-            println("configuring KMP ext for ${subproject.name}")
 
             // configure the target hierarchy, this does not actually enable the targets, just their relationships
             // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
