@@ -54,8 +54,8 @@ public fun Project.prop(name: String): Any? =
     properties[name] ?: localProperties()[name]
 
 
-inline fun <reified T> Project.prop(name: String): T? {
-    val any = prop(name)
+inline fun <reified T> Project.typedProp(name: String): T? {
+    val any = properties[name] ?: localProperties()[name]
 
     return when(T::class) {
         String::class -> any?.toString() as? T
