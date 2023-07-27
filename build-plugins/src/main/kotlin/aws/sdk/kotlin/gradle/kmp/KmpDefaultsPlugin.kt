@@ -11,7 +11,7 @@ import org.gradle.api.Project
  */
 class KmpDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        println("applying kmp defaults to $target")
+        target.logger.info("applying kmp defaults plugin to $target")
         target.configureKmpTargets()
     }
 }
