@@ -1,11 +1,15 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package aws.sdk.kotlin.gradle.kmp
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.*
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 import java.io.File
 
@@ -38,8 +42,6 @@ val Project.hasLinux: Boolean get() = hasNative || hasJvmAndNative || files.any 
 val Project.hasApple: Boolean get() = hasNative || hasJvmAndNative || files.any { it.name == "apple" }
 val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "windows" }
 
-
-
 /**
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
@@ -69,7 +71,7 @@ fun Project.configureKmpTargets() {
             // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
             kmpExt.targetHierarchy.default {
                 if (hasJvmAndNative) {
-                    group("jvmAndNative"){
+                    group("jvmAndNative") {
                         withJvm()
                         withNative()
                     }
@@ -100,7 +102,7 @@ fun Project.configureKmpTargets() {
             withIf(!COMMON_JVM_ONLY, kmpExt) {
                 if (hasJs) {
                     // FIXME - configure JS
-                    js(KotlinJsCompilerType.IR){
+                    js(KotlinJsCompilerType.IR) {
                         nodejs()
                     }
                 }
@@ -129,7 +131,6 @@ fun Project.configureKmpTargets() {
                     macosX64()
                     macosArm64()
                 }
-
             }
 
             kmpExt.configureSourceSetsConvention()
@@ -151,21 +152,20 @@ fun Project.configureCommon() {
 fun Project.configureJvm() {
     kotlin {
         jvm()
-        sourceSets.named("jvmMain"){
+        sourceSets.named("jvmMain") {
             dependencies {
                 api(kotlin("stdlib"))
             }
-
         }
 
-        sourceSets.named("jvmTest"){
+        sourceSets.named("jvmTest") {
             dependencies {
                 implementation(kotlin("test-junit5"))
             }
         }
     }
 
-    tasks.named<Test>("jvmTest"){
+    tasks.named<Test>("jvmTest") {
         testLogging {
             events("passed", "skipped", "failed")
             showStandardStreams = true
@@ -176,7 +176,6 @@ fun Project.configureJvm() {
         useJUnitPlatform()
     }
 }
-
 
 fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
     sourceSets.all {
@@ -191,7 +190,7 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
     }
 }
 
-internal inline fun <T> withIf(condition: Boolean, receiver: T, block: T.() -> Unit): Unit {
+internal inline fun <T> withIf(condition: Boolean, receiver: T, block: T.() -> Unit) {
     if (condition) {
         receiver.block()
     }

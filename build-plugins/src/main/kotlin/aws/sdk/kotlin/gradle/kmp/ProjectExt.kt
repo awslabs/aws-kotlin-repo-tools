@@ -1,13 +1,16 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package aws.sdk.kotlin.gradle.kmp
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.kotlin.dsl.configure
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.gradle.kotlin.dsl.the
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.util.*
-
 
 /**
  * Allows configuration from parent projects subprojects/allprojects block when they haven't configured the KMP
@@ -23,7 +26,6 @@ public fun <T> ExtraPropertiesExtension.getOrNull(name: String): T? {
     @Suppress("UNCHECKED_CAST")
     return get(name) as? T
 }
-
 
 /**
  * Attempts to load and merge all properties from:
@@ -53,11 +55,10 @@ public fun Project.localProperties(): Map<String, Any> {
 public fun Project.prop(name: String): Any? =
     properties[name] ?: localProperties()[name]
 
-
 inline fun <reified T> Project.typedProp(name: String): T? {
     val any = properties[name] ?: localProperties()[name]
 
-    return when(T::class) {
+    return when (T::class) {
         String::class -> any?.toString() as? T
         Boolean::class -> any?.toString()?.toBoolean() as? T
         else -> null

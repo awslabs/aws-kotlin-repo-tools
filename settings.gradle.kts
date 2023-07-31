@@ -1,3 +1,7 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 rootProject.name = "aws-kotlin-repo-tools"
 
 pluginManagement {
@@ -12,7 +16,6 @@ pluginManagement {
         id("org.jetbrains.kotlin.jvm") version kotlinVersion
     }
 }
-
 
 include(":build-plugins")
 include(":ktlint-rules")

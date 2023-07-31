@@ -1,10 +1,14 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package aws.sdk.kotlin.gradle.kmp
 
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 
 /**
  * Whether Intellij is active or not
@@ -24,12 +28,11 @@ val HOST_NAME = when {
 // val Project.COMMON_JVM_ONLY get() = IDEA_ACTIVE && properties["aws.kotlin.ide.jvmAndCommonOnly"] == "true"
 val Project.COMMON_JVM_ONLY get() = true
 
-
 /**
  * Scope down the native target enabled when working in intellij
  */
 val KotlinMultiplatformExtension.ideaTarget: KotlinNativeTarget
-    get() = when(HostManager.host) {
+    get() = when (HostManager.host) {
         is KonanTarget.LINUX_X64 -> linuxX64()
         is KonanTarget.LINUX_ARM64 -> linuxArm64()
         is KonanTarget.MACOS_X64 -> macosX64()
@@ -37,4 +40,3 @@ val KotlinMultiplatformExtension.ideaTarget: KotlinNativeTarget
         is KonanTarget.MINGW_X64 -> mingwX64()
         else -> error("Unsupported target ${HostManager.host}")
     }
-
