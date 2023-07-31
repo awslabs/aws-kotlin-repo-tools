@@ -1,0 +1,7 @@
+[versions]
+ktlint = "0.48.1"
+
+[libraries]
+ktlint = { module = "com.pinterest:ktlint", version.ref = "ktlint" }
+ktlint-core = { module = "com.pinterest.ktlint:ktlint-core", version.ref = "ktlint" }
+ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
