@@ -7,6 +7,7 @@ package aws.sdk.kotlin.gradle.kmp
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
@@ -49,18 +50,21 @@ public fun Project.localProperties(): Map<String, Any> {
 }
 
 /**
- * Convenience to get a project property or a property from [localProperties]
+ * Convenience to get a property from the following (in order):
+ * * project property
+ * * property from [localProperties]
+ * * property from extras
  * @return property if it exists or null
  */
 public fun Project.prop(name: String): Any? =
-    properties[name] ?: localProperties()[name]
+    properties[name] ?: localProperties()[name] ?: extra[name]
 
 inline fun <reified T> Project.typedProp(name: String): T? {
-    val any = properties[name] ?: localProperties()[name]
+    val any = prop(name)
 
     return when (T::class) {
         String::class -> any?.toString() as? T
         Boolean::class -> any?.toString()?.toBoolean() as? T
-        else -> null
+        else -> error("unknown type ${T::class} for property $name")
     }
 }
