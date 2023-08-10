@@ -33,6 +33,11 @@ gradlePlugin {
             id = "aws.sdk.kotlin.kmp"
             implementationClass = "aws.sdk.kotlin.gradle.kmp.KmpDefaultsPlugin"
         }
+
+        // create("buildDefaultsPlugin") {
+        //     id = "aws.sdk.kotlin.build-defaults"
+        //     implementationClass = "aws.sdk.kotlin.gradle.BuildDefaultsPlugin"
+        // }
     }
 }
 
