@@ -57,7 +57,7 @@ public fun Project.localProperties(): Map<String, Any> {
  * @return property if it exists or null
  */
 public fun Project.prop(name: String): Any? =
-    properties[name] ?: localProperties()[name] ?: extra[name]
+    properties[name] ?: localProperties()[name] ?: extra.getOrNull(name)
 
 inline fun <reified T> Project.typedProp(name: String): T? {
     val any = prop(name)
