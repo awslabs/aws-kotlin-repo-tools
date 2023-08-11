@@ -23,20 +23,10 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("gradle-plugin", "1.8.22"))
+    runtimeOnly(project(":ktlint-rules"))
 }
 
 group = "aws.sdk.kotlin"
-
-val ktlint = configurations.create("ktlint") {
-    attributes {
-        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-    }
-}
-
-dependencies {
-    ktlint(libs.ktlint)
-    ktlint(project(":ktlint-rules"))
-}
 
 gradlePlugin {
     plugins {

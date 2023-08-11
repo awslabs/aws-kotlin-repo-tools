@@ -19,19 +19,19 @@ import org.gradle.kotlin.dsl.register
 fun Project.configureLinting(lintPaths: List<String>) {
     verifyRootProject { "AWS SDK lint configuration is expected to be configured on the root project" }
 
-    // val ktlint = configurations.create("ktlint") {
-    //     attributes {
-    //         attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-    //     }
-    // }
-    //
-    // // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
-    // val ktlintVersion = "0.48.1"
-    // dependencies {
-    //     ktlint("com.pinterest:ktlint:$ktlintVersion")
-    //     // this is expected available (usually by configuring sourceControl and telling gradle it's produced by this repo)
-    //     ktlint("aws.sdk.kotlin:ktlint-rules")
-    // }
+    val ktlint = configurations.create("ktlint") {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        }
+    }
+
+    // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
+    val ktlintVersion = "0.48.1"
+    dependencies {
+        ktlint("com.pinterest:ktlint:$ktlintVersion")
+        // this is expected available (usually by configuring sourceControl and telling gradle it's produced by this repo)
+        // ktlint("aws.sdk.kotlin:ktlint-rules")
+    }
 
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
