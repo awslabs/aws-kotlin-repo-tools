@@ -23,6 +23,7 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("gradle-plugin", "1.8.22"))
+    // make our custom lint rules available to the buildscript classpath
     runtimeOnly(project(":ktlint-rules"))
 }
 
@@ -34,11 +35,6 @@ gradlePlugin {
             id = "aws.sdk.kotlin.kmp"
             implementationClass = "aws.sdk.kotlin.gradle.kmp.KmpDefaultsPlugin"
         }
-
-        // create("buildDefaultsPlugin") {
-        //     id = "aws.sdk.kotlin.build-defaults"
-        //     implementationClass = "aws.sdk.kotlin.gradle.BuildDefaultsPlugin"
-        // }
     }
 }
 

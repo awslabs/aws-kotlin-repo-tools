@@ -29,12 +29,11 @@ fun Project.configureLinting(lintPaths: List<String>) {
     val ktlintVersion = "0.48.1"
     dependencies {
         ktlint("com.pinterest:ktlint:$ktlintVersion")
-        // this is expected available (usually by configuring sourceControl and telling gradle it's produced by this repo)
-        // ktlint("aws.sdk.kotlin:ktlint-rules")
     }
 
-    // add the buildscript classpath which should pickup our custom ktlint-rules + any custom rules added by consumer
-    val execKtlintClaspath= ktlint + buildscript.configurations.getByName("classpath")
+    // add the buildscript classpath which should pickup our custom ktlint-rules (via runtimeOnly dep on this plugin)
+    // plus any custom rules added by consumer
+    val execKtlintClaspath = ktlint + buildscript.configurations.getByName("classpath")
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
         group = "Verification"
