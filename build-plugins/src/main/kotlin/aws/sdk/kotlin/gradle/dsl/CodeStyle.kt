@@ -33,10 +33,12 @@ fun Project.configureLinting(lintPaths: List<String>) {
         // ktlint("aws.sdk.kotlin:ktlint-rules")
     }
 
+    // add the buildscript classpath which should pickup our custom ktlint-rules + any custom rules added by consumer
+    val execKtlintClaspath= ktlint + buildscript.configurations.getByName("classpath")
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
         group = "Verification"
-        classpath = configurations.getByName("ktlint")
+        classpath = execKtlintClaspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = lintPaths
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
@@ -45,7 +47,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
     tasks.register<JavaExec>("ktlintFormat") {
         description = "Auto fix Kotlin code style violations"
         group = "formatting"
-        classpath = configurations.getByName("ktlint")
+        classpath = execKtlintClaspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = listOf("-F") + lintPaths
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
