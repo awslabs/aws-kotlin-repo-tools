@@ -30,7 +30,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
     dependencies {
         ktlint("com.pinterest:ktlint:$ktlintVersion")
         // this is expected available (usually by configuring sourceControl and telling gradle it's produced by this repo)
-        ktlint(project(":aws-kotlin-repo-tools:ktlint-rules"))
+        ktlint("aws.sdk.kotlin:ktlint-rules")
     }
 
     tasks.register<JavaExec>("ktlint") {
