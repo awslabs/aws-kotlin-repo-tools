@@ -17,7 +17,7 @@ import org.gradle.kotlin.dsl.register
  * @param lintPaths list of paths relative to the project root to lint (or not lint).
  */
 fun Project.configureLinting(lintPaths: List<String>) {
-    verifyRootProject { "AWS SDK lint configuration is expected to be configured on the root project" }
+    verifyRootProject { "Kotlin SDK lint configuration is expected to be configured on the root project" }
 
     val ktlint = configurations.create("ktlint") {
         attributes {
