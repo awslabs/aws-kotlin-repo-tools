@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.kmp
 
+import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -15,7 +16,10 @@ import org.gradle.api.Project
  */
 class KmpDefaultsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        target.logger.info("applying kmp defaults plugin to $target")
-        target.configureKmpTargets()
+        with(target) {
+            logger.info("applying kmp defaults plugin to $target")
+            verifyRootProject { "AWS SDK KmpDefaultsPlugin requires installation into root project" }
+            configureKmpTargets()
+        }
     }
 }

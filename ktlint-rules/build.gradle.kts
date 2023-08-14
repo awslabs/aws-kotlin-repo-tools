@@ -2,6 +2,12 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 description = "Lint rules for the AWS SDK for Kotlin"
 
@@ -11,16 +17,27 @@ plugins {
 
 kotlin {
     sourceSets {
-        val main by getting {
+        main {
             dependencies {
                 implementation(libs.ktlint.core)
             }
         }
 
-        val test by getting {
+        test {
             dependencies {
                 implementation(libs.ktlint.test)
             }
         }
     }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = JavaVersion.VERSION_1_8.toString()
+    targetCompatibility = JavaVersion.VERSION_1_8.toString()
 }

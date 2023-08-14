@@ -2,25 +2,14 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.kmp
+package aws.sdk.kotlin.gradle.util
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtraPropertiesExtension
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.extra
-import org.gradle.kotlin.dsl.the
-import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import java.io.File
 import java.util.*
-
-/**
- * Allows configuration from parent projects subprojects/allprojects block when they haven't configured the KMP
- * plugin but the subproject has applied it. The extension is otherwise not visible.
- */
-fun Project.kotlin(block: KotlinMultiplatformExtension.() -> Unit) {
-    configure(block)
-}
-val Project.kotlin: KotlinMultiplatformExtension get() = the()
 
 public fun <T> ExtraPropertiesExtension.getOrNull(name: String): T? {
     if (!has(name)) return null
@@ -68,3 +57,12 @@ inline fun <reified T> Project.typedProp(name: String): T? {
         else -> error("unknown type ${T::class} for property $name")
     }
 }
+
+public inline fun Project.verifyRootProject(lazyMessage: () -> Any) {
+    if (rootProject != this) {
+        val message = lazyMessage()
+        throw AwsSdkGradleException(message.toString())
+    }
+}
+
+class AwsSdkGradleException(message: String) : GradleException(message)

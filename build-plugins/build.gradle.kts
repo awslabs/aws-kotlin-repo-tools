@@ -23,6 +23,8 @@ repositories {
 dependencies {
     implementation(gradleApi())
     implementation(kotlin("gradle-plugin", "1.8.22"))
+    // make our custom lint rules available to the buildscript classpath
+    runtimeOnly(project(":ktlint-rules"))
 }
 
 group = "aws.sdk.kotlin"
