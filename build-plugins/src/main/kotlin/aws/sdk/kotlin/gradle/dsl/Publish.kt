@@ -89,6 +89,14 @@ fun Project.configurePublishing(repoName: String) {
 
 fun Project.configureNexus() {
     verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
+
+    val doConfigure = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
+        .all { project.hasProperty(it) }
+    if (!doConfigure) {
+        logger.info("skipping nexus configuration, missing required one or more required properties")
+        return
+    }
+
     apply(plugin = "io.github.gradle-nexus.publish-plugin")
     extensions.configure<NexusPublishExtension> {
         val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
