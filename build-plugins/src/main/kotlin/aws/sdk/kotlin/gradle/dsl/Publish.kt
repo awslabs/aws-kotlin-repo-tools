@@ -13,6 +13,7 @@ import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.SigningExtension
+import java.time.Duration
 
 private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
 private const val SKIP_PUBLISH_PROP = "skipPublish"
@@ -109,6 +110,11 @@ fun Project.configureNexus() {
                 username.set(project.property(SONATYPE_USERNAME_PROP) as String)
                 password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
             }
+        }
+
+        transitionCheckOptions {
+            maxRetries.set(180)
+            delayBetween.set(Duration.ofSeconds(10))
         }
     }
 }
