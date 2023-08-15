@@ -22,10 +22,18 @@ private const val SIGNING_PASSWORD_PROP = "signingPassword"
 private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
 private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 
+/**
+ * Mark this project as excluded from publishing
+ */
 fun Project.skipPublishing() {
     extra.set(SKIP_PUBLISH_PROP, true)
 }
 
+/**
+ * Configure publishing for this project. This applies the `maven-publish` and `signing` plugins and configures
+ * the publications.
+ * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
+ */
 fun Project.configurePublishing(repoName: String) {
     val project = this
     apply(plugin = "maven-publish")
@@ -88,13 +96,16 @@ fun Project.configurePublishing(repoName: String) {
     }
 }
 
+/**
+ * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
+ */
 fun Project.configureNexus() {
     verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
 
-    val doConfigure = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
-        .all { project.hasProperty(it) }
+    val requiredProps = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
+    val doConfigure = requiredProps.all { project.hasProperty(it) }
     if (!doConfigure) {
-        logger.info("skipping nexus configuration, missing required one or more required properties")
+        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
         return
     }
 
