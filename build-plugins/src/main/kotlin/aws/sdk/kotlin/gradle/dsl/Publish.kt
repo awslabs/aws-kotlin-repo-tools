@@ -1,0 +1,112 @@
+/*
+ * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package aws.sdk.kotlin.gradle.dsl
+
+import aws.sdk.kotlin.gradle.util.verifyRootProject
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
+import org.gradle.api.Project
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.*
+import org.gradle.plugins.signing.SigningExtension
+
+private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
+private const val SKIP_PUBLISH_PROP = "skipPublish"
+private const val SIGNING_KEY_PROP = "signingKey"
+private const val SIGNING_PASSWORD_PROP = "signingPassword"
+private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
+private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
+
+fun Project.skipPublishing() {
+    extra.set(SKIP_PUBLISH_PROP, true)
+}
+
+fun Project.configurePublishing(repoName: String) {
+    val project = this
+    apply(plugin = "maven-publish")
+    apply(plugin = "signing")
+
+    // FIXME: create a real "javadoc" JAR from Dokka output
+    val javadocJar = tasks.register<Jar>("emptyJar") {
+        archiveClassifier.set("javadoc")
+        from()
+    }
+
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven { name = "testLocal"; url = rootProject.buildDir.resolve("m2").toURI() }
+        }
+
+        publications.all {
+            if (this !is MavenPublication) return@all
+            project.afterEvaluate {
+                pom {
+                    name.set(project.name)
+                    description.set(project.description)
+                    url.set("https://github.com/awslabs/$repoName")
+                    licenses {
+                        licenses {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set(repoName)
+                            name.set("AWS SDK Kotlin Team")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/awslabs/$repoName.git")
+                        developerConnection.set("scm:git:ssh://github.com/awslabs/$repoName.git")
+                        url.set("https://github.com/awslabs/$repoName")
+                    }
+
+                    artifact(javadocJar)
+                }
+            }
+        }
+
+        if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
+            extensions.configure<SigningExtension> {
+                useInMemoryPgpKeys(
+                    project.property(SIGNING_KEY_PROP) as String,
+                    project.property(SIGNING_PASSWORD_PROP) as String,
+                )
+                sign(publications)
+            }
+        }
+    }
+
+    tasks.withType<AbstractPublishToMaven>().all {
+        onlyIf { isAvailableForPublication(project, publication) }
+    }
+}
+
+fun Project.configureNexus() {
+    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
+    apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    extensions.configure<NexusPublishExtension> {
+        val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
+        group = publishGroupName
+        packageGroup.set(publishGroupName)
+        repositories {
+            create("awsNexus") {
+                nexusUrl.set(uri("https://aws.oss.sonatype.org/service/local/"))
+                snapshotRepositoryUrl.set(uri("https://aws.oss.sonatype.org/content/repositories/snapshots/"))
+                username.set(project.property(SONATYPE_USERNAME_PROP) as String)
+                password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
+            }
+        }
+    }
+}
+
+private fun isAvailableForPublication(project: Project, publication: MavenPublication): Boolean {
+    if (project.extra.has(SKIP_PUBLISH_PROP)) return false
+    val publishGroupName = project.findProperty(PUBLISH_GROUP_NAME_PROP) as? String
+    return publishGroupName == null || publication.groupId.startsWith(publishGroupName)
+}
