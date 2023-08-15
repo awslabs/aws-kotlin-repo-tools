@@ -49,7 +49,7 @@ fun Project.configurePublishing(repoName: String) {
                     description.set(project.description)
                     url.set("https://github.com/awslabs/$repoName")
                     licenses {
-                        licenses {
+                        license {
                             name.set("The Apache License, Version 2.0")
                             url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                         }
