@@ -19,7 +19,10 @@ class KmpDefaultsPlugin : Plugin<Project> {
         with(target) {
             logger.info("applying kmp defaults plugin to $target")
             verifyRootProject { "AWS SDK KmpDefaultsPlugin requires installation into root project" }
-            configureKmpTargets()
+            subprojects {
+                val subproject = this
+                subproject.configureKmpTargets()
+            }
         }
     }
 }
