@@ -25,6 +25,7 @@ dependencies {
     implementation(kotlin("gradle-plugin", "1.8.22"))
     // make our custom lint rules available to the buildscript classpath
     runtimeOnly(project(":ktlint-rules"))
+    implementation(libs.nexusPublishPlugin)
 }
 
 group = "aws.sdk.kotlin"
