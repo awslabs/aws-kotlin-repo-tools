@@ -58,83 +58,80 @@ fun Project.configureKmpTargets() {
         return
     }
 
-    subprojects {
-        val subproject = this
-        subproject.pluginManager.withPlugin("kotlin-multiplatform") {
-            val kmpExt = subproject.extensions.findByType(kmpExtensionClass)
-            if (kmpExt == null) {
-                logger.info("$name: skipping KMP configuration because multiplatform plugin has not been configured properly")
-                return@withPlugin
-            }
-
-            // configure the target hierarchy, this does not actually enable the targets, just their relationships
-            // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
-            kmpExt.targetHierarchy.default {
-                if (hasJvmAndNative) {
-                    group("jvmAndNative") {
-                        withJvm()
-                        withNative()
-                    }
-                }
-
-                if (hasWindows) {
-                    group("windows") {
-                        withMingw()
-                    }
-                }
-
-                if (hasDesktop) {
-                    group("desktop") {
-                        withLinux()
-                        withMingw()
-                        withMacos()
-                    }
-                }
-            }
-
-            // enable targets
-            configureCommon()
-
-            if (hasJvm) {
-                configureJvm()
-            }
-
-            withIf(!COMMON_JVM_ONLY, kmpExt) {
-                if (hasJs) {
-                    // FIXME - configure JS
-                    js(KotlinJsCompilerType.IR) {
-                        nodejs()
-                    }
-                }
-
-                if (hasApple) {
-                    macosX64()
-                    macosArm64()
-                    ios()
-                    watchos()
-                    tvos()
-                }
-
-                if (hasLinux) {
-                    linuxX64()
-                    linuxArm64()
-                }
-
-                if (hasWindows) {
-                    mingwX64()
-                }
-
-                if (hasDesktop) {
-                    linuxX64()
-                    linuxArm64()
-                    mingwX64()
-                    macosX64()
-                    macosArm64()
-                }
-            }
-
-            kmpExt.configureSourceSetsConvention()
+    pluginManager.withPlugin("kotlin-multiplatform") {
+        val kmpExt = extensions.findByType(kmpExtensionClass)
+        if (kmpExt == null) {
+            logger.info("$name: skipping KMP configuration because multiplatform plugin has not been configured properly")
+            return@withPlugin
         }
+
+        // configure the target hierarchy, this does not actually enable the targets, just their relationships
+        // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
+        kmpExt.targetHierarchy.default {
+            if (hasJvmAndNative) {
+                group("jvmAndNative") {
+                    withJvm()
+                    withNative()
+                }
+            }
+
+            if (hasWindows) {
+                group("windows") {
+                    withMingw()
+                }
+            }
+
+            if (hasDesktop) {
+                group("desktop") {
+                    withLinux()
+                    withMingw()
+                    withMacos()
+                }
+            }
+        }
+
+        // enable targets
+        configureCommon()
+
+        if (hasJvm) {
+            configureJvm()
+        }
+
+        withIf(!COMMON_JVM_ONLY, kmpExt) {
+            if (hasJs) {
+                // FIXME - configure JS
+                js(KotlinJsCompilerType.IR) {
+                    nodejs()
+                }
+            }
+
+            if (hasApple) {
+                macosX64()
+                macosArm64()
+                ios()
+                watchos()
+                tvos()
+            }
+
+            if (hasLinux) {
+                linuxX64()
+                linuxArm64()
+            }
+
+            if (hasWindows) {
+                mingwX64()
+            }
+
+            if (hasDesktop) {
+                linuxX64()
+                linuxArm64()
+                mingwX64()
+                macosX64()
+                macosArm64()
+            }
+        }
+
+        kmpExt.configureSourceSetsConvention()
     }
 }
 
