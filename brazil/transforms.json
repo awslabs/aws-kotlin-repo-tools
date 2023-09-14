@@ -32,7 +32,7 @@
       "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
     },
     "resolvesConflictDependencies": {
-      "com.squareup.okhttp3:okhttp-coroutines:5.0.0-alpha.11": [
+      "com.squareup.okhttp3:okhttp-coroutines-jvm:5.0.0-alpha.11": [
         "KotlinxCoroutinesCore-1.7.x"
       ]
     }
