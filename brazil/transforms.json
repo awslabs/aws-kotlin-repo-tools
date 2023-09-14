@@ -1,24 +1,24 @@
 {
   "dependencies": {
-    "com.squareup.okhttp3:okhttp-coroutines-jvm:5.0.0-alpha.11": "OkHttp3CoroutinesJvm-5.x",
-    "com.squareup.okhttp3:okhttp-coroutines:5.0.0-alpha.11": "OkHttp3Coroutines-5.x",
-    "com.squareup.okhttp3:okhttp-jvm:5.0.0-alpha.11": "OkHttp3Jvm-5.x",
-    "com.squareup.okhttp3:okhttp:5.0.0-alpha.11": "OkHttp3-5.x",
-    "com.squareup.okio:okio-jvm:3.3.0": "OkioJvm-3.x",
-    "com.squareup.okio:okio:3.3.0": "Okio-3.x",
-    "io.github.microutils:kotlin-logging-jvm:3.0.0": "Maven-io-github-microutils_kotlin-logging-jvm-3.x",
-    "io.github.microutils:kotlin-logging:3.0.0": "Maven-io-github-microutils_kotlin-logging-3.x",
-    "io.opentelemetry:opentelemetry-api:1.27.0": "Maven-io-opentelemetry_opentelemetry-api-1.x",
-    "org.jetbrains.kotlin:kotlin-stdlib-common:1.8.22": "KotlinStdlibCommon-1.8.x",
-    "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22": "KotlinStdlibJdk8-1.8.x",
-    "org.jetbrains.kotlin:kotlin-stdlib:1.8.22": "KotlinStdlib-1.8.x",
+    "com.squareup.okhttp3:okhttp-coroutines-jvm:5.*": "OkHttp3CoroutinesJvm-5.x",
+    "com.squareup.okhttp3:okhttp-coroutines:5.*": "OkHttp3Coroutines-5.x",
+    "com.squareup.okhttp3:okhttp-jvm:5.*": "OkHttp3Jvm-5.x",
+    "com.squareup.okhttp3:okhttp:5.*": "OkHttp3-5.x",
+    "com.squareup.okio:okio-jvm:3.*": "OkioJvm-3.x",
+    "com.squareup.okio:okio:3.*": "Okio-3.x",
+    "io.github.microutils:kotlin-logging-jvm:3.*": "Maven-io-github-microutils_kotlin-logging-jvm-3.x",
+    "io.github.microutils:kotlin-logging:3.*": "Maven-io-github-microutils_kotlin-logging-3.x",
+    "io.opentelemetry:opentelemetry-api:1.*": "Maven-io-opentelemetry_opentelemetry-api-1.x",
+    "org.jetbrains.kotlin:kotlin-stdlib-common:1.8.*": "KotlinStdlibCommon-1.8.x",
+    "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.*": "KotlinStdlibJdk8-1.8.x",
+    "org.jetbrains.kotlin:kotlin-stdlib:1.8.*": "KotlinStdlib-1.8.x",
     "org.jetbrains.kotlinx:atomicfu-jvm:0.19.0": "AtomicfuJvm-0.19.0",
     "org.jetbrains.kotlinx:atomicfu:0.19.0": "Atomicfu-0.19.0",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3": "KotlinxCoroutinesCoreJvm-1.7.x",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3": "KotlinxCoroutinesCore-1.7.x",
-    "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.3": "KotlinxCoroutinesJdk8-1.7.x",
-    "org.slf4j:slf4j-api:2.0.6": "Maven-org-slf4j_slf4j-api-2.x",
-    "software.amazon.awssdk.crt:aws-crt:0.21.7": "Aws-crt-java-1.0.x"
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.*": "KotlinxCoroutinesCoreJvm-1.7.x",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.*": "KotlinxCoroutinesCore-1.7.x",
+    "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.*": "KotlinxCoroutinesJdk8-1.7.x",
+    "org.slf4j:slf4j-api:2.*": "Maven-org-slf4j_slf4j-api-2.x",
+    "software.amazon.awssdk.crt:aws-crt:0.*": "Aws-crt-java-1.0.x"
   },
   "packageHandlingRules": {
     "ignore": [
@@ -30,6 +30,11 @@
     ],
     "rename": {
       "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
+    },
+    "resolvesConflictDependencies": {
+      "com.squareup.okhttp3:okhttp-coroutines:5.0.0-alpha.11": [
+        "KotlinxCoroutinesCore-1.7.x"
+      ]
     }
   }
 }
