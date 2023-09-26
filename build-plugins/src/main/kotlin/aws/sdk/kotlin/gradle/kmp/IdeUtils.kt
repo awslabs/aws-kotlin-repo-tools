@@ -24,9 +24,7 @@ val HOST_NAME = when {
     else -> error("Unknown os name `$OS_NAME`")
 }
 
-// TODO - enable real logic when ready to add additional targets
-// val Project.COMMON_JVM_ONLY get() = IDEA_ACTIVE && properties["aws.kotlin.ide.jvmAndCommonOnly"] == "true"
-val Project.COMMON_JVM_ONLY get() = true
+val Project.COMMON_JVM_ONLY get() = IDEA_ACTIVE && properties["aws.kotlin.ide.jvmAndCommonOnly"] == "true"
 
 /**
  * Scope down the native target enabled when working in intellij

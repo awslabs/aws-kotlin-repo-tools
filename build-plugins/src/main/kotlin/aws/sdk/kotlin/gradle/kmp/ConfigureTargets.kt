@@ -98,36 +98,37 @@ fun Project.configureKmpTargets() {
         }
 
         withIf(!COMMON_JVM_ONLY, kmpExt) {
-            if (hasJs) {
-                // FIXME - configure JS
-                js(KotlinJsCompilerType.IR) {
-                    nodejs()
-                }
-            }
+            // FIXME - configure JS
+            // if (hasJs) {
+            //     js(KotlinJsCompilerType.IR) {
+            //         nodejs()
+            //     }
+            // }
 
-            if (hasApple) {
-                macosX64()
-                macosArm64()
-                ios()
-                watchos()
-                tvos()
-            }
+            // if (hasApple) {
+            //     macosX64()
+            //     macosArm64()
+            //     ios()
+            //     watchos()
+            //     tvos()
+            // }
 
             if (hasLinux) {
                 linuxX64()
-                linuxArm64()
+                // FIXME - okio missing arm64 target support
+                // linuxArm64()
             }
 
-            if (hasWindows) {
-                mingwX64()
-            }
-
+            // if (hasWindows) {
+            //     mingwX64()
+            // }
+            //
             if (hasDesktop) {
                 linuxX64()
-                linuxArm64()
-                mingwX64()
-                macosX64()
-                macosArm64()
+                // linuxArm64()
+                // mingwX64()
+                // macosX64()
+                // macosArm64()
             }
         }
 
