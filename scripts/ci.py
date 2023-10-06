@@ -9,6 +9,14 @@ import subprocess
 import shlex
 
 GIT_ORIGIN_REFIX = "refs/heads/"
+VERBOSE = True
+
+
+def vprint(message):
+    global VERBOSE
+    if VERBOSE:
+        print(message)
+
 
 def running_in_github_action():
     """
@@ -27,7 +35,7 @@ def shell(command, cwd=None, check=True):
     if not shell:
         command = shlex.split(command)
 
-    print(f"running `{command}`")
+    vprint(f"running `{command}`")
     return subprocess.run(command, shell=True, check=check, cwd=cwd, capture_output=True)
 
 
@@ -56,18 +64,18 @@ def update_repo(repo_dir, branch_name):
     """
     branch_name = branch_name.removeprefix(GIT_ORIGIN_REFIX)
     curr_branch = get_current_branch(repo_dir)
-    print(f"current branch of `{repo_dir}`: {curr_branch}")
+    vprint(f"current branch of `{repo_dir}`: {curr_branch}")
     if curr_branch == branch_name:
-        print("branches match already, nothing to do")
+        vprint("branches match already, nothing to do")
         return
 
     has_branch = has_remote_branch(repo_dir, branch_name)
     if has_branch:
-        print(f"repo has target branch `{branch_name}`: {has_branch}...updating")
+        vprint(f"repo has target branch `{branch_name}`: {has_branch}...updating")
         pout = shell(f"git switch {branch_name}", cwd=repo_dir)
-        print(pout.stdout.decode("utf-8"))
+        vprint(pout.stdout.decode("utf-8"))
     else:
-        print(f"repo does not have target branch `{branch_name}`, leaving at {curr_branch}")
+        vprint(f"repo does not have target branch `{branch_name}`, leaving at {curr_branch}")
 
 
 def _get_branch_cmd(opts):
@@ -96,6 +104,7 @@ def create_cli():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
+    parser.add_argument("-q", "--quiet", help="quiet output", action="store_true")
     subparsers = parser.add_subparsers()
     set_branch = subparsers.add_parser('set-branch', help="update a local git repository to a given branch if it exists on the remote")
     get_branch = subparsers.add_parser('get-branch', help="get the current branch of a local git repository")
@@ -114,7 +123,9 @@ def main():
     cli = create_cli()
     opts = cli.parse_args()
     opts.repository = os.path.abspath(opts.repository)
-    print(opts)
+    if opts.quiet:
+        global VERBOSE
+        VERBOSE = False
     opts.cmd(opts)
 
 
