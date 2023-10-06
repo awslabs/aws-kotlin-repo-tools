@@ -9,7 +9,7 @@ import subprocess
 import shlex
 
 GIT_ORIGIN_REFIX = "refs/heads/"
-VERBOSE = True
+VERBOSE = False
 
 
 def vprint(message):
@@ -104,7 +104,7 @@ def create_cli():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument("-q", "--quiet", help="quiet output", action="store_true")
+    parser.add_argument("-v", "--verbose", help="quiet output", action="store_true")
     subparsers = parser.add_subparsers()
     set_branch = subparsers.add_parser('set-branch', help="update a local git repository to a given branch if it exists on the remote")
     get_branch = subparsers.add_parser('get-branch', help="get the current branch of a local git repository")
@@ -123,9 +123,9 @@ def main():
     cli = create_cli()
     opts = cli.parse_args()
     opts.repository = os.path.abspath(opts.repository)
-    if opts.quiet:
+    if opts.verbose:
         global VERBOSE
-        VERBOSE = False
+        VERBOSE = True
     opts.cmd(opts)
 
 
