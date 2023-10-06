@@ -30,7 +30,10 @@ def shell(command, cwd=None, check=True):
     """
     Run a command
     :param command: command to run
-    :param shell: Flag indicating if shell should be used by subprocess command
+    :param cwd: the current working directory to change to before executing the command
+    :param check: flag indicating if the status code should be checked. When true an exception will be
+    thrown if the command exits with a non-zero exit status.
+    :returns: the subprocess CompletedProcess output
     """
     if not shell:
         command = shlex.split(command)
@@ -58,9 +61,6 @@ def has_remote_branch(repo_dir, branch_name):
 def update_repo(repo_dir, branch_name):
     """
     Attempt to update the repository to the given branch name
-    :param repo_dir:
-    :param branch_name:
-    :return:
     """
     branch_name = branch_name.removeprefix(GIT_ORIGIN_REFIX)
     curr_branch = get_current_branch(repo_dir)
@@ -104,7 +104,7 @@ def create_cli():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument("-v", "--verbose", help="quiet output", action="store_true")
+    parser.add_argument("-v", "--verbose", help="enable verbose output", action="store_true")
     subparsers = parser.add_subparsers()
     set_branch = subparsers.add_parser('set-branch', help="update a local git repository to a given branch if it exists on the remote")
     get_branch = subparsers.add_parser('get-branch', help="get the current branch of a local git repository")
