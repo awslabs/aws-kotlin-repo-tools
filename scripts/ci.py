@@ -54,7 +54,7 @@ def update_repo(repo_dir, branch_name):
     :param branch_name:
     :return:
     """
-    branch_name = branch_name.remove_prefix(GIT_ORIGIN_REFIX)
+    branch_name = branch_name.removeprefix(GIT_ORIGIN_REFIX)
     curr_branch = get_current_branch(repo_dir)
     print(f"current branch of `{repo_dir}`: {curr_branch}")
     if curr_branch == branch_name:
