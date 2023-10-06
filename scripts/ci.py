@@ -113,7 +113,7 @@ def create_cli():
     get_branch.set_defaults(cmd=_get_branch_cmd)
 
     set_branch.add_argument("--branch", help="the name of the branch to sync to if it exists", required=True)
-    set_branch.add_argument("repository", help="the local repository directory to update")
+    set_branch.add_argument("repository", nargs="?", help="the local repository directory to update", default=os.getcwd())
     set_branch.set_defaults(cmd=_set_branch_cmd)
 
     return parser
