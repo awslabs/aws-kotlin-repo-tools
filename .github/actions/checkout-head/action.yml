@@ -40,16 +40,17 @@ runs:
         fi
         
         if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$ref"; then
-          echo "::notice ::Checkout Head: using $ref for $REPOSITORY"
+          echo "::notice ::Checkout Head: using '$ref' for $REPOSITORY"
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
         else
           baseref="main"
           if [ -n "$GITHUB_BASE_REF" ]; then
+            echo "attempting GH base ref: $GITHUB_BASE_REF"
             if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$GITHUB_BASE_REF"; then
               baseref="$GITHUB_BASE_REF"
             fi
           fi
-          echo "::notice ::Checkout Head: $REPOSITORY does not have the head ref $ref, using base $baseref"
+          echo "::notice ::Checkout Head: $REPOSITORY does not have the head ref '$ref', using base '$baseref'"
           echo "ref=$baseref" >> "$GITHUB_OUTPUT"
         fi
 
