@@ -1,0 +1,63 @@
+name: Checkout Head
+description: >
+  Attempt to checkout a repository using the head ref. If it doesn't exist attempt to fallback to the 
+  base ref. If it doesn't exist then use the default branch.
+
+inputs:
+  fetch-depth:
+    description: 'Number of commits to fetch. 0 indicates all history for all branches and tags.'
+    default: 1
+    required: false
+  path:
+    description: 'Relative path under $GITHUB_WORKSPACE to place the repository'
+    default: ''
+    required: false
+  repository:
+    description: 'Repository name with owner. For example, actions/checkout'
+    default: ${{ github.repository }}
+    required: false
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+    default: ${{ github.token }}
+    required: false
+
+runs:
+  using: composite
+
+  steps:
+    - id: repo
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPOSITORY: ${{ inputs.repository }}
+      run: |
+        ref="$GITHUB_REF"
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          ref="$GITHUB_HEAD_REF"
+        fi
+        
+        if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$ref"; then
+          echo "::notice ::Checkout Head: using '$ref' for $REPOSITORY"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+        else
+          baseref="main"
+          if [ -n "$GITHUB_BASE_REF" ]; then
+            echo "attempting GH base ref: $GITHUB_BASE_REF"
+            if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$GITHUB_BASE_REF"; then
+              baseref="$GITHUB_BASE_REF"
+            fi
+          fi
+          echo "::notice ::Checkout Head: $REPOSITORY does not have the head ref '$ref', using base '$baseref'"
+          echo "ref=$baseref" >> "$GITHUB_OUTPUT"
+        fi
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+        path: ${{ inputs.path }}
+        repository: ${{ inputs.repository }}
+        ref: ${{ steps.repo.outputs.ref }}
+        token: ${{ inputs.token }}
