@@ -22,6 +22,16 @@ private const val SIGNING_PASSWORD_PROP = "signingPassword"
 private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
 private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 
+// Names of publications that are allowed to be published
+private val ALLOWED_PUBLICATIONS = listOf(
+    "common",
+    "jvm",
+    "metadata",
+    "kotlinMultiplatform",
+    "bom",
+    "versionCatalog"
+)
+
 /**
  * Mark this project as excluded from publishing
  */
@@ -52,6 +62,7 @@ fun Project.configurePublishing(repoName: String) {
 
         publications.all {
             if (this !is MavenPublication) return@all
+
             project.afterEvaluate {
                 pom {
                     name.set(project.name)
@@ -131,7 +142,17 @@ fun Project.configureNexus() {
 }
 
 private fun isAvailableForPublication(project: Project, publication: MavenPublication): Boolean {
-    if (project.extra.has(SKIP_PUBLISH_PROP)) return false
+    var shouldPublish = true
+
+    // Check SKIP_PUBLISH_PROP
+    if (project.extra.has(SKIP_PUBLISH_PROP)) shouldPublish = false
+
+    // Validate publishGroupName
     val publishGroupName = project.findProperty(PUBLISH_GROUP_NAME_PROP) as? String
-    return publishGroupName == null || publication.groupId.startsWith(publishGroupName)
+    shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
+
+    // Validate publication name is allowed to be published
+    shouldPublish = shouldPublish && ALLOWED_PUBLICATIONS.any { publication.name.equals(it, ignoreCase = true) }
+
+    return shouldPublish
 }
