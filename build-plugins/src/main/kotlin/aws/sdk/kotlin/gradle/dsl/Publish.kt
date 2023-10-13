@@ -29,7 +29,7 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "metadata",
     "kotlinMultiplatform",
     "bom",
-    "versionCatalog"
+    "versionCatalog",
 )
 
 /**
