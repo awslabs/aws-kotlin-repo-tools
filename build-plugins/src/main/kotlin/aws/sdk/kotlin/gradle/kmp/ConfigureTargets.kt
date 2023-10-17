@@ -98,18 +98,8 @@ fun Project.configureKmpTargets() {
 
         withIf(!COMMON_JVM_ONLY, kmpExt) {
             // FIXME Configure JS
-//            if (hasJs) {
-//                js(KotlinJsCompilerType.IR) { nodejs() }
-//            }
-
             // FIXME Configure Apple
-//            if (hasApple) {
-//                macosX64()
-//                macosArm64()
-//                ios()
-//                watchos()
-//                tvos()
-//            }
+            // FIXME Configure Windows
 
             if (hasLinux) {
                 linuxX64()
@@ -117,18 +107,9 @@ fun Project.configureKmpTargets() {
 //                linuxArm64()
             }
 
-            // FIXME Configure Windows
-//            if (hasWindows) {
-//                mingwX64()
-//            }
-
             if (hasDesktop) {
                 linuxX64()
                 // FIXME Configure desktop
-//                linuxArm64()
-//                mingwX64()
-//                macosX64()
-//                macosArm64()
             }
         }
 
