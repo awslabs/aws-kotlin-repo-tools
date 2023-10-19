@@ -10,7 +10,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 import java.io.File
 
 internal fun <T> Project.tryGetClass(className: String): Class<T>? {
@@ -98,36 +97,19 @@ fun Project.configureKmpTargets() {
         }
 
         withIf(!COMMON_JVM_ONLY, kmpExt) {
-            if (hasJs) {
-                // FIXME - configure JS
-                js(KotlinJsCompilerType.IR) {
-                    nodejs()
-                }
-            }
-
-            if (hasApple) {
-                macosX64()
-                macosArm64()
-                ios()
-                watchos()
-                tvos()
-            }
+            // FIXME Configure JS
+            // FIXME Configure Apple
+            // FIXME Configure Windows
 
             if (hasLinux) {
                 linuxX64()
-                linuxArm64()
-            }
-
-            if (hasWindows) {
-                mingwX64()
+                // FIXME - Okio missing arm64 target support
+//                linuxArm64()
             }
 
             if (hasDesktop) {
                 linuxX64()
-                linuxArm64()
-                mingwX64()
-                macosX64()
-                macosArm64()
+                // FIXME Configure desktop
             }
         }
 
