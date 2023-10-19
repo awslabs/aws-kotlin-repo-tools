@@ -22,11 +22,15 @@
   },
   "packageHandlingRules": {
     "ignore": [
-      "aws.sdk.kotlin:testing",
       "aws.smithy.kotlin:http-test",
       "aws.smithy.kotlin:smithy-test",
       "aws.smithy.kotlin:testing",
-      "aws.sdk.kotlin.crt:aws-crt-kotlin-android"
+      "aws.smithy.kotlin:bom",
+      "aws.smithy.kotlin:version-catalog",
+      "aws.sdk.kotlin:bom",
+      "aws.sdk.kotlin.crt:aws-crt-kotlin-android",
+      "aws.sdk.kotlin:testing",
+      "aws.sdk.kotlin:version-catalog"
     ],
     "rename": {
       "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
