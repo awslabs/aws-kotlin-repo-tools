@@ -30,6 +30,7 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "kotlinMultiplatform",
     "bom",
     "versionCatalog",
+    "android" // aws-crt-kotlin
 )
 
 /**
