@@ -96,6 +96,10 @@ fun Project.configureKmpTargets() {
             configureJvm()
         }
 
+        if (hasLinux) {
+            configureLinux()
+        }
+
         withIf(!COMMON_JVM_ONLY, kmpExt) {
             // FIXME Configure JS
             // FIXME Configure Apple
@@ -153,6 +157,16 @@ fun Project.configureJvm() {
             exceptionFormat = TestExceptionFormat.FULL
         }
         useJUnitPlatform()
+    }
+}
+
+fun Project.configureLinux() {
+    kotlin {
+        linuxX64 {
+            tasks.named("linuxX64Test") {
+                enabled = false
+            }
+        }
     }
 }
 
