@@ -163,6 +163,7 @@ fun Project.configureJvm() {
 fun Project.configureLinux() {
     kotlin {
         linuxX64 {
+            // FIXME enable tests once the target is fully implemented
             tasks.named("linuxX64Test") {
                 enabled = false
             }
