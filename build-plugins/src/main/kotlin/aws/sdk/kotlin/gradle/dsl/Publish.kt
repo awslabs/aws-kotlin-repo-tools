@@ -31,6 +31,8 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "bom",
     "versionCatalog",
     "android", // aws-crt-kotlin
+    "codegen",
+    "codegen-testutils",
 )
 
 /**
@@ -104,7 +106,13 @@ fun Project.configurePublishing(repoName: String) {
     }
 
     tasks.withType<AbstractPublishToMaven>().all {
-        onlyIf { isAvailableForPublication(project, publication) }
+        onlyIf {
+            isAvailableForPublication(project, publication).also {
+                if (!it) {
+                    logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}")
+                }
+            }
+        }
     }
 }
 
