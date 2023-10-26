@@ -96,7 +96,7 @@ fun Project.configureKmpTargets() {
             configureJvm()
         }
 
-        if (hasLinux) {
+        if (NATIVE_ENABLED && hasLinux) {
             configureLinux()
         }
 
