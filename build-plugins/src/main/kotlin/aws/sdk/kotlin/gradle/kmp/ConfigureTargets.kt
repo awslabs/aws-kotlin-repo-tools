@@ -105,13 +105,13 @@ fun Project.configureKmpTargets() {
             // FIXME Configure Apple
             // FIXME Configure Windows
 
-            withIf (NATIVE_ENABLED && hasLinux, kmpExt) {
+            withIf(NATIVE_ENABLED && hasLinux, kmpExt) {
                 linuxX64()
                 // FIXME - Okio missing arm64 target support
 //                linuxArm64()
             }
 
-            withIf (NATIVE_ENABLED && hasDesktop, kmpExt) {
+            withIf(NATIVE_ENABLED && hasDesktop, kmpExt) {
                 linuxX64()
                 // FIXME Configure desktop
             }
