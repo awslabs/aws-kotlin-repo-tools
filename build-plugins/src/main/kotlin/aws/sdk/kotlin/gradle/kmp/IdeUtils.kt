@@ -26,7 +26,7 @@ val HOST_NAME = when {
 
 val Project.COMMON_JVM_ONLY get() = IDEA_ACTIVE && properties["aws.kotlin.ide.jvmAndCommonOnly"] == "true"
 
-val Project.NATIVE_ENABLED get() = properties["aws.sdk.kotlin.native"] == "true"
+val Project.NATIVE_DISABLED get() = properties["aws.kotlin.disableNative"] == "true"
 
 /**
  * Scope down the native target enabled when working in intellij
