@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.kmp
 
+import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
@@ -24,9 +25,8 @@ val HOST_NAME = when {
     else -> error("Unknown os name `$OS_NAME`")
 }
 
-val Project.COMMON_JVM_ONLY get() = IDEA_ACTIVE && properties["aws.kotlin.ide.jvmAndCommonOnly"] == "true"
-
-val Project.NATIVE_ENABLED get() = properties["aws.kotlin.native"]?.let { it == "true" } ?: true
+val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
+val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
 
 /**
  * Scope down the native target enabled when working in intellij

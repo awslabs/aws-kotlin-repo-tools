@@ -92,29 +92,21 @@ fun Project.configureKmpTargets() {
         // enable targets
         configureCommon()
 
-        if (hasJvm) {
+        if (hasJvm && JVM_ENABLED) {
             configureJvm()
         }
 
-        if (hasLinux && NATIVE_ENABLED) {
+        // FIXME Configure JS
+        // FIXME Configure Apple
+        // FIXME Configure Windows
+
+        withIf(hasLinux && NATIVE_ENABLED, kmpExt) {
             configureLinux()
         }
 
-        withIf(!COMMON_JVM_ONLY, kmpExt) {
-            // FIXME Configure JS
-            // FIXME Configure Apple
-            // FIXME Configure Windows
-
-            withIf(hasLinux && NATIVE_ENABLED, kmpExt) {
-                linuxX64()
-                // FIXME - Okio missing arm64 target support
-//                linuxArm64()
-            }
-
-            withIf(hasDesktop && NATIVE_ENABLED, kmpExt) {
-                linuxX64()
-                // FIXME Configure desktop
-            }
+        withIf(hasDesktop && NATIVE_ENABLED, kmpExt) {
+            configureLinux()
+            // FIXME Configure desktop
         }
 
         kmpExt.configureSourceSetsConvention()
@@ -168,6 +160,8 @@ fun Project.configureLinux() {
                 enabled = false
             }
         }
+        // FIXME - Okio missing arm64 target support
+        // linuxArm64()
     }
 }
 
