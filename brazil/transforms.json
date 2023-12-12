@@ -34,8 +34,25 @@
       "aws.sdk.kotlin.crt:aws-crt-kotlin": "AwsCrtKotlin"
     },
     "resolvesConflictDependencies": {
-      "com.squareup.okhttp3:okhttp-coroutines-jvm:5.0.0-alpha.11": [
+      "com.squareup.okhttp3:okhttp-coroutines-jvm:5.*": [
+        "KotlinStdlibCommon-1.9.x",
+        "KotlinStdlib-1.9.x",
         "KotlinxCoroutinesCoreJvm-1.7.x"
+      ],
+      "com.squareup.okhttp3:okhttp-jvm:5.*": [
+        "KotlinStdlibCommon-1.9.x",
+        "KotlinStdlib-1.9.x"
+      ],
+      "com.squareup.okio:okio-jvm:3.*": [
+        "KotlinStdlibCommon-1.9.x",
+        "KotlinStdlibJdk8-1.9.x"
+      ],
+      "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.*": [
+        "KotlinStdlibCommon-1.9.x",
+        "KotlinStdlibJdk8-1.9.x"
+      ],
+      "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.7.*": [
+        "KotlinStdlibJdk8-1.9.x"
       ]
     }
   }
