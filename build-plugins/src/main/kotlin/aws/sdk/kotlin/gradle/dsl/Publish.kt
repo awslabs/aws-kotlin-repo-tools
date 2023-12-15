@@ -60,7 +60,10 @@ fun Project.configurePublishing(repoName: String) {
 
     extensions.configure<PublishingExtension> {
         repositories {
-            maven { name = "testLocal"; url = rootProject.buildDir.resolve("m2").toURI() }
+            maven {
+                name = "testLocal"
+                url = rootProject.layout.buildDirectory.dir("m2").get().asFile.toURI()
+            }
         }
 
         publications.all {
