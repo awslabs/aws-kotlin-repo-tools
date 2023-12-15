@@ -66,7 +66,7 @@ fun Project.configureKmpTargets() {
 
         // configure the target hierarchy, this does not actually enable the targets, just their relationships
         // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
-        kmpExt.targetHierarchy.default {
+        kmpExt.applyDefaultHierarchyTemplate {
             if (hasJvmAndNative) {
                 group("jvmAndNative") {
                     withJvm()

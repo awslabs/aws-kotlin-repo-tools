@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -22,7 +23,7 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation(kotlin("gradle-plugin", "1.9.10"))
+    implementation(kotlin("gradle-plugin", "1.9.20"))
     // make our custom lint rules available to the buildscript classpath
     runtimeOnly(project(":ktlint-rules"))
     implementation(libs.nexusPublishPlugin)
@@ -40,9 +41,9 @@ gradlePlugin {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = "1.8"
-        freeCompilerArgs += listOf("-Xopt-in=kotlin.RequiresOptIn")
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_1_8)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 

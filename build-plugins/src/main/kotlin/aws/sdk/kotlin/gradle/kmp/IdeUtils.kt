@@ -10,13 +10,14 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
+import java.util.*
 
 /**
  * Whether Intellij is active or not
  */
 val IDEA_ACTIVE = System.getProperty("idea.active") == "true"
 
-val OS_NAME = System.getProperty("os.name").toLowerCase()
+val OS_NAME = System.getProperty("os.name").lowercase(Locale.getDefault())
 
 val HOST_NAME = when {
     OS_NAME.startsWith("linux") -> "linux"
