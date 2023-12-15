@@ -17,7 +17,7 @@ import java.util.*
  */
 val IDEA_ACTIVE = System.getProperty("idea.active") == "true"
 
-val OS_NAME = System.getProperty("os.name").lowercase(Locale.getDefault())
+val OS_NAME = System.getProperty("os.name").lowercase()
 
 val HOST_NAME = when {
     OS_NAME.startsWith("linux") -> "linux"
