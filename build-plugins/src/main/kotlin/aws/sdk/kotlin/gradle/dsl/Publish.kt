@@ -12,6 +12,7 @@ import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
+import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import java.time.Duration
 
@@ -105,10 +106,16 @@ fun Project.configurePublishing(repoName: String) {
                 )
                 sign(publications)
             }
+
+            // FIXME - workaround for https://github.com/gradle/gradle/issues/26091
+            val signingTasks = tasks.withType<Sign>()
+            tasks.withType<AbstractPublishToMaven>().configureEach {
+                mustRunAfter(signingTasks)
+            }
         }
     }
 
-    tasks.withType<AbstractPublishToMaven>().all {
+    tasks.withType<AbstractPublishToMaven>().configureEach {
         onlyIf {
             isAvailableForPublication(project, publication).also {
                 if (!it) {
