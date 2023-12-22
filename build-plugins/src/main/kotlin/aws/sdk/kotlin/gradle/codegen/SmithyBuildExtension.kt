@@ -27,7 +27,10 @@ open class SmithyBuildExtension(private val project: Project) {
      */
     public fun getProjectionPath(projectionName: String, pluginName: String): Provider<Path> =
         SmithyUtils.getProjectionOutputDirProperty(project).map {
-            println("getProjectionOutputDirProp: $it; isDirectory: ${it.asFile.isDirectory}")
+            // FIXME - bug in smithy gradle base? it expects the input file to pass "isDirectory"
+            // but that flag is only true IFF the path _exists_ AND is a directory
+            // should probably check if file exists before checking if it's a directory
+            it.asFile.mkdirs()
             SmithyUtils.getProjectionPluginPath(it.asFile, projectionName, pluginName)
         }
 

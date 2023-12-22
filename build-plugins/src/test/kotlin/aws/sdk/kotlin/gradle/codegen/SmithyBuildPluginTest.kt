@@ -8,6 +8,7 @@ import aws.sdk.kotlin.gradle.codegen.dsl.generateSmithyBuild
 import aws.sdk.kotlin.gradle.codegen.dsl.generateSmithyProjections
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -57,5 +58,21 @@ class SmithyBuildPluginTest {
         """.trimIndent()
 
         assertEquals(expected, contents)
+    }
+
+    @Test
+    fun testProjectionPath() {
+        val testProj = ProjectBuilder.builder().build()
+        testProj.apply<SmithyBuildPlugin>()
+        val ext = testProj.extensions.getByType<SmithyBuildExtension>()
+        ext.projections.create("foo")
+        val expected = testProj.layout.buildDirectory.get().asFile.toPath()
+            .resolve("smithyprojections")
+            .resolve("test")
+            .resolve("foo")
+            .resolve("myplugin")
+            .toString()
+        val actual = ext.getProjectionPath("foo", "myplugin").get().toString()
+        assertEquals(expected, actual)
     }
 }
