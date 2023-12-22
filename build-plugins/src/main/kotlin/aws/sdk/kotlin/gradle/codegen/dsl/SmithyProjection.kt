@@ -7,6 +7,7 @@ package aws.sdk.kotlin.gradle.codegen.dsl
 import software.amazon.smithy.model.node.ArrayNode
 import software.amazon.smithy.model.node.Node
 import software.amazon.smithy.model.node.ObjectNode
+import java.io.Serializable
 
 /**
  * A container for settings related to a single Smithy projection.
@@ -15,7 +16,11 @@ import software.amazon.smithy.model.node.ObjectNode
  *
  * @param name the name of the projection
  */
-class SmithyProjection(val name: String) {
+class SmithyProjection(val name: String) : Serializable {
+    // NOTE: We implement Serializable because this is used in a task input property and is required by Gradle when used that way
+    companion object {
+        private val serialVersionUID: Long = 1L
+    }
 
     /**
      * List of files/directories that contain models that are considered sources models of the build.
@@ -83,4 +88,22 @@ class SmithyProjection(val name: String) {
         result = 31 * result + plugins.hashCode()
         return result
     }
+
+    // /**
+    //  * Always treat de-serialization as a full-blown constructor, by
+    //  * validating the final state of the de-serialized object.
+    //  */
+    // private fun readObject(inputStream: ObjectInputStream) {
+    //     // always perform the default de-serialization first
+    //     inputStream.defaultReadObject();
+    // }
+    //
+    // /**
+    //  * This is the default implementation of writeObject.
+    //  * Customise if necessary.
+    //  */
+    // private fun writeObject( outputStream: ObjectOutputStream): Unit {
+    //     // perform the default serialization for all non-transient, non-static fields
+    //     outputStream.defaultWriteObject();
+    // }
 }
