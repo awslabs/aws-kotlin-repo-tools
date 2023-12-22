@@ -98,7 +98,7 @@ class SmithyBuildPlugin : Plugin<Project> {
             resolvedCliClasspath.set(codegenConfig)
             runtimeClasspath.set(codegenConfig)
             buildClasspath.set(codegenConfig)
-            smithyBuildConfigs.set(files(generateSmithyBuild.map { it.smithyBuildConfig.get() }))
+            smithyBuildConfigs.set(generateSmithyBuild.get().outputs.files)
         }
     }
 }

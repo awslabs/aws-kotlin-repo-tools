@@ -7,7 +7,6 @@ package aws.sdk.kotlin.gradle.codegen.tasks
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyProjection
 import aws.sdk.kotlin.gradle.codegen.dsl.withObjectMember
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
@@ -28,16 +27,12 @@ abstract class GenerateSmithyBuild : DefaultTask() {
     public abstract val projections: ListProperty<SmithyProjection>
 
     /**
-     * The output directory for the generated `smithy-build.json` configuration file.
+     * The generated `smithy-build.json` configuration file.
      * Defaults to the project build directory.
      */
-    @OutputDirectory
-    @Optional
-    public val outputDir: DirectoryProperty = project.layout.buildDirectory
-
     @get:OutputFile
-    public val smithyBuildConfig: Provider<RegularFile>
-        get() = outputDir.file(SMITHY_BUILD_CONFIG_FILENAME)
+    public val smithyBuildConfig: Provider<RegularFile> =
+        project.layout.buildDirectory.file(SMITHY_BUILD_CONFIG_FILENAME)
 
     /**
      * Generate `smithy-build.json`
