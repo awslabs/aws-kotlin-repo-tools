@@ -80,6 +80,9 @@ class SmithyBuildPlugin : Plugin<Project> {
         val generateSmithyBuild = tasks.register<GenerateSmithyBuild>(TASK_GENERATE_SMITHY_BUILD) {
             group = "codegen"
             projections.set(smithyBuildExtension.projections)
+            onlyIf {
+                projections.get().isNotEmpty()
+            }
         }
 
         val codegenConfig = configurations.register("codegen")
