@@ -6,6 +6,7 @@ package aws.sdk.kotlin.gradle.codegen
 
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyBuildPluginSettings
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyProjection
+import aws.sdk.kotlin.gradle.codegen.dsl.smithyKotlinPlugin
 import aws.sdk.kotlin.gradle.codegen.tasks.GenerateSmithyBuild
 import org.gradle.kotlin.dsl.create
 import org.gradle.testfixtures.ProjectBuilder
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import software.amazon.smithy.model.node.Node
+import java.io.*
 
 class GenerateSmithyBuildTaskTest {
     @Test
@@ -69,5 +71,27 @@ class GenerateSmithyBuildTaskTest {
             }
         """.trimIndent()
         assertEquals(expected, contents)
+    }
+
+    @Test
+    fun testSerializability() {
+        val obj = SmithyProjection("foo").apply {
+            smithyKotlinPlugin {
+                sdkId = "mySdkId"
+            }
+        }
+        val file = File.createTempFile("smithy-build-test", "test-serializability")
+        file.deleteOnExit()
+        val fos = FileOutputStream(file)
+        val oos = ObjectOutputStream(fos)
+        oos.writeObject(obj)
+        oos.close()
+
+        val fis = FileInputStream(file)
+        val ois = ObjectInputStream(fis)
+        val reconstituted = ois.readObject() as SmithyProjection
+        ois.close()
+
+        assertEquals(obj, reconstituted)
     }
 }
