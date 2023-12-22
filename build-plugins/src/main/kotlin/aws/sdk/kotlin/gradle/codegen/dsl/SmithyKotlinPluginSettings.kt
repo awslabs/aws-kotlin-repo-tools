@@ -8,13 +8,14 @@ import software.amazon.smithy.model.node.ArrayNode
 import software.amazon.smithy.model.node.Node
 import software.amazon.smithy.model.node.ObjectNode
 import software.amazon.smithy.model.node.ToNode
+import java.io.Serializable
 import java.util.*
 
 /**
  * Container for `smithy-kotlin` plugin settings
  * See https://github.com/awslabs/smithy-kotlin/blob/main/codegen/smithy-kotlin-codegen/src/main/kotlin/software/amazon/smithy/kotlin/codegen/KotlinSettings.kt
  */
-class SmithyKotlinApiSettings : ToNode {
+class SmithyKotlinApiSettings : ToNode, Serializable {
     var visibility: String? = null
     var nullabilityCheckMode: String? = null
     var defaultValueSerializationMode: String? = null
@@ -28,9 +29,34 @@ class SmithyKotlinApiSettings : ToNode {
         builder.withNullableMember("enableEndpointAuthProvider", enableEndpointAuthProvider)
         return builder.build()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SmithyKotlinApiSettings
+
+        if (visibility != other.visibility) return false
+        if (nullabilityCheckMode != other.nullabilityCheckMode) return false
+        if (defaultValueSerializationMode != other.defaultValueSerializationMode) return false
+        if (enableEndpointAuthProvider != other.enableEndpointAuthProvider) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = visibility?.hashCode() ?: 0
+        result = 31 * result + (nullabilityCheckMode?.hashCode() ?: 0)
+        result = 31 * result + (defaultValueSerializationMode?.hashCode() ?: 0)
+        result = 31 * result + (enableEndpointAuthProvider?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String =
+        "SmithyKotlinApiSettings(visibility=$visibility, nullabilityCheckMode=$nullabilityCheckMode, defaultValueSerializationMode=$defaultValueSerializationMode, enableEndpointAuthProvider=$enableEndpointAuthProvider)"
 }
 
-class SmithyKotlinBuildSettings : ToNode {
+class SmithyKotlinBuildSettings : ToNode, Serializable {
     var generateFullProject: Boolean? = null
     var generateDefaultBuildFiles: Boolean? = null
     var optInAnnotations: List<String>? = null
@@ -46,6 +72,29 @@ class SmithyKotlinBuildSettings : ToNode {
 
         return builder.build()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SmithyKotlinBuildSettings
+
+        if (generateFullProject != other.generateFullProject) return false
+        if (generateDefaultBuildFiles != other.generateDefaultBuildFiles) return false
+        if (optInAnnotations != other.optInAnnotations) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = generateFullProject?.hashCode() ?: 0
+        result = 31 * result + (generateDefaultBuildFiles?.hashCode() ?: 0)
+        result = 31 * result + (optInAnnotations?.hashCode() ?: 0)
+        return result
+    }
+
+    override fun toString(): String =
+        "SmithyKotlinBuildSettings(generateFullProject=$generateFullProject, generateDefaultBuildFiles=$generateDefaultBuildFiles, optInAnnotations=$optInAnnotations)"
 }
 
 class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
@@ -81,6 +130,7 @@ class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
         if (packageDescription != other.packageDescription) return false
         if (sdkId != other.sdkId) return false
         if (buildSettings != other.buildSettings) return false
+        if (apiSettings != other.apiSettings) return false
 
         return true
     }
@@ -92,6 +142,7 @@ class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
         result = 31 * result + (packageDescription?.hashCode() ?: 0)
         result = 31 * result + (sdkId?.hashCode() ?: 0)
         result = 31 * result + (buildSettings?.hashCode() ?: 0)
+        result = 31 * result + (apiSettings?.hashCode() ?: 0)
         return result
     }
 
@@ -109,6 +160,9 @@ class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
 
         return obj.build()
     }
+
+    override fun toString(): String =
+        "SmithyKotlinPluginSettings(pluginName='$pluginName', serviceShapeId=$serviceShapeId, packageName=$packageName, packageVersion=$packageVersion, packageDescription=$packageDescription, sdkId=$sdkId, buildSettings=$buildSettings, apiSettings=$apiSettings)"
 }
 
 fun SmithyProjection.smithyKotlinPlugin(configure: SmithyKotlinPluginSettings.() -> Unit) {

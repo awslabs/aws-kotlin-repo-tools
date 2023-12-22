@@ -78,6 +78,12 @@ class GenerateSmithyBuildTaskTest {
         val obj = SmithyProjection("foo").apply {
             smithyKotlinPlugin {
                 sdkId = "mySdkId"
+                apiSettings {
+                    visibility = "public"
+                }
+                buildSettings {
+                    generateDefaultBuildFiles = false
+                }
             }
         }
         val file = File.createTempFile("smithy-build-test", "test-serializability")
