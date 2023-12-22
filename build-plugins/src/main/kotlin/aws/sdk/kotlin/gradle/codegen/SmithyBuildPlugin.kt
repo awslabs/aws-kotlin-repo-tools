@@ -81,7 +81,7 @@ class SmithyBuildPlugin : Plugin<Project> {
             group = "codegen"
             projections.set(smithyBuildExtension.projections)
             onlyIf {
-                projections.get().isNotEmpty()
+                smithyBuildExtension.projections.isNotEmpty()
             }
         }
 
