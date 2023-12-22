@@ -27,6 +27,7 @@ open class SmithyBuildExtension(private val project: Project) {
      */
     public fun getProjectionPath(projectionName: String, pluginName: String): Provider<Path> =
         SmithyUtils.getProjectionOutputDirProperty(project).map {
+            println("getProjectionOutputDirProp: $it; isDirectory: ${it.asFile.isDirectory}")
             SmithyUtils.getProjectionPluginPath(it.asFile, projectionName, pluginName)
         }
 
