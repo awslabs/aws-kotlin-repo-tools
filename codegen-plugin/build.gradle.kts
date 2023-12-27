@@ -23,10 +23,9 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation(kotlin("gradle-plugin", "1.9.20"))
     // make our custom lint rules available to the buildscript classpath
-    runtimeOnly(project(":ktlint-rules"))
-    implementation(libs.nexusPublishPlugin)
+    implementation(libs.smithy.model)
+    implementation(libs.smithy.gradle.base.plugin)
     testImplementation(libs.junit.jupiter)
 }
 
@@ -34,9 +33,9 @@ group = "aws.sdk.kotlin"
 
 gradlePlugin {
     plugins {
-        val awsKotlinRepoToolsPlugin by creating {
-            id = "aws.sdk.kotlin.kmp"
-            implementationClass = "aws.sdk.kotlin.gradle.kmp.KmpDefaultsPlugin"
+        val awsKotlinSmithyBuildPlugin by creating {
+            id = "aws.sdk.kotlin.gradle.smithybuild"
+            implementationClass = "aws.sdk.kotlin.gradle.codegen.SmithyBuildPlugin"
         }
     }
 }

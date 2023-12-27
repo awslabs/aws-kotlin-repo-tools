@@ -18,4 +18,5 @@ pluginManagement {
 }
 
 include(":build-plugins")
+include(":codegen-plugin")
 include(":ktlint-rules")
