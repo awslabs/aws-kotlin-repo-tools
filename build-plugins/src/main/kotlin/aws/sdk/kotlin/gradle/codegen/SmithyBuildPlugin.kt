@@ -8,6 +8,7 @@ import aws.sdk.kotlin.gradle.codegen.dsl.TASK_GENERATE_SMITHY_BUILD
 import aws.sdk.kotlin.gradle.codegen.dsl.TASK_GENERATE_SMITHY_PROJECTIONS
 import aws.sdk.kotlin.gradle.codegen.dsl.smithyBuildExtension
 import aws.sdk.kotlin.gradle.codegen.tasks.GenerateSmithyBuild
+import aws.sdk.kotlin.gradle.codegen.tasks.json
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.register
@@ -79,7 +80,10 @@ class SmithyBuildPlugin : Plugin<Project> {
     private fun Project.registerCodegenTasks() {
         val generateSmithyBuild = tasks.register<GenerateSmithyBuild>(TASK_GENERATE_SMITHY_BUILD) {
             group = "codegen"
-            projections.set(smithyBuildExtension.projections)
+            val configProvider = project.provider {
+                smithyBuildExtension.projections.json
+            }
+            smithyBuildConfig.set(configProvider)
             onlyIf {
                 smithyBuildExtension.projections.isNotEmpty()
             }

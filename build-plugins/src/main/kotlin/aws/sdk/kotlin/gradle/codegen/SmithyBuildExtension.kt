@@ -33,15 +33,6 @@ open class SmithyBuildExtension(private val project: Project) {
             it.asFile.mkdirs()
             SmithyUtils.getProjectionPluginPath(it.asFile, projectionName, pluginName)
         }
-
-    // /**
-    //  * Get the list of all the imports for the projections configured
-    //  */
-    // val models: FileCollection
-    //     get() {
-    //         val paths = projections.flatMap(SmithyProjection::imports)
-    //         return project.files(paths)
-    //     }
 }
 
 // smithy-kotlin specific extensions

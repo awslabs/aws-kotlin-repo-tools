@@ -7,7 +7,6 @@ package aws.sdk.kotlin.gradle.codegen.dsl
 import software.amazon.smithy.model.node.ArrayNode
 import software.amazon.smithy.model.node.Node
 import software.amazon.smithy.model.node.ObjectNode
-import java.io.Serializable
 
 /**
  * A container for settings related to a single Smithy projection.
@@ -16,8 +15,7 @@ import java.io.Serializable
  *
  * @param name the name of the projection
  */
-class SmithyProjection(val name: String) : Serializable {
-    // NOTE: We implement Serializable because this is used in a task input property and is required by Gradle when used that way
+class SmithyProjection(val name: String) {
 
     /**
      * List of files/directories that contain models that are considered sources models of the build.

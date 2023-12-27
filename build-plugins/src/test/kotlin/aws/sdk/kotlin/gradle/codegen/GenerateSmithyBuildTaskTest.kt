@@ -6,8 +6,8 @@ package aws.sdk.kotlin.gradle.codegen
 
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyBuildPluginSettings
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyProjection
-import aws.sdk.kotlin.gradle.codegen.dsl.smithyKotlinPlugin
 import aws.sdk.kotlin.gradle.codegen.tasks.GenerateSmithyBuild
+import aws.sdk.kotlin.gradle.codegen.tasks.json
 import org.gradle.kotlin.dsl.create
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +21,7 @@ class GenerateSmithyBuildTaskTest {
     fun testDefaults() {
         val testProj = ProjectBuilder.builder().build()
         val task = testProj.tasks.create<GenerateSmithyBuild>("generateSmithyBuild")
-        assertEquals(task.smithyBuildConfig.get().asFile.path, testProj.layout.buildDirectory.file("smithy-build.json").get().asFile.path)
+        assertEquals(task.generatedOutput.get().asFile.path, testProj.layout.buildDirectory.file("smithy-build.json").get().asFile.path)
     }
 
     @Test
@@ -43,12 +43,12 @@ class GenerateSmithyBuildTaskTest {
             },
         )
         val task = testProj.tasks.create<GenerateSmithyBuild>("generateSmithyBuild") {
-            projections.set(smithyProjections)
+            smithyBuildConfig.set(smithyProjections.json)
         }
 
         task.generateSmithyBuild()
-        assertTrue(task.smithyBuildConfig.get().asFile.exists())
-        val contents = task.smithyBuildConfig.get().asFile.readText()
+        assertTrue(task.generatedOutput.get().asFile.exists())
+        val contents = task.generatedOutput.get().asFile.readText()
         val expected = """
             {
                 "version": "1.0",
@@ -71,33 +71,5 @@ class GenerateSmithyBuildTaskTest {
             }
         """.trimIndent()
         assertEquals(expected, contents)
-    }
-
-    @Test
-    fun testSerializability() {
-        val obj = SmithyProjection("foo").apply {
-            smithyKotlinPlugin {
-                sdkId = "mySdkId"
-                apiSettings {
-                    visibility = "public"
-                }
-                buildSettings {
-                    generateDefaultBuildFiles = false
-                }
-            }
-        }
-        val file = File.createTempFile("smithy-build-test", "test-serializability")
-        file.deleteOnExit()
-        val fos = FileOutputStream(file)
-        val oos = ObjectOutputStream(fos)
-        oos.writeObject(obj)
-        oos.close()
-
-        val fis = FileInputStream(file)
-        val ois = ObjectInputStream(fis)
-        val reconstituted = ois.readObject() as SmithyProjection
-        ois.close()
-
-        assertEquals(obj, reconstituted)
     }
 }

@@ -43,7 +43,7 @@ class SmithyBuildPluginTest {
         }
 
         testProj.tasks.generateSmithyBuild.get().generateSmithyBuild()
-        val contents = testProj.tasks.generateSmithyBuild.get().smithyBuildConfig.get().asFile.readText()
+        val contents = testProj.tasks.generateSmithyBuild.get().generatedOutput.get().asFile.readText()
         val expected = """
             {
                 "version": "1.0",

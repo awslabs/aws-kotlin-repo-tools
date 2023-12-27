@@ -8,14 +8,13 @@ import software.amazon.smithy.model.node.ArrayNode
 import software.amazon.smithy.model.node.Node
 import software.amazon.smithy.model.node.ObjectNode
 import software.amazon.smithy.model.node.ToNode
-import java.io.Serializable
 import java.util.*
 
 /**
  * Container for `smithy-kotlin` plugin settings
  * See https://github.com/awslabs/smithy-kotlin/blob/main/codegen/smithy-kotlin-codegen/src/main/kotlin/software/amazon/smithy/kotlin/codegen/KotlinSettings.kt
  */
-class SmithyKotlinApiSettings : ToNode, Serializable {
+class SmithyKotlinApiSettings : ToNode {
     var visibility: String? = null
     var nullabilityCheckMode: String? = null
     var defaultValueSerializationMode: String? = null
@@ -56,7 +55,7 @@ class SmithyKotlinApiSettings : ToNode, Serializable {
         "SmithyKotlinApiSettings(visibility=$visibility, nullabilityCheckMode=$nullabilityCheckMode, defaultValueSerializationMode=$defaultValueSerializationMode, enableEndpointAuthProvider=$enableEndpointAuthProvider)"
 }
 
-class SmithyKotlinBuildSettings : ToNode, Serializable {
+class SmithyKotlinBuildSettings : ToNode {
     var generateFullProject: Boolean? = null
     var generateDefaultBuildFiles: Boolean? = null
     var optInAnnotations: List<String>? = null

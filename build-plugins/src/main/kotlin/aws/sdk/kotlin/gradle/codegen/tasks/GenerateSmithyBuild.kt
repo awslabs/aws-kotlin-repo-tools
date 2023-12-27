@@ -8,7 +8,7 @@ import aws.sdk.kotlin.gradle.codegen.dsl.SmithyProjection
 import aws.sdk.kotlin.gradle.codegen.dsl.withObjectMember
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import software.amazon.smithy.model.node.Node
 
@@ -20,20 +20,20 @@ private const val SMITHY_BUILD_CONFIG_FILENAME = "smithy-build.json"
 abstract class GenerateSmithyBuild : DefaultTask() {
 
     /**
-     * The list of projections to generate
+     * The projections to generate as JSON string
      */
     @get:Input
-    public abstract val projections: ListProperty<SmithyProjection>
+    public abstract val smithyBuildConfig: Property<String>
 
     /**
      * The generated `smithy-build.json` configuration file.
      * Defaults to the project build directory.
      */
     @get:OutputFile
-    public abstract val smithyBuildConfig: RegularFileProperty
+    public abstract val generatedOutput: RegularFileProperty
 
     init {
-        smithyBuildConfig.convention(
+        generatedOutput.convention(
             project.layout.buildDirectory.file(SMITHY_BUILD_CONFIG_FILENAME),
         )
     }
@@ -43,18 +43,20 @@ abstract class GenerateSmithyBuild : DefaultTask() {
      */
     @TaskAction
     fun generateSmithyBuild() {
-        val buildConfig = smithyBuildConfig.get().asFile
+        val buildConfig = generatedOutput.get().asFile
         if (buildConfig.exists()) {
             buildConfig.delete()
         }
 
         buildConfig.parentFile.mkdirs()
-        val contents = projections.get().let(::generateSmithyBuild)
-        buildConfig.writeText(contents)
+        buildConfig.writeText(smithyBuildConfig.get())
     }
 }
 
-private fun generateSmithyBuild(projections: Collection<SmithyProjection>): String {
+internal val Collection<SmithyProjection>.json: String
+    get() = projectionsToBuildConfig(this)
+
+internal fun projectionsToBuildConfig(projections: Collection<SmithyProjection>): String {
     val buildConfig = Node.objectNodeBuilder()
         .withMember("version", "1.0")
         .withObjectMember("projections") {
