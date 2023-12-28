@@ -6,15 +6,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-}
-
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
+    alias(libs.plugins.plugin.publish)
 }
 
 repositories {
@@ -22,7 +17,7 @@ repositories {
 }
 
 dependencies {
-    implementation(gradleApi())
+    // FIXME - should probably be compile only
     implementation(kotlin("gradle-plugin", "1.9.20"))
     // make our custom lint rules available to the buildscript classpath
     runtimeOnly(project(":ktlint-rules"))
@@ -32,18 +27,18 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 }
 
-group = "aws.sdk.kotlin"
-
 gradlePlugin {
     plugins {
         val awsKotlinRepoToolsPlugin by creating {
             id = "aws.sdk.kotlin.kmp"
             implementationClass = "aws.sdk.kotlin.gradle.kmp.KmpDefaultsPlugin"
+            description = "Kotlin Multiplatform defaults and build settings for AWS Kotlin repositories"
         }
 
         val awsKotlinSmithyBuildPlugin by creating {
             id = "aws.sdk.kotlin.gradle.smithybuild"
             implementationClass = "aws.sdk.kotlin.gradle.codegen.SmithyBuildPlugin"
+            description = "A plugin that wraps smithy gradle base plugin and provides a DSL for generating smithy-build.json dynamically"
         }
     }
 }

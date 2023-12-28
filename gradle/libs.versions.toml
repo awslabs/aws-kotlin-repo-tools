@@ -13,3 +13,6 @@ smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "
 smithy-gradle-base-plugin = { module = "software.amazon.smithy:smithy-base-plugin", version.ref = "smithy-gradle-plugin-version" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-version" }
+
+[plugins]
+plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.1"}
