@@ -55,7 +55,7 @@ const val SMITHY_BUILD_EXTENSION_NAME = "smithyBuild"
  * // register the generated code as a kotlin source directory
  * codegen.projections.all {
  *     kotlin.sourceSets.main {
- *         kotlin.srcDir(smithyBuild.getProjectionPath(projectionName, "kotlin-codegen").map { it.resolve("src/main/kotlin") })
+ *         kotlin.srcDir(smithyBuild.smithyKotlinProjectionSrcDir(projectionName))
  *     }
  * }
  * ```

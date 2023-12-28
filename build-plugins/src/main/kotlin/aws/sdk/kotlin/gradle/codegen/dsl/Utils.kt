@@ -19,7 +19,7 @@ import java.util.*
  * Get the [SmithyBuildExtension] instance configured for the project
  */
 internal val Project.smithyBuildExtension: SmithyBuildExtension
-    get() = ((this as ExtensionAware).extensions[SMITHY_BUILD_EXTENSION_NAME] as? SmithyBuildExtension) ?: error("CodegenPlugin has not been applied")
+    get() = ((this as ExtensionAware).extensions[SMITHY_BUILD_EXTENSION_NAME] as? SmithyBuildExtension) ?: error("SmithyBuildPlugin has not been applied")
 
 internal fun ObjectNode.Builder.withObjectMember(key: String, block: ObjectNode.Builder.() -> Unit): ObjectNode.Builder {
     val builder = ObjectNode.objectNodeBuilder()
