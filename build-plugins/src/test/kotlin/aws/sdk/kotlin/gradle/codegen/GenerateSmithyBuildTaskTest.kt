@@ -39,6 +39,7 @@ class GenerateSmithyBuildTaskTest {
             SmithyProjection("foo").apply {
                 imports = listOf("i1")
                 sources = listOf("s1")
+                transforms = listOf("""{ "key": "value" }""")
                 plugins["plugin1"] = testPlugin
             },
         )
@@ -60,7 +61,11 @@ class GenerateSmithyBuildTaskTest {
                         "imports": [
                             "i1"
                         ],
-                        "transforms": [],
+                        "transforms": [
+                            {
+                                "key": "value"
+                            }
+                        ],
                         "plugins": {
                             "plugin1": {
                                 "key1": "value1"
