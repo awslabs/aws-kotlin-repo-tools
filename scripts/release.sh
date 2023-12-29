@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 [ -z "$RELEASE_BUCKET" ] && { echo "RELEASE_BUCKET environment variable not set"; exit 1; }
 [ -z "$PUBLISHING_ROLE_ARN" ] && { echo "PUBLISHING_ROLE_ARN environment variable not set"; exit 1; }
