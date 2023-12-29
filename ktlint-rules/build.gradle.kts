@@ -5,14 +5,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-/*
- * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
- * SPDX-License-Identifier: Apache-2.0
- */
-
 description = "Lint rules for the AWS SDK for Kotlin"
 
 plugins {
+    `maven-publish`
     kotlin("jvm")
 }
 
@@ -41,4 +37,12 @@ tasks.withType<KotlinCompile> {
 tasks.withType<JavaCompile> {
     sourceCompatibility = JavaVersion.VERSION_1_8.toString()
     targetCompatibility = JavaVersion.VERSION_1_8.toString()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("ktlintRules") {
+            from(components["kotlin"])
+        }
+    }
 }

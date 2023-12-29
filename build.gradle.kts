@@ -2,11 +2,24 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-allprojects {
-    group = "aws.sdk.kotlin"
+plugins {
+    `maven-publish`
+}
 
-    repositories {
-        mavenCentral()
+subprojects {
+    // FIXME - do we want this to be the group?
+    group = "aws.sdk.kotlin"
+    // FIXME - set dynamically
+    version = "0.3.2"
+
+    apply(plugin = "maven-publish")
+    publishing {
+        repositories {
+            maven {
+                name = "testLocal"
+                url = rootProject.layout.buildDirectory.dir("m2").get().asFile.toURI()
+            }
+        }
     }
 }
 

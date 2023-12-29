@@ -17,5 +17,11 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+
 include(":build-plugins")
 include(":ktlint-rules")
