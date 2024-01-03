@@ -22,7 +22,7 @@ To cut a new release:
 
 1. Create a new tag, e.g. `git tag x.y.z`
 2. Push the tag up `git push origin x.y.z`
-3. Kick off the release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`)
+3. Kick off the release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`) specifying the tag as the source version to build.
 
 
 ## Security
