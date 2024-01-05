@@ -36,6 +36,12 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "codegen-testutils",
 )
 
+private val ALLOWED_PLATFORM_PUBLICATION_NAMES = setOf(
+    "kotlinMultiplatform", // common
+    "jvm",
+    "android",
+)
+
 /**
  * Mark this project as excluded from publishing
  */
@@ -69,6 +75,7 @@ fun Project.configurePublishing(repoName: String) {
 
         publications.all {
             if (this !is MavenPublication) return@all
+            val publicationName = name
 
             project.afterEvaluate {
                 pom {
@@ -94,6 +101,19 @@ fun Project.configurePublishing(repoName: String) {
                     }
 
                     artifact(javadocJar)
+
+                    val platformName = when {
+                        project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm") -> "jvm"
+                        // KMP publication names are _generally_ the platform name or `kotlinMultiplatform` which is the
+                        // metadata publication for common, see https://kotlinlang.org/docs/multiplatform-publish-lib.html#structure-of-publications.
+                        // There is nothing preventing a project from using a custom publication name though
+                        project.pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform") -> publicationName
+                        else -> null
+                    }?.takeIf { it in ALLOWED_PLATFORM_PUBLICATION_NAMES }
+
+                    if (platformName != null) {
+                        this.properties.put("aws.sdk.kotlin.platform.type", platformName)
+                    }
                 }
             }
         }
