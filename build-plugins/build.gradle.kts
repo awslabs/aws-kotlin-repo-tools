@@ -17,8 +17,7 @@ repositories {
 }
 
 dependencies {
-    // FIXME - should probably be compile only
-    implementation(kotlin("gradle-plugin", "1.9.20"))
+    compileOnly(kotlin("gradle-plugin", "1.9.20"))
     // make our custom lint rules available to the buildscript classpath
     runtimeOnly(project(":ktlint-rules"))
     implementation(libs.nexusPublishPlugin)
@@ -30,7 +29,7 @@ dependencies {
 gradlePlugin {
     plugins {
         val awsKotlinRepoToolsPlugin by creating {
-            id = "aws.sdk.kotlin.kmp"
+            id = "aws.sdk.kotlin.gradle.kmp"
             implementationClass = "aws.sdk.kotlin.gradle.kmp.KmpDefaultsPlugin"
             description = "Kotlin Multiplatform defaults and build settings for AWS Kotlin repositories"
         }
