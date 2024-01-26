@@ -24,6 +24,12 @@ To cut a new release:
 2. Push the tag up `git push origin x.y.z`
 3. Kick off the release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`) specifying the tag as the source version to build.
 
+## Projects
+
+* `:build-plugins:build-support`   - common build support (publishing, linting, utils, etc)
+* `:build-plugins:kmp-conventions` - Plugin that applies common conventions for KMP projects (source sets, targets, etc)
+* `:build-plugins:smithy-build`    - Opinionated plugin that wraps the `smithy-base` plugin with a DSL for generating projections dynamically
+* `:ktlint-rules`                  - Custom ktlint rules (consumed by `build-support` at runtime)
 
 ## Security
 

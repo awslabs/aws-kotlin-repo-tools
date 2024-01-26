@@ -13,8 +13,7 @@ val s3Url = propertyOrEnv("release.s3.url", "RELEASE_S3_URL")
 if (s3Url == null) logger.warn("S3 repository not configured, missing S3 url")
 
 subprojects {
-    // FIXME - do we want this to be the group?
-    group = "aws.sdk.kotlin"
+    group = "aws.sdk.kotlin.gradle"
     version = releaseVersion ?: "0.0.1"
 
     apply(plugin = "maven-publish")
