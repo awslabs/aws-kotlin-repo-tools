@@ -97,6 +97,18 @@ def _set_branch_cmd(opts):
     update_repo(opts.repository, opts.branch)
 
 
+def _checkout_pr_cmd(opts):
+    vprint(f"checking if PR #{opts.pr} exists for {opts.repository}")
+    try:
+        shell(f"git ls-remote origin 'pull/*/head' | grep 'refs/pull/{opts.pr}/head'")
+    except subprocess.CalledProcessError as error:
+        vprint(f"PR #{opts.pr} does not exist. Please specify a valid PR number. {error}")
+        exit(1)
+    vprint(f"PR #{opts.pr} exists. Checking out PR.")
+    shell(f"git fetch origin pull/{opts.pr}/head:pr-{opts.pr}")
+    shell(f"git switch pr-{opts.pr}")
+
+
 def create_cli():
     parser = argparse.ArgumentParser(
         prog="ci",
@@ -108,6 +120,7 @@ def create_cli():
     subparsers = parser.add_subparsers()
     set_branch = subparsers.add_parser('set-branch', help="update a local git repository to a given branch if it exists on the remote")
     get_branch = subparsers.add_parser('get-branch', help="get the current branch of a local git repository")
+    checkout_pr = subparsers.add_parser('checkout-pr', help="checks out a pr if it exists, throws error otherwise")
 
     get_branch.add_argument("repository", nargs="?", help="the local repository directory to update", default=os.getcwd())
     get_branch.set_defaults(cmd=_get_branch_cmd)
@@ -115,6 +128,10 @@ def create_cli():
     set_branch.add_argument("--branch", help="the name of the branch to sync to if it exists", required=True)
     set_branch.add_argument("repository", nargs="?", help="the local repository directory to update", default=os.getcwd())
     set_branch.set_defaults(cmd=_set_branch_cmd)
+
+    checkout_pr.add_argument("--pr", help="the pr number to use", required=True)
+    checkout_pr.add_argument("repository", nargs="?", help="the local repository directory to update", default=os.getcwd())
+    checkout_pr.set_defaults(cmd=_checkout_pr_cmd)
 
     return parser
 
