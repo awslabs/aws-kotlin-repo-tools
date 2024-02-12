@@ -102,7 +102,7 @@ def _checkout_pr_cmd(opts):
     try:
         shell(f"git ls-remote origin 'pull/*/head' | grep 'refs/pull/{opts.pr}/head'")
     except subprocess.CalledProcessError as error:
-        vprint(f"PR #{opts.pr} does not exist. Please specify a valid PR number. {error}")
+        print(f"PR #{opts.pr} does not exist. Please specify a valid PR number. {error}")
         exit(1)
     vprint(f"PR #{opts.pr} exists. Checking out PR.")
     shell(f"git fetch origin pull/{opts.pr}/head:pr-{opts.pr}")
