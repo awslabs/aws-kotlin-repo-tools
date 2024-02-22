@@ -23,6 +23,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":build-plugins:api-scan")
 include(":build-plugins:build-support")
 include(":build-plugins:kmp-conventions")
 include(":build-plugins:smithy-build")
