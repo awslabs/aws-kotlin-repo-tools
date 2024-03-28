@@ -17,7 +17,6 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import kotlin.math.abs
-import kotlin.math.roundToInt
 
 internal abstract class AnalyzeMetricsTask : DefaultTask() {
     @get:InputFile
@@ -37,103 +36,131 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
 
     @TaskAction
     fun analyze() {
-        runBlocking {
-            S3Client.fromEnvironment().use { s3 ->
-                s3.getObject(
-                    GetObjectRequest {
-                        bucket = "TODO"
-                        key = "TODO"
-                    },
-                ) { latestReleaseMetrics ->
-                    val remoteMetricsFile =
-                        project.layout.buildDirectory.file(OUTPUT_PATH + "latestReleaseMetrics.csv").get().asFile
+        val releaseMetricsFile =
+            project.layout.buildDirectory.file(OUTPUT_PATH + "latestReleaseMetrics.csv").get().asFile
+        writeReleaseMetrics(releaseMetricsFile)
 
-                    remoteMetricsFile.writeText(
-                        latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty"),
-                    )
+        val releaseMetrics = releaseMetricsFile.toMap()
+        val currentMetrics = metricsFile.get().asFile.toMap()
+        val artifactNames = getArtifactNames(releaseMetricsFile)
+        val analysis = analyzeMetrics(artifactNames, releaseMetrics, currentMetrics)
 
-                    val remoteMetrics = remoteMetricsFile.toMap()
-                    val remoteLines = remoteMetricsFile.readLines()
-                    val remoteHeaders = remoteLines[0].split(",").map { it.trim() }
+        shouldFailWorkflow.get().asFile.writeText(analysis.significantChange.toString())
+        val diffTable = createDiffTable(analysis)
+        val output = if (analysis.delta) diffTable else noDiffMessage
 
-                    val localMetrics = metricsFile.get().asFile.toMap()
-                    val localLines = metricsFile.get().asFile.readLines()
-                    val localHeaders = localLines[0].split(",").map { it.trim() }
+        summary.get().asFile.writeText(output)
+    }
 
-                    val artifactNames = remoteHeaders.toSet() + localHeaders.toSet()
-                    val metrics = mutableMapOf<String, DataPoint>()
-
-                    var addedArtifact = false
-                    var removedArtifact = false
-                    var significantChange = false
-
-                    artifactNames.forEach { artifact ->
-                        val local = localMetrics[artifact] ?: 0
-                        val remote = remoteMetrics[artifact] ?: 0
-
-                        val diff = local - remote
-                        val percentage = buildString {
-                            if (remote == 0L || local == 0L) {
-                                append("NaN")
-
-                                if (remote == 0L) addedArtifact = true
-                                if (local == 0L) removedArtifact = true
-
-                                return@buildString
-                            }
-
-                            if (diff < 0) append("-")
-
-                            val percentageValue = (abs(diff).toDouble() / remote.toDouble() * 100).roundToInt()
-                            if (percentageValue > 5 && diff > 0) significantChange = true
-
-                            append(percentageValue)
-                            append("%")
-                        }
-
-                        metrics[artifact] =
-                            DataPoint(
-                                remote,
-                                local,
-                                diff,
-                                percentage,
-                            )
-                    }
-
-                    shouldFailWorkflow.get().asFile.writeText(significantChange.toString())
-
-                    val diffTable = buildString {
-                        appendLine("Affected Artifacts\n=")
-                        appendLine("| Artifact |Pull Request (bytes) | Latest Release (bytes) | Delta (bytes / percentage) |")
-                        appendLine("| -------- | ------------------- | ---------------------- | -------------------------- |")
-                        metrics.forEach { artifact ->
-                            if (artifact.value.diff != 0L) {
-                                appendLine("|${artifact.key}|${"%,d".format(artifact.value.localSize)}|${"%,d".format(artifact.value.latestReleaseSize)}|${"%,d".format(artifact.value.diff)} / ${artifact.value.percentage}|")
-                            }
-                        }
-                        appendLine()
-
-                        when {
-                            addedArtifact && !removedArtifact -> appendLine("note: artifact(s) were added ⚠️")
-                            !addedArtifact && removedArtifact -> appendLine("note: artifact(s) were removed ⚠️")
-                            addedArtifact && removedArtifact -> appendLine("note: artifact(s) were added and removed ⚠️")
-                        }
-                    }
-
-                    summary.get().asFile.writeText(diffTable)
-                }
+    private fun writeReleaseMetrics(releaseMetricsFile: File) = runBlocking {
+        S3Client.fromEnvironment().use { s3 ->
+            s3.getObject(
+                GetObjectRequest {
+                    bucket = "artifact-size-metrics-aws-sdk-kotlin"
+                    key = "artifactSizeMetrics.csv"
+                },
+            ) { latestReleaseMetrics ->
+                releaseMetricsFile.writeText(
+                    latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty")
+                )
             }
         }
     }
 
-    private data class DataPoint(
-        val latestReleaseSize: Long,
-        val localSize: Long,
-        val diff: Long,
-        val percentage: String,
+    private fun analyzeMetrics(
+        artifactNames: Set<String>,
+        releaseMetrics: Map<String, Long>,
+        currentMetrics: Map<String, Long>,
+    ): Analysis {
+        val metrics = mutableMapOf<String, Metric>()
+        var addedArtifact = false
+        var removedArtifact = false
+        var significantChange = false
+        var changeHappened = false
+
+        artifactNames.forEach { artifact ->
+            val current = currentMetrics[artifact] ?: 0
+            val release = releaseMetrics[artifact] ?: 0
+
+            val delta = current - release
+            val percentage = if (current == 0L || release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
+
+            if (delta != 0L ) changeHappened = true
+            if (abs(percentage) > 5 && delta > 0L) significantChange = true
+            if (release == 0L) addedArtifact = true
+            if (current == 0L) removedArtifact = true
+
+            metrics[artifact] =
+                Metric(
+                    current,
+                    release,
+                    delta,
+                    percentage,
+                )
+        }
+
+        return Analysis(metrics, addedArtifact, removedArtifact, significantChange, changeHappened)
+    }
+
+    private data class Analysis(
+        val metrics: Map<String, Metric>,
+        val addedArtifact: Boolean,
+        val removedArtifact: Boolean,
+        val significantChange: Boolean,
+        val delta: Boolean,
     )
 
-    private fun File.toMap(): MutableMap<String, Long> {
+    private fun getArtifactNames(releaseMetricsFile: File): Set<String> {
+        val releaseLines = releaseMetricsFile.readLines()
+        val releaseHeaders = releaseLines[0].split(",").map { it.trim() }
+
+        val currentLines = metricsFile.get().asFile.readLines()
+        val currentHeaders = currentLines[0].split(",").map { it.trim() }
+
+        return releaseHeaders.toSet() + currentHeaders.toSet()
+    }
+
+    private fun createDiffTable(analysis: Analysis): String = buildString {
+        appendLine("Affected Artifacts\n=")
+        appendLine("| Artifact |Pull Request (bytes) | Latest Release (bytes) | Delta (bytes) | Delta (percentage) |")
+        appendLine("| -------- | ------------------: | ---------------------: | ------------: | -----------------: |")
+        analysis.metrics.forEach { metric ->
+            if (metric.value.delta != 0L) {
+                append('|')
+                append(metric.key)
+                append('|')
+                append("%,d".format(metric.value.currentSize))
+                append('|')
+                append("%,d".format(metric.value.latestReleaseSize))
+                append('|')
+                append("%,d".format(metric.value.delta))
+                append('|')
+                append("%.2f".format(metric.value.percentage))
+                append("%")
+                appendLine('|')
+            }
+        }
+
+        appendLine()
+
+        when {
+            analysis.addedArtifact && !analysis.removedArtifact ->
+                appendLine("note: artifact(s) were added ⚠️")
+            !analysis.addedArtifact && analysis.removedArtifact ->
+                appendLine("note: artifact(s) were removed ⚠️")
+            analysis.addedArtifact && analysis.removedArtifact ->
+                appendLine("note: artifact(s) were added and removed ⚠️")
+        }
+    }
+
+    private data class Metric(
+        val currentSize: Long,
+        val latestReleaseSize: Long,
+        val delta: Long,
+        val percentage: Double,
+    )
+
+    private fun File.toMap(): Map<String, Long> {
         val lines = this.readLines()
         val headers = lines[0].split(",").map { it.trim() }
         val values = lines[1].split(",").map { it.trim() }
@@ -144,5 +171,11 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
         }
 
         return metrics
+    }
+
+    private val noDiffMessage = buildString {
+        appendLine("Affected Artifacts")
+        appendLine("=")
+        appendLine("No artifact changed size")
     }
 }

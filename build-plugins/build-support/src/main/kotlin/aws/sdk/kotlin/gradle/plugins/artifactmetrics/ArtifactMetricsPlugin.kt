@@ -12,7 +12,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 
-private const val TASK_GROUP = "Metrics"
+private const val TASK_GROUP = "Verification"
 internal const val OUTPUT_PATH = "reports/metrics/"
 
 /**

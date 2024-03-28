@@ -27,7 +27,8 @@ internal abstract class CollectMetricsTask : DefaultTask() {
             append(jvmJarTask.archiveBaseName.get())
             append("-")
             append(jvmJarTask.archiveAppendix.orNull ?: "unknown")
-            append(".${jvmJarTask.archiveExtension.get()}")
+            append(".")
+            append(jvmJarTask.archiveExtension.get())
         }
 
         var closureSize: Long? = null
