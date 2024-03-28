@@ -16,7 +16,7 @@ private const val TASK_GROUP = "Metrics"
 internal const val OUTPUT_PATH = "reports/metrics/"
 
 /**
- * Facilitates the collection and analysis of artifact size metrics via the `artifactMetrics` and `analyzeArtifactMetrics` tasks.
+ * Facilitates the collection and analysis of artifact size metrics via the `artifactMetrics` and `analyzeArtifactMetrics` gradle tasks.
  */
 class ArtifactMetricsPlugin : Plugin<Project> {
     override fun apply(target: Project) {

@@ -22,14 +22,14 @@ dependencies {
     runtimeOnly(project(":ktlint-rules"))
     implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
-    implementation("aws.sdk.kotlin:s3:+")
+    implementation("aws.sdk.kotlin:s3:1.+")
     testImplementation(libs.junit.jupiter)
 }
 
 gradlePlugin {
     plugins {
         create("artifact-metrics") {
-            id = "artifact-metrics-final"
+            id = "artifact-metrics"
             implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactmetrics.ArtifactMetricsPlugin"
             version = 1.0
         }

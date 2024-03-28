@@ -26,7 +26,7 @@ internal abstract class CollectMetricsTask : DefaultTask() {
         val artifactName = buildString {
             append(jvmJarTask.archiveBaseName.get())
             append("-")
-            append(jvmJarTask.archiveAppendix.orNull)
+            append(jvmJarTask.archiveAppendix.orNull ?: "unknown")
             append(".${jvmJarTask.archiveExtension.get()}")
         }
 

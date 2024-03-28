@@ -41,8 +41,8 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
             S3Client.fromEnvironment().use { s3 ->
                 s3.getObject(
                     GetObjectRequest {
-                        bucket = "artifact-size-metrics-aws-sdk-kotlin"
-                        key = "artifactSizeMetrics.csv"
+                        bucket = "TODO"
+                        key = "TODO"
                     },
                 ) { latestReleaseMetrics ->
                     val remoteMetricsFile =
