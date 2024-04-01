@@ -24,23 +24,13 @@ class ArtifactMetricsPlugin : Plugin<Project> {
             throw GradleException("${this::class.java} can only be applied to the root project")
         }
 
+        target.extensions.create("artifactMetricsConfig", ArtifactMetricsConfig::class.java)
+
         val tasks = mutableListOf<TaskProvider<CollectMetricsTask>>()
-        target.subprojects {
-            if (
-                (target.rootProject.name == "aws-sdk-kotlin" && (path.startsWith(":services") || path.startsWith(":aws-runtime"))) ||
-                (target.rootProject.name == "smithy-kotlin" && (path.startsWith(":codegen") || path.startsWith(":runtime"))) ||
-                (target.rootProject.name == "aws-crt-kotlin-parent" && path.startsWith(":aws-crt-kotlin"))
-            ) {
-                logger.info("registering artifact metrics tasks for $name at $path")
-                tasks.add(subprojectMetricsTask())
-            }
-        }
+        target.subprojects { tasks.add(subprojectMetricsTask()) }
 
         target.registerRootProjectMetricsTask(tasks)
-
-        target.tasks.register<AnalyzeMetricsTask>("analyzeArtifactMetrics") {
-            group = TASK_GROUP
-        }
+        target.tasks.register<AnalyzeMetricsTask>("analyzeArtifactMetrics") { group = TASK_GROUP }
     }
 }
 
@@ -68,13 +58,22 @@ private fun Project.registerRootProjectMetricsTask(
                 .map { it.get().metricsFile.asFile.get() }
                 .filter { it.exists() && it.length() > 0 }
                 .forEach { file ->
-                    val lines = file.readLines()
-                    headers.add(lines[0])
-                    values.add(lines[1])
+                    val fileLines = file.readLines()
+                    val fileHeaders = fileLines[0].split(",").map { it.trim() }
+                    val fileValues = fileLines[1].split(",").map { it.trim() }
+
+                    headers.addAll(fileHeaders)
+                    values.addAll(fileValues)
                 }
 
-            combinedMetrics.get().asFile
-                .writeText("${headers.joinToString(separator = ",")}\n${values.joinToString(separator = ",")}")
+            combinedMetrics.get().asFile.writeText(
+                "${headers.joinToString(separator = ",")}\n${values.joinToString(separator = ",")}",
+            )
         }
     }
+}
+
+open class ArtifactMetricsConfig {
+    var artifactPrefixes: Set<String> = emptySet()
+    var closurePrefixes: Set<String> = emptySet()
 }

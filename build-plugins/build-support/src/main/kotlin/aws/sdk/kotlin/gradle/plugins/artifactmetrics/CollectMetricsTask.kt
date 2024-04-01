@@ -21,6 +21,9 @@ internal abstract class CollectMetricsTask : DefaultTask() {
 
     @TaskAction
     fun generateMetrics() {
+        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactMetricsConfig::class.java)
+        if (!project.path.startsWith(pluginConfig.artifactPrefixes)) return
+
         val jvmJarTask = project.tasks.getByName<Jar>("jvmJar")
         val jarSize = jvmJarTask.archiveFile.get().asFile.length()
         val artifactName = buildString {
@@ -33,7 +36,7 @@ internal abstract class CollectMetricsTask : DefaultTask() {
 
         var closureSize: Long? = null
 
-        if (project.path.startsWith(":services")) {
+        if (project.path.startsWith(pluginConfig.closurePrefixes)) {
             closureSize = jarSize + project.configurations.getByName("jvmRuntimeClasspath").sumOf { it.length() }
         }
 
@@ -51,4 +54,11 @@ internal abstract class CollectMetricsTask : DefaultTask() {
 
         metricsFile.asFile.get().writeText(metrics)
     }
+}
+
+private fun String.startsWith(prefixes: Set<String>): Boolean {
+    prefixes.forEach { prefix ->
+        if (this.startsWith(prefix)) return true
+    }
+    return false
 }

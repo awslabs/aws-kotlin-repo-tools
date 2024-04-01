@@ -56,12 +56,12 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "artifact-size-metrics-aws-sdk-kotlin"
-                    key = "artifactSizeMetrics.csv"
+                    bucket = "TODO"
+                    key = "TODO"
                 },
             ) { latestReleaseMetrics ->
                 releaseMetricsFile.writeText(
-                    latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty")
+                    latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty"),
                 )
             }
         }
@@ -85,7 +85,7 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
             val delta = current - release
             val percentage = if (current == 0L || release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
 
-            if (delta != 0L ) changeHappened = true
+            if (delta != 0L) changeHappened = true
             if (abs(percentage) > 5 && delta > 0L) significantChange = true
             if (release == 0L) addedArtifact = true
             if (current == 0L) removedArtifact = true
@@ -176,6 +176,6 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
     private val noDiffMessage = buildString {
         appendLine("Affected Artifacts")
         appendLine("=")
-        appendLine("No artifact changed size")
+        appendLine("No artifacts changed size")
     }
 }
