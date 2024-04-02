@@ -50,7 +50,7 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
     @TaskAction
     fun analyze() {
         val latestReleaseMetricsFile =
-            project.layout.buildDirectory.file(OUTPUT_PATH + "latest-release-metrics.csv").get().asFile
+            project.layout.buildDirectory.file(OUTPUT_PATH + "latest-release-artifact-size-metrics.csv").get().asFile
         writeLatestReleaseMetrics(latestReleaseMetricsFile)
 
         val latestReleaseMetrics = latestReleaseMetricsFile.toMap()
@@ -82,7 +82,7 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
     private fun analyzeArtifactSizeMetrics(
         releaseMetrics: Map<String, Long>,
         currentMetrics: Map<String, Long>,
-    ): ArtifactAnalysis {
+    ): ArtifactSizeMetricsAnalysis {
         val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
 
         val artifactNames = releaseMetrics.keys + currentMetrics.keys
@@ -110,16 +110,16 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
                 )
         }
 
-        return ArtifactAnalysis(artifactSizeMetrics, significantChange, changeHappened)
+        return ArtifactSizeMetricsAnalysis(artifactSizeMetrics, significantChange, changeHappened)
     }
 
-    private data class ArtifactAnalysis(
+    private data class ArtifactSizeMetricsAnalysis(
         val metrics: Map<String, ArtifactSizeMetric>,
         val significantChange: Boolean,
         val delta: Boolean,
     )
 
-    private fun createDiffTable(analysis: ArtifactAnalysis): String = buildString {
+    private fun createDiffTable(analysis: ArtifactSizeMetricsAnalysis): String = buildString {
         appendLine("Affected Artifacts\n=")
         appendLine("| Artifact |Pull Request (bytes) | Latest Release (bytes) | Delta (bytes) | Delta (percentage) |")
         appendLine("| -------- | ------------------: | ---------------------: | ------------: | -----------------: |")

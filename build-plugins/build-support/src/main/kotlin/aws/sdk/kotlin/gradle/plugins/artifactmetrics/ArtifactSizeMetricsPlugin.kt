@@ -47,35 +47,34 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
     tasks.register("artifactSizeMetrics") {
         group = TASK_GROUP
         dependsOn(subProjects)
-        val combinedMetrics = layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv")
-        outputs.file(combinedMetrics)
+        val artifactSizeMetricsFile = layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv")
+        outputs.file(artifactSizeMetricsFile)
 
         doLast {
-            val artifactSizeMetrics = mutableListOf<String>()
+            val subProjectArtifactSizeMetrics = mutableListOf<String>()
 
             subProjects
                 .map { it.get().metricsFile.asFile.get() }
                 .filter { it.exists() && it.length() > 0 }
-                .forEach { file ->
-                    val fileLines = file.readLines()
+                .forEach { metricsFile ->
+                    val metrics = metricsFile.readLines().toMutableList()
+                    metrics.removeAt(0) // Remove header
 
-                    fileLines.forEachIndexed { index, line ->
-                        if (index > 0) { // Skipping header row
-                            artifactSizeMetrics.add(line) // e.g. "S3-jvm.jar, 103948"
-                        }
+                    metrics.forEach { metric ->
+                        subProjectArtifactSizeMetrics.add(metric)
                     }
                 }
 
-            val contents = buildString {
-                val headerRow = "Artifact, Size"
-                appendLine(headerRow)
+            val projectArtifactSizeMetrics = buildString {
+                val header = "Artifact, Size"
+                appendLine(header)
 
-                artifactSizeMetrics.forEach { metric ->
-                    appendLine(metric)
+                subProjectArtifactSizeMetrics.forEach { entry ->
+                    appendLine(entry)
                 }
             }
 
-            combinedMetrics.get().asFile.writeText(contents)
+            artifactSizeMetricsFile.get().asFile.writeText(projectArtifactSizeMetrics)
         }
     }
 }
