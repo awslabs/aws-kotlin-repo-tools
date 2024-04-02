@@ -68,8 +68,8 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "artifact-size-metrics-aws-sdk-kotlin" // TODO: Point to artifact size metrics bucket
-                    key = "artifact-size-metrics.csv" // TODO: Point to artifact size metrics for latest release
+                    bucket = "" // TODO: Point to artifact size metrics bucket
+                    key = "" // TODO: Point to artifact size metrics for latest release
                 },
             ) { latestReleaseMetrics ->
                 file.writeText(
