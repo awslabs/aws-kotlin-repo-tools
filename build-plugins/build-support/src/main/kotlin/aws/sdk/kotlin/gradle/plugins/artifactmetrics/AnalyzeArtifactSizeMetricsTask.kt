@@ -18,63 +18,76 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 import kotlin.math.abs
 
-internal abstract class AnalyzeMetricsTask : DefaultTask() {
+/**
+ * Gradle task that analyzes/compares a project's local artifact size metrics to
+ * ones from a project's latest GitHub release. Outputs the results into various files.
+ */
+internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
+    /**
+     * The project's current computed artifact size metrics.
+     */
     @get:InputFile
     abstract val metricsFile: RegularFileProperty
 
+    /**
+     * The results of analyzing the artifact size metrics.
+     */
     @get:OutputFile
-    abstract val summary: RegularFileProperty
+    abstract val analysis: RegularFileProperty
 
+    /**
+     * File containing either "true" or "false".
+     */
     @get:OutputFile
-    abstract val shouldFailWorkflow: RegularFileProperty
+    abstract val hasSignificantChange: RegularFileProperty
 
     init {
-        metricsFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifactSizeMetrics.csv"))
-        summary.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-summary.md"))
-        shouldFailWorkflow.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "shouldFailWorkflow.txt"))
+        metricsFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv"))
+        analysis.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-analysis.md"))
+        hasSignificantChange.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
     }
 
     @TaskAction
     fun analyze() {
-        val releaseMetricsFile =
-            project.layout.buildDirectory.file(OUTPUT_PATH + "latestReleaseMetrics.csv").get().asFile
-        writeReleaseMetrics(releaseMetricsFile)
+        val latestReleaseMetricsFile =
+            project.layout.buildDirectory.file(OUTPUT_PATH + "latest-release-metrics.csv").get().asFile
+        writeLatestReleaseMetrics(latestReleaseMetricsFile)
 
-        val releaseMetrics = releaseMetricsFile.toMap()
+        val latestReleaseMetrics = latestReleaseMetricsFile.toMap()
         val currentMetrics = metricsFile.get().asFile.toMap()
-        val artifactNames = getArtifactNames(releaseMetricsFile)
-        val analysis = analyzeMetrics(artifactNames, releaseMetrics, currentMetrics)
+        val analysis = analyzeArtifactSizeMetrics(latestReleaseMetrics, currentMetrics)
 
-        shouldFailWorkflow.get().asFile.writeText(analysis.significantChange.toString())
+        hasSignificantChange.get().asFile.writeText(analysis.significantChange.toString())
         val diffTable = createDiffTable(analysis)
         val output = if (analysis.delta) diffTable else noDiffMessage
 
-        summary.get().asFile.writeText(output)
+        this.analysis.get().asFile.writeText(output)
     }
 
-    private fun writeReleaseMetrics(releaseMetricsFile: File) = runBlocking {
+    private fun writeLatestReleaseMetrics(file: File) = runBlocking {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "TODO"
-                    key = "TODO"
+                    bucket = "artifact-size-metrics-aws-sdk-kotlin" // TODO: Point to artifact size metrics bucket
+                    key = "artifact-size-metrics.csv" // TODO: Point to artifact size metrics for latest release
                 },
             ) { latestReleaseMetrics ->
-                releaseMetricsFile.writeText(
+                file.writeText(
                     latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty"),
                 )
             }
         }
     }
 
-    private fun analyzeMetrics(
-        artifactNames: Set<String>,
+    private fun analyzeArtifactSizeMetrics(
         releaseMetrics: Map<String, Long>,
         currentMetrics: Map<String, Long>,
-    ): Analysis {
-        val metrics = mutableMapOf<String, Metric>()
-        var addedArtifact = false
-        var removedArtifact = false
+    ): ArtifactAnalysis {
+        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+
+        val artifactNames = releaseMetrics.keys + currentMetrics.keys
+        val artifactSizeMetrics = mutableMapOf<String, ArtifactSizeMetric>()
+
         var significantChange = false
         var changeHappened = false
 
@@ -86,12 +99,10 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
             val percentage = if (current == 0L || release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
 
             if (delta != 0L) changeHappened = true
-            if (abs(percentage) > 5 && delta > 0L) significantChange = true
-            if (release == 0L) addedArtifact = true
-            if (current == 0L) removedArtifact = true
+            if (abs(percentage) > pluginConfig.significantChangeThresholdPercentage && delta > 0L) significantChange = true
 
-            metrics[artifact] =
-                Metric(
+            artifactSizeMetrics[artifact] =
+                ArtifactSizeMetric(
                     current,
                     release,
                     delta,
@@ -99,61 +110,38 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
                 )
         }
 
-        return Analysis(metrics, addedArtifact, removedArtifact, significantChange, changeHappened)
+        return ArtifactAnalysis(artifactSizeMetrics, significantChange, changeHappened)
     }
 
-    private data class Analysis(
-        val metrics: Map<String, Metric>,
-        val addedArtifact: Boolean,
-        val removedArtifact: Boolean,
+    private data class ArtifactAnalysis(
+        val metrics: Map<String, ArtifactSizeMetric>,
         val significantChange: Boolean,
         val delta: Boolean,
     )
 
-    private fun getArtifactNames(releaseMetricsFile: File): Set<String> {
-        val releaseLines = releaseMetricsFile.readLines()
-        val releaseHeaders = releaseLines[0].split(",").map { it.trim() }
-
-        val currentLines = metricsFile.get().asFile.readLines()
-        val currentHeaders = currentLines[0].split(",").map { it.trim() }
-
-        return releaseHeaders.toSet() + currentHeaders.toSet()
-    }
-
-    private fun createDiffTable(analysis: Analysis): String = buildString {
+    private fun createDiffTable(analysis: ArtifactAnalysis): String = buildString {
         appendLine("Affected Artifacts\n=")
         appendLine("| Artifact |Pull Request (bytes) | Latest Release (bytes) | Delta (bytes) | Delta (percentage) |")
         appendLine("| -------- | ------------------: | ---------------------: | ------------: | -----------------: |")
         analysis.metrics.forEach { metric ->
             if (metric.value.delta != 0L) {
-                append('|')
+                append("|")
                 append(metric.key)
-                append('|')
+                append("|")
                 append("%,d".format(metric.value.currentSize))
-                append('|')
+                append("|")
                 append("%,d".format(metric.value.latestReleaseSize))
-                append('|')
+                append("|")
                 append("%,d".format(metric.value.delta))
-                append('|')
+                append("|")
                 append("%.2f".format(metric.value.percentage))
                 append("%")
-                appendLine('|')
+                appendLine("|")
             }
-        }
-
-        appendLine()
-
-        when {
-            analysis.addedArtifact && !analysis.removedArtifact ->
-                appendLine("note: artifact(s) were added ⚠️")
-            !analysis.addedArtifact && analysis.removedArtifact ->
-                appendLine("note: artifact(s) were removed ⚠️")
-            analysis.addedArtifact && analysis.removedArtifact ->
-                appendLine("note: artifact(s) were added and removed ⚠️")
         }
     }
 
-    private data class Metric(
+    private data class ArtifactSizeMetric(
         val currentSize: Long,
         val latestReleaseSize: Long,
         val delta: Long,
@@ -162,12 +150,17 @@ internal abstract class AnalyzeMetricsTask : DefaultTask() {
 
     private fun File.toMap(): Map<String, Long> {
         val lines = this.readLines()
-        val headers = lines[0].split(",").map { it.trim() }
-        val values = lines[1].split(",").map { it.trim() }
         val metrics = mutableMapOf<String, Long>()
 
-        headers.forEachIndexed { index, header ->
-            metrics[header] = values[index].toLong()
+        lines.forEachIndexed { index, line ->
+            if (index > 0) { // Skipping header row
+                val metric = line.split(",").map { it.trim() } // e.g. ["S3-jvm.jar", "103948"]
+
+                val artifact = metric[0]
+                val size = metric[1].toLong()
+
+                metrics[artifact] = size
+            }
         }
 
         return metrics

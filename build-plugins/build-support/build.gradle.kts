@@ -28,9 +28,9 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("artifact-metrics") {
-            id = "artifact-metrics"
-            implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactmetrics.ArtifactMetricsPlugin"
+        create("artifact-size-metrics") {
+            id = "artifact-size-metrics"
+            implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactmetrics.ArtifactSizeMetricsPlugin"
             version = 1.0
         }
     }
