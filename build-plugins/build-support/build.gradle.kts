@@ -22,7 +22,7 @@ dependencies {
     runtimeOnly(project(":ktlint-rules"))
     implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
-    implementation("aws.sdk.kotlin:s3:1.+")
+    implementation("aws.sdk.kotlin:s3:1.1.+")
     testImplementation(libs.junit.jupiter)
 }
 

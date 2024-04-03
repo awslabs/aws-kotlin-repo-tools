@@ -16,7 +16,6 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import java.io.File
-import kotlin.math.abs
 
 /**
  * Gradle task that analyzes/compares a project's local artifact size metrics to
@@ -24,13 +23,13 @@ import kotlin.math.abs
  */
 internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
     /**
-     * The project's current computed artifact size metrics.
+     * File containing the project's current computed artifact size metrics.
      */
     @get:InputFile
     abstract val metricsFile: RegularFileProperty
 
     /**
-     * The results of analyzing the artifact size metrics.
+     * File containing the results of analyzing the artifact size metrics.
      */
     @get:OutputFile
     abstract val analysisFile: RegularFileProperty
@@ -59,7 +58,7 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
 
         hasSignificantChangeFile.get().asFile.writeText(analysis.significantChange.toString())
         val diffTable = createDiffTable(analysis)
-        val output = if (analysis.delta) diffTable else noDiffMessage
+        val output = if (analysis.hasDelta) diffTable else noDiffMessage
 
         this.analysisFile.get().asFile.writeText(output)
     }
@@ -68,8 +67,8 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "" // TODO: Point to artifact size metrics bucket
-                    key = "" // TODO: Point to artifact size metrics for latest release
+                    bucket = "artifact-size-metrics-aws-sdk-kotlin" // TODO: Point to artifact size metrics bucket
+                    key = "artifact-size-metrics.csv" // TODO: Point to artifact size metrics for latest release
                 },
             ) { latestReleaseMetrics ->
                 file.writeText(
@@ -103,7 +102,7 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
 
         val changeHappened = artifactSizeMetrics.values.any { it.delta != 0L }
         val significantChange = artifactSizeMetrics.values.any {
-            (abs(it.percentage) > pluginConfig.significantChangeThresholdPercentage && it.delta > 0L) || // Increase in size above threshold
+            (it.percentage > pluginConfig.significantChangeThresholdPercentage) || // Increase in size above threshold
                 (it.latestReleaseSize == 0L) // New artifact
         }
 
@@ -113,7 +112,7 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
     private data class ArtifactSizeMetricsAnalysis(
         val metrics: Map<String, ArtifactSizeMetric>,
         val significantChange: Boolean,
-        val delta: Boolean,
+        val hasDelta: Boolean,
     )
 
     private fun createDiffTable(analysis: ArtifactSizeMetricsAnalysis): String = buildString {
