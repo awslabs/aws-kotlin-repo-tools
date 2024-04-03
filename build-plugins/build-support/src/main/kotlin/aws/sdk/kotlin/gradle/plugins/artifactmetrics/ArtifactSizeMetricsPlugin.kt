@@ -12,7 +12,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 
-private const val TASK_GROUP = "Metrics"
+private const val TASK_GROUP = "Verification"
 internal const val OUTPUT_PATH = "reports/metrics/"
 
 /**
@@ -57,8 +57,9 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
                 .map { it.get().metricsFile.asFile.get() }
                 .filter { it.exists() && it.length() > 0 }
                 .forEach { metricsFile ->
-                    val metrics = metricsFile.readLines().toMutableList()
-                    metrics.removeAt(0) // Remove header
+                    val metrics = metricsFile
+                        .readLines()
+                        .drop(1) // Remove header
 
                     metrics.forEach { metric ->
                         subProjectArtifactSizeMetrics.add(metric)
@@ -82,5 +83,5 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
 open class ArtifactSizeMetricsPluginConfig {
     var artifactPrefixes: Set<String> = emptySet()
     var closurePrefixes: Set<String> = emptySet()
-    var significantChangeThresholdPercentage: Int = 5
+    var significantChangeThresholdPercentage: Double = 5.0
 }

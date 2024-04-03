@@ -33,18 +33,18 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
      * The results of analyzing the artifact size metrics.
      */
     @get:OutputFile
-    abstract val analysis: RegularFileProperty
+    abstract val analysisFile: RegularFileProperty
 
     /**
      * File containing either "true" or "false".
      */
     @get:OutputFile
-    abstract val hasSignificantChange: RegularFileProperty
+    abstract val hasSignificantChangeFile: RegularFileProperty
 
     init {
         metricsFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv"))
-        analysis.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-analysis.md"))
-        hasSignificantChange.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
+        analysisFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-analysis.md"))
+        hasSignificantChangeFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
     }
 
     @TaskAction
@@ -57,11 +57,11 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         val currentMetrics = metricsFile.get().asFile.toMap()
         val analysis = analyzeArtifactSizeMetrics(latestReleaseMetrics, currentMetrics)
 
-        hasSignificantChange.get().asFile.writeText(analysis.significantChange.toString())
+        hasSignificantChangeFile.get().asFile.writeText(analysis.significantChange.toString())
         val diffTable = createDiffTable(analysis)
         val output = if (analysis.delta) diffTable else noDiffMessage
 
-        this.analysis.get().asFile.writeText(output)
+        this.analysisFile.get().asFile.writeText(output)
     }
 
     private fun writeLatestReleaseMetrics(file: File) = runBlocking {
@@ -86,28 +86,25 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
 
         val artifactNames = releaseMetrics.keys + currentMetrics.keys
-        val artifactSizeMetrics = mutableMapOf<String, ArtifactSizeMetric>()
-
-        var significantChange = false
-        var changeHappened = false
-
-        artifactNames.forEach { artifact ->
+        val artifactSizeMetrics = artifactNames.associateWith { artifact ->
             val current = currentMetrics[artifact] ?: 0
             val release = releaseMetrics[artifact] ?: 0
 
             val delta = current - release
             val percentage = if (current == 0L || release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
 
-            if (delta != 0L) changeHappened = true
-            if (abs(percentage) > pluginConfig.significantChangeThresholdPercentage && delta > 0L) significantChange = true
+            ArtifactSizeMetric(
+                current,
+                release,
+                delta,
+                percentage,
+            )
+        }
 
-            artifactSizeMetrics[artifact] =
-                ArtifactSizeMetric(
-                    current,
-                    release,
-                    delta,
-                    percentage,
-                )
+        val changeHappened = artifactSizeMetrics.values.any { it.delta != 0L }
+        val significantChange = artifactSizeMetrics.values.any {
+            (abs(it.percentage) > pluginConfig.significantChangeThresholdPercentage && it.delta > 0L) || // Increase in size above threshold
+                (it.latestReleaseSize == 0L) // New artifact
         }
 
         return ArtifactSizeMetricsAnalysis(artifactSizeMetrics, significantChange, changeHappened)
@@ -128,9 +125,9 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
                 append("|")
                 append(metric.key)
                 append("|")
-                append("%,d".format(metric.value.currentSize))
+                if (metric.value.currentSize == 0L) append("(does not exist)") else append("%,d".format(metric.value.currentSize))
                 append("|")
-                append("%,d".format(metric.value.latestReleaseSize))
+                if (metric.value.latestReleaseSize == 0L) append("(does not exist)") else append("%,d".format(metric.value.latestReleaseSize))
                 append("|")
                 append("%,d".format(metric.value.delta))
                 append("|")
@@ -149,26 +146,21 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
     )
 
     private fun File.toMap(): Map<String, Long> {
-        val lines = this.readLines()
-        val metrics = mutableMapOf<String, Long>()
-
-        lines.forEachIndexed { index, line ->
-            if (index > 0) { // Skipping header row
-                val metric = line.split(",").map { it.trim() } // e.g. ["S3-jvm.jar", "103948"]
-
-                val artifact = metric[0]
-                val size = metric[1].toLong()
-
-                metrics[artifact] = size
+        val metrics = this
+            .readLines()
+            .drop(1) // Ignoring header
+            .map { metricLine ->
+                metricLine.split(",").map { it.trim() } // e.g. ["S3-jvm.jar", "103948"]
             }
+
+        return metrics.associate { metric ->
+            metric[0] to metric[1].toLong()
         }
-
-        return metrics
     }
 
-    private val noDiffMessage = buildString {
-        appendLine("Affected Artifacts")
-        appendLine("=")
-        appendLine("No artifacts changed size")
-    }
+    private val noDiffMessage = """
+        Affected Artifacts
+        =
+        No artifacts changed size
+    """.trimIndent()
 }

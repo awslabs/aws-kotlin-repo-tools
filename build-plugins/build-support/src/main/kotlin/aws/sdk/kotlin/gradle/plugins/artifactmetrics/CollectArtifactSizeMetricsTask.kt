@@ -58,7 +58,7 @@ internal abstract class CollectArtifactSizeMetricsTask : DefaultTask() {
             if (closureSize != null) {
                 append("$artifact closure")
                 append(",")
-                append(closureSize)
+                appendLine(closureSize)
             }
         }
 
