@@ -31,6 +31,9 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
 
         target.registerRootProjectArtifactSizeMetricsTask(tasks)
         target.tasks.register<AnalyzeArtifactSizeMetricsTask>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
+
+        // Used only when delegating artifact size metrics task to codebuild. Codebuild should put the metrics in S3.
+        target.tasks.register<CollectDelegatedArtifactSizeMetricsTask>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
     }
 }
 
