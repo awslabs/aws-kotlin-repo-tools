@@ -32,7 +32,7 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
         target.registerRootProjectArtifactSizeMetricsTask(tasks)
         target.tasks.register<AnalyzeArtifactSizeMetricsTask>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
 
-        // Used only when delegating artifact size metrics task to codebuild. Codebuild should put the metrics in S3.
+        // Used only when delegating artifact size metrics task to codebuild
         target.tasks.register<CollectDelegatedArtifactSizeMetricsTask>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
     }
 }
@@ -60,11 +60,10 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
                 .map { it.get().metricsFile.asFile.get() }
                 .filter { it.exists() && it.length() > 0 }
                 .forEach { metricsFile ->
-                    val metrics = metricsFile
+                    metricsFile
                         .readLines()
                         .drop(1) // Remove header
-
-                    metrics.forEach { metric ->
+                        .forEach { metric ->
                         subProjectArtifactSizeMetrics.add(metric)
                     }
                 }

@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.plugins.artifactmetrics
+package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
