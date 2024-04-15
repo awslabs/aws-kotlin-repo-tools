@@ -15,7 +15,7 @@ import org.gradle.kotlin.dsl.getByName
  * Gradle task that collects artifact size metrics for configured projects and closures.
  * Outputs the results to a CSV file.
  */
-internal abstract class CollectArtifactSizeMetricsTask : DefaultTask() {
+internal abstract class CollectArtifactSizeMetrics : DefaultTask() {
     /**
      * The file where the artifact size metrics will be stored, defaults to /build/reports/metrics/artifact-size-metrics.csv
      */

@@ -21,7 +21,7 @@ import java.io.File
  * Gradle task that analyzes/compares a project's local artifact size metrics to
  * ones from a project's latest GitHub release. Outputs the results into various files.
  */
-internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
+internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
     /**
      * File containing the project's current computed artifact size metrics.
      */

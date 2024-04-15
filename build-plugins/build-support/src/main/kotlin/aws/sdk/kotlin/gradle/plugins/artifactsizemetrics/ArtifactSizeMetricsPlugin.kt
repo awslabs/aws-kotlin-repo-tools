@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.plugins.artifactmetrics
+package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -26,26 +26,26 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
 
         target.extensions.create("artifactSizeMetrics", ArtifactSizeMetricsPluginConfig::class.java)
 
-        val tasks = mutableListOf<TaskProvider<CollectArtifactSizeMetricsTask>>()
+        val tasks = mutableListOf<TaskProvider<CollectArtifactSizeMetrics>>()
         target.subprojects { tasks.add(subprojectArtifactSizeMetricsTask()) }
 
         target.registerRootProjectArtifactSizeMetricsTask(tasks)
-        target.tasks.register<AnalyzeArtifactSizeMetricsTask>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
 
-        // Used only when delegating artifact size metrics task to codebuild
-        target.tasks.register<CollectDelegatedArtifactSizeMetricsTask>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
+        target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
+        target.tasks.register<AnalyzeArtifactSizeMetrics>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
+        target.tasks.register<PutArtifactSizeMetricsInCloudWatch>("putArtifactSizeMetricsInCloudWatch") { group = TASK_GROUP }
     }
 }
 
-private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetricsTask> =
-    tasks.register<CollectArtifactSizeMetricsTask>("artifactSizeMetrics") {
+private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetrics> =
+    tasks.register<CollectArtifactSizeMetrics>("artifactSizeMetrics") {
         group = TASK_GROUP
         onlyIf { tasks.findByName("jvmJar") != null }
         dependsOn(tasks.withType<Jar>())
     }
 
 private fun Project.registerRootProjectArtifactSizeMetricsTask(
-    subProjects: List<TaskProvider<CollectArtifactSizeMetricsTask>>,
+    subProjects: List<TaskProvider<CollectArtifactSizeMetrics>>,
 ) {
     tasks.register("artifactSizeMetrics") {
         group = TASK_GROUP

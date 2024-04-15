@@ -17,7 +17,7 @@ import org.gradle.api.tasks.TaskAction
 /**
  * Collects the artifact size metrics for a projects subprojects from S3, combines them and outputs them to a file
  */
-internal abstract class CollectDelegatedArtifactSizeMetricsTask : DefaultTask() {
+internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     /**
      * The file where the artifact size metrics will be stored, defaults to /build/reports/metrics/artifact-size-metrics.csv
      */
