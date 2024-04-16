@@ -46,6 +46,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         hasSignificantChangeFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
     }
 
+    private val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+
     @TaskAction
     fun analyze() {
         val latestReleaseMetricsFile =
@@ -67,8 +69,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "artifact-size-metrics-aws-sdk-kotlin" // TODO: Point to artifact size metrics bucket
-                    key = "artifact-size-metrics.csv" // TODO: Point to artifact size metrics for latest release
+                    bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                    key = "${pluginConfig.projectRepositoryName}-latest-release.csv"
                 },
             ) { latestReleaseMetrics ->
                 file.writeText(
@@ -82,8 +84,6 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         releaseMetrics: Map<String, Long>,
         currentMetrics: Map<String, Long>,
     ): ArtifactSizeMetricsAnalysis {
-        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-
         val artifactNames = releaseMetrics.keys + currentMetrics.keys
         val artifactSizeMetrics = artifactNames.associateWith { artifact ->
             val current = currentMetrics[artifact] ?: 0
