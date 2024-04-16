@@ -8,6 +8,7 @@ import aws.sdk.kotlin.gradle.util.AwsSdkGradleException
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
+import aws.smithy.kotlin.runtime.content.decodeToString
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -30,14 +31,37 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
 
     @TaskAction
     fun collect() {
-        val pullRequestNumber = project.property("pullRequest")
-        val releaseTag = project.property("release")
+        val pullRequestNumber = if (project.hasProperty("pullRequest")) {
+            project.property("pullRequest")
+                .toString()
+                .let { releaseProperty ->
+                    releaseProperty.ifEmpty { // "-PpullRequest=" (no value set)
+                        null
+                    }
+                }
+        } else null
+
+        val releaseTag = if (project.hasProperty("release")) {
+            project.property("release")
+                .toString()
+                .let { releaseProperty ->
+                    releaseProperty.ifEmpty { // "-Prelease=" (no value set)
+                        null
+                    }
+                }
+        } else null
+
         val identifier = pullRequestNumber ?: releaseTag ?: throw AwsSdkGradleException("Please specify a pull request or release number")
 
         val artifactSizeMetricsFileKeys = getArtifactSizeMetricsFileKeys() ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
-        artifactSizeMetricsFileKeys.filter { it?.startsWith("[TEMP]${project.rootProject.name}-$identifier-") == true }
 
-        val artifactSizeMetricsFiles = getArtifactSizeMetricsFiles(artifactSizeMetricsFileKeys)
+        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+
+        val relevantArtifactSizeMetricsFileKeys = artifactSizeMetricsFileKeys.filter {
+            it?.startsWith("[TEMP]${pluginConfig.projectRepositoryName}-$identifier-") == true
+        }
+
+        val artifactSizeMetricsFiles = getArtifactSizeMetricsFiles(relevantArtifactSizeMetricsFileKeys)
         val combined = combine(artifactSizeMetricsFiles)
 
         metricsFile.asFile.get().writeText(combined)
@@ -46,7 +70,7 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     private fun getArtifactSizeMetricsFileKeys(): List<String?>? = runBlocking {
         S3Client.fromEnvironment().use { s3 ->
             return@runBlocking s3.listObjects {
-                bucket = ""
+                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
             }.contents?.map { it.key }
         }
     }
@@ -60,11 +84,13 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                     k?.let {
                         s3.getObject(
                             GetObjectRequest {
-                                bucket = ""
+                                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
                                 key = k
                             },
                         ) { file ->
-                            files.add(file.body.toString()) // Files are a few kb each
+                            files.add(
+                                file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $file is missing a body")
+                            )
                         }
                     }
                 }
@@ -81,7 +107,9 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                 .split("\n")
                 .drop(1) // Remove header
                 .forEach { metric ->
-                    appendLine(metric)
+                    if (metric.isNotEmpty()) {
+                        appendLine(metric)
+                    }
                 }
         }
     }
