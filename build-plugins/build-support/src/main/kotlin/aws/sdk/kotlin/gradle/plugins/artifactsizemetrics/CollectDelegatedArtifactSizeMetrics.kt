@@ -59,7 +59,7 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
 
         val identifier = pullRequestNumber ?: releaseTag ?: throw AwsSdkGradleException("Please specify a pull request or release number")
 
-        val artifactSizeMetricsFileKeys = getArtifactSizeMetricsFileKeys() ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
+        val artifactSizeMetricsFileKeys = getFileKeys() ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
 
         val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
 
@@ -67,13 +67,13 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
             it?.startsWith("[TEMP]${pluginConfig.projectRepositoryName}-$identifier-") == true
         }
 
-        val artifactSizeMetricsFiles = getArtifactSizeMetricsFiles(relevantArtifactSizeMetricsFileKeys)
+        val artifactSizeMetricsFiles = getFiles(relevantArtifactSizeMetricsFileKeys)
         val combined = combine(artifactSizeMetricsFiles)
 
         metricsFile.asFile.get().writeText(combined)
     }
 
-    private fun getArtifactSizeMetricsFileKeys(): List<String?>? = runBlocking {
+    private fun getFileKeys(): List<String?>? = runBlocking {
         S3Client.fromEnvironment().use { s3 ->
             return@runBlocking s3.listObjects {
                 bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
@@ -81,7 +81,7 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
         }
     }
 
-    private fun getArtifactSizeMetricsFiles(keys: List<String?>): List<String> {
+    private fun getFiles(keys: List<String?>): List<String> {
         val files = mutableListOf<String>()
 
         runBlocking {
