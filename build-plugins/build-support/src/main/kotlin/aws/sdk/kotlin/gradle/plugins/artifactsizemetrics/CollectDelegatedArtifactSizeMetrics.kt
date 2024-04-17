@@ -16,7 +16,9 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 
 /**
- * Collects the artifact size metrics for a projects subprojects from S3, combines them and outputs them to a file
+ * Collects the artifact size metrics for a projects subprojects from S3, combines them and outputs them to a file.
+ * This task should typically be run after codebuild gathers metrics and puts them in S3 during CI but can also be used to
+ * query the metrics bucket if you modify the file key filter.
  */
 internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     /**
@@ -39,7 +41,9 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                         null
                     }
                 }
-        } else null
+        } else {
+            null
+        }
 
         val releaseTag = if (project.hasProperty("release")) {
             project.property("release")
@@ -49,7 +53,9 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                         null
                     }
                 }
-        } else null
+        } else {
+            null
+        }
 
         val identifier = pullRequestNumber ?: releaseTag ?: throw AwsSdkGradleException("Please specify a pull request or release number")
 
@@ -89,7 +95,7 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                             },
                         ) { file ->
                             files.add(
-                                file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $file is missing a body")
+                                file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $file is missing a body"),
                             )
                         }
                     }

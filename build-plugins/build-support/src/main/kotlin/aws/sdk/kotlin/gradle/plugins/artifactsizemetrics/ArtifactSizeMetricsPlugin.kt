@@ -18,6 +18,7 @@ internal const val S3_ARTIFACT_SIZE_METRICS_BUCKET = "artifact-size-metrics-aws-
 
 /**
  * Facilitates the collection and analysis of artifact size metrics via the `artifactSizeMetrics` and `analyzeArtifactSizeMetrics` gradle tasks.
+ * Includes additional tasks for CI to run.
  */
 class ArtifactSizeMetricsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -65,8 +66,8 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
                         .readLines()
                         .drop(1) // Remove header
                         .forEach { metric ->
-                        subProjectArtifactSizeMetrics.add(metric)
-                    }
+                            subProjectArtifactSizeMetrics.add(metric)
+                        }
                 }
 
             val projectArtifactSizeMetrics = buildString {
