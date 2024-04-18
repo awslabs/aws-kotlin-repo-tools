@@ -35,8 +35,8 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
     fun put() {
         val currentTime = Instant.now()
         val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-        val release = project.property("release").toString().let {
-            check(it.isNotEmpty()) { "The release property is empty. Please specify a value." } // "-Prelease=" (no value set)
+        val releaseTag = project.property("release").toString().let {
+            check(it.isNotEmpty()) { "The release property is empty \"-Prelease=\" (no value set). Please specify a value." }
             it
         }
         val metrics = metricsFile
@@ -62,28 +62,14 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
                                 value = artifactSize
                                 dimensions = listOf(
                                     Dimension {
-                                        name = "Release"
-                                        value = "${pluginConfig.projectRepositoryName}-$release"
+                                        name = "Version"
+                                        value = "${pluginConfig.projectRepositoryName}-$releaseTag"
                                     },
-                                )
-                            },
-                            MetricDatum {
-                                metricName = "${pluginConfig.projectRepositoryName}-$artifactName"
-                                timestamp = currentTime
-                                unit = StandardUnit.Bytes
-                                value = artifactSize
-                                dimensions = listOf(
                                     Dimension {
                                         name = "Project"
                                         value = pluginConfig.projectRepositoryName
                                     },
                                 )
-                            },
-                            MetricDatum {
-                                metricName = "${pluginConfig.projectRepositoryName}-$artifactName"
-                                timestamp = currentTime
-                                unit = StandardUnit.Bytes
-                                value = artifactSize
                             },
                         )
                     }

@@ -36,12 +36,6 @@ gradlePlugin {
     }
 }
 
-publishing {
-    repositories {
-        mavenLocal()
-    }
-}
-
 tasks.withType<KotlinCompile> {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_1_8)

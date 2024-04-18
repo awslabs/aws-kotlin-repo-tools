@@ -46,7 +46,7 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         hasSignificantChangeFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
     }
 
-    private val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+    private val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
 
     @TaskAction
     fun analyze() {
