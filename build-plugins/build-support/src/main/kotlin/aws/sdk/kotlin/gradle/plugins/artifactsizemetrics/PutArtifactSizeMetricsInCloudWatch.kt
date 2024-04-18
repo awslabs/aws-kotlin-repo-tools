@@ -71,7 +71,7 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
         runBlocking {
             CloudWatchClient.fromEnvironment().use { cloudWatch ->
                 metrics
-                    .chunked(1000)
+                    .chunked(1000) // CloudWatch allows up to 1000 metrics at a time
                     .forEach { chunk ->
                         cloudWatch.putMetricData {
                             namespace = "Artifact Size Metrics"
