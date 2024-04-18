@@ -34,45 +34,45 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
     @TaskAction
     fun put() {
         val currentTime = Instant.now()
-        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+        val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
         val releaseTag = project.property("release").toString().let {
             check(it.isNotEmpty()) { "The release property is empty \"-Prelease=\" (no value set). Please specify a value." }
             it
         }
+
         val metrics = metricsFile
             .get()
             .asFile
             .readLines()
             .drop(1) // Ignoring header
+            .map { metric ->
+                val split = metric.split(",").map { it.trim() }
+                val artifactName = split[0]
+                val artifactSize = split[1].toDouble()
+
+                MetricDatum {
+                    metricName = "${pluginConfig.projectRepositoryName}-$artifactName"
+                    timestamp = currentTime
+                    unit = StandardUnit.Bytes
+                    value = artifactSize
+                    dimensions = listOf(
+                        Dimension {
+                            name = "Version"
+                            value = "${pluginConfig.projectRepositoryName}-$releaseTag"
+                        },
+                        Dimension {
+                            name = "Project"
+                            value = pluginConfig.projectRepositoryName
+                        },
+                    )
+                }
+            }
 
         runBlocking {
             CloudWatchClient.fromEnvironment().use { cloudWatch ->
-                metrics.forEach { metric ->
-                    val split = metric.split(",").map { it.trim() }
-                    val artifactName = split[0]
-                    val artifactSize = split[1].toDouble()
-
-                    cloudWatch.putMetricData {
-                        namespace = "Artifact Size Metrics"
-                        metricData = listOf(
-                            MetricDatum {
-                                metricName = "${pluginConfig.projectRepositoryName}-$artifactName"
-                                timestamp = currentTime
-                                unit = StandardUnit.Bytes
-                                value = artifactSize
-                                dimensions = listOf(
-                                    Dimension {
-                                        name = "Version"
-                                        value = "${pluginConfig.projectRepositoryName}-$releaseTag"
-                                    },
-                                    Dimension {
-                                        name = "Project"
-                                        value = pluginConfig.projectRepositoryName
-                                    },
-                                )
-                            },
-                        )
-                    }
+                cloudWatch.putMetricData {
+                    namespace = "Artifact Size Metrics"
+                    metricData = metrics
                 }
             }
         }
