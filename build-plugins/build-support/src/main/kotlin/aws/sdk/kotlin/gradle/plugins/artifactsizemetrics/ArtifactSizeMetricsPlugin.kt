@@ -85,9 +85,44 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
 }
 
 open class ArtifactSizeMetricsPluginConfig {
-    var artifactPrefixes: Set<String> = emptySet()
-    var closurePrefixes: Set<String> = emptySet()
-    var significantChangeThresholdPercentage: Double = 5.0
-    var projectRepositoryName: String = ""
+    /**
+     * Changes the prefix used to get artifact size metrics in the
+     * "collectDelegatedArtifactSizeMetrics" task. For developer use only
+     */
     var bucketPrefixOverride: String? = null
+
+    /**
+     * The gradle project name prefixes to collect metrics on. Check projects using "./gradlew project"
+     */
+    var artifactPrefixes: Set<String> = emptySet()
+
+    /**
+     * Same as artifactPrefixes but considers the whole closure
+     */
+    var closurePrefixes: Set<String> = emptySet()
+
+    /**
+     * The threshold for an acceptable artifact size increase (percentage)
+     */
+    var significantChangeThresholdPercentage: Double = 5.0
+
+    /**
+     * The GitHub repository name for the project
+     */
+    var projectRepositoryName: String? = null
+        get() {
+            check(!field.isNullOrEmpty()) {
+                missingProjectRepositoryNameMessage
+            }
+            return field
+        }
 }
+
+internal val missingProjectRepositoryNameMessage = """
+    Please specify a repository name in the plugin DSL for this project.
+    In build.gradle.kts:
+    
+    artifactSizeMetrics {
+        ${ArtifactSizeMetricsPluginConfig::projectRepositoryName.name} = "YOUR_REPOSITORY_NAME"
+    }
+""".trimIndent()
