@@ -9,6 +9,9 @@ import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.smithy.kotlin.runtime.content.decodeToString
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -50,31 +53,34 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
             return@runBlocking s3.listObjects {
                 bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
                 prefix = "[TEMP]$repository-$identifier-"
-            }.contents?.map { it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key") }
+            }.contents?.map {
+                it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
+            }
         }
     }
 
     private fun getFiles(keys: List<String>): List<String> {
-        val files = mutableListOf<String>()
+        val files = mutableListOf<Deferred<String>>()
 
-        runBlocking {
+        return runBlocking {
             S3Client.fromEnvironment().use { s3 ->
                 keys.forEach { k ->
-                    s3.getObject(
-                        GetObjectRequest {
-                            bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                            key = k
+                    files.add(
+                        async {
+                            s3.getObject(
+                                GetObjectRequest {
+                                    bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                                    key = k
+                                },
+                            ) { file ->
+                                file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $k is missing a body")
+                            }
                         },
-                    ) { file ->
-                        files.add(
-                            file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $k is missing a body"),
-                        )
-                    }
+                    )
                 }
+                return@runBlocking files.awaitAll()
             }
         }
-
-        return files
     }
 
     private fun combine(metricsFiles: List<String>) = buildString {

@@ -48,7 +48,7 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
             .map { metric ->
                 val split = metric.split(",").map { it.trim() }
                 val artifactName = split[0]
-                val artifactSize = split[1].toDouble()
+                val artifactSize = split[1].toDouble() // CloudWatch's requires metric values to be double
 
                 MetricDatum {
                     metricName = "${pluginConfig.projectRepositoryName}-$artifactName"
@@ -70,10 +70,14 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
 
         runBlocking {
             CloudWatchClient.fromEnvironment().use { cloudWatch ->
-                cloudWatch.putMetricData {
-                    namespace = "Artifact Size Metrics"
-                    metricData = metrics
-                }
+                metrics
+                    .chunked(1000)
+                    .forEach { chunk ->
+                        cloudWatch.putMetricData {
+                            namespace = "Artifact Size Metrics"
+                            metricData = chunk
+                        }
+                    }
             }
         }
     }
