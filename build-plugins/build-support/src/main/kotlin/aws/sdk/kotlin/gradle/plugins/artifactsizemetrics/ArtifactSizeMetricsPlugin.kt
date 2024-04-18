@@ -89,4 +89,5 @@ open class ArtifactSizeMetricsPluginConfig {
     var closurePrefixes: Set<String> = emptySet()
     var significantChangeThresholdPercentage: Double = 5.0
     var projectRepositoryName: String = ""
+    var bucketPrefixOverride: String? = null
 }

@@ -34,25 +34,26 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
         metricsFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv"))
     }
 
+    private val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+
     @TaskAction
     fun collect() {
         val pullRequestNumber = project.findProperty("pullRequest")?.toString()?.takeIf { it.isNotEmpty() }
         val releaseTag = project.findProperty("release")?.toString()?.takeIf { it.isNotEmpty() }
         val identifier = pullRequestNumber ?: releaseTag ?: throw AwsSdkGradleException("Please specify a pull request or release number")
-        val repository = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java).projectRepositoryName
 
-        val artifactSizeMetricsFileKeys = getFileKeys(repository, identifier) ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
+        val artifactSizeMetricsFileKeys = getFileKeys(identifier) ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
         val artifactSizeMetricsFiles = getFiles(artifactSizeMetricsFileKeys)
         val combined = combine(artifactSizeMetricsFiles)
 
         metricsFile.asFile.get().writeText(combined)
     }
 
-    private fun getFileKeys(repository: String, identifier: String): List<String>? = runBlocking {
+    private fun getFileKeys(identifier: String): List<String>? = runBlocking {
         S3Client.fromEnvironment().use { s3 ->
             return@runBlocking s3.listObjects {
                 bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                prefix = "[TEMP]$repository-$identifier-"
+                prefix = pluginConfig.bucketPrefixOverride ?: "[TEMP]${pluginConfig.projectRepositoryName}-$identifier-"
             }.contents?.map {
                 it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
             }
