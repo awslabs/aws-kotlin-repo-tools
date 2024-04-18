@@ -60,27 +60,25 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
         }
     }
 
-    private fun getFiles(keys: List<String>): List<String> {
+    private fun getFiles(keys: List<String>): List<String> = runBlocking {
         val files = mutableListOf<Deferred<String>>()
 
-        return runBlocking {
-            S3Client.fromEnvironment().use { s3 ->
-                keys.forEach { k ->
-                    files.add(
-                        async {
-                            s3.getObject(
-                                GetObjectRequest {
-                                    bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                                    key = k
-                                },
-                            ) { file ->
-                                file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $k is missing a body")
-                            }
-                        },
-                    )
-                }
-                return@runBlocking files.awaitAll()
+        S3Client.fromEnvironment().use { s3 ->
+            keys.forEach { k ->
+                files.add(
+                    async {
+                        s3.getObject(
+                            GetObjectRequest {
+                                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                                key = k
+                            },
+                        ) { file ->
+                            file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $k is missing a body")
+                        }
+                    },
+                )
             }
+            return@runBlocking files.awaitAll()
         }
     }
 

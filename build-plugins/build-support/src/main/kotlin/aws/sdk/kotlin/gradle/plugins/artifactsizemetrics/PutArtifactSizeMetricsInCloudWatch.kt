@@ -35,9 +35,8 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
     fun put() {
         val currentTime = Instant.now()
         val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-        val releaseTag = project.property("release").toString().let {
+        val releaseTag = project.property("release").toString().also {
             check(it.isNotEmpty()) { "The release property is empty \"-Prelease=\" (no value set). Please specify a value." }
-            it
         }
 
         val metrics = metricsFile
