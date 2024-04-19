@@ -9,7 +9,6 @@ import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.listObjects
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.smithy.kotlin.runtime.content.decodeToString
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.runBlocking
@@ -61,26 +60,20 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     }
 
     private fun getFiles(keys: List<String>): List<String> = runBlocking {
-        val files = mutableListOf<Deferred<String>>()
-
         S3Client.fromEnvironment().use { s3 ->
-            keys.forEach { k ->
-                files.add(
-                    async {
-                        s3.getObject(
-                            GetObjectRequest {
-                                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                                key = k
-                            },
-                        ) { file ->
-                            file.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $k is missing a body")
-                        }
-                    },
-                )
-            }
-            return@runBlocking files.awaitAll()
+            keys.map { key ->
+                async { s3.getObjectAsText(key) }
+            }.awaitAll()
         }
     }
+
+    private suspend fun S3Client.getObjectAsText(objectKey: String) =
+        getObject(
+            GetObjectRequest {
+                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                key = objectKey
+            },
+        ) { it.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $objectKey is missing a body") }
 
     private fun combine(metricsFiles: List<String>) = buildString {
         appendLine("Artifact, Size")

@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
+import aws.sdk.kotlin.gradle.util.AwsSdkGradleException
 import aws.sdk.kotlin.services.cloudwatch.CloudWatchClient
 import aws.sdk.kotlin.services.cloudwatch.model.Dimension
 import aws.sdk.kotlin.services.cloudwatch.model.MetricDatum
@@ -35,9 +36,9 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
     fun put() {
         val currentTime = Instant.now()
         val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-        val releaseTag = project.property("release").toString().also {
-            check(it.isNotEmpty()) { "The release property is empty \"-Prelease=\" (no value set). Please specify a value." }
-        }
+        val releaseTag = project.findProperty("release")?.toString()?.also {
+            check(it.isNotEmpty()) { "The release property is set to empty \"-Prelease=\" (no value set). Please specify a value." }
+        } ?: throw AwsSdkGradleException("The release property is not set. Please set a value: \"-Prelease=YOUR_RELEASE_VALUE\"")
 
         val metrics = metricsFile
             .get()

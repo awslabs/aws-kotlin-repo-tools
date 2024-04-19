@@ -87,7 +87,7 @@ private fun Project.registerRootProjectArtifactSizeMetricsTask(
 open class ArtifactSizeMetricsPluginConfig {
     /**
      * Changes the prefix used to get artifact size metrics in the
-     * "collectDelegatedArtifactSizeMetrics" task. For developer use only
+     * "collectDelegatedArtifactSizeMetrics" task.
      */
     var bucketPrefixOverride: String? = null
 
@@ -97,7 +97,8 @@ open class ArtifactSizeMetricsPluginConfig {
     var artifactPrefixes: Set<String> = emptySet()
 
     /**
-     * Same as artifactPrefixes but considers the whole closure
+     * The gradle project name prefixes to collect metrics on. This will consider the whole closure.
+     * Check projects using "./gradlew project"
      */
     var closurePrefixes: Set<String> = emptySet()
 
