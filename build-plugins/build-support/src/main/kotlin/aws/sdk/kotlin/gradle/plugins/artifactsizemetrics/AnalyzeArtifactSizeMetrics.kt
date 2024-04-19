@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.plugins.artifactmetrics
+package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
@@ -21,7 +21,7 @@ import java.io.File
  * Gradle task that analyzes/compares a project's local artifact size metrics to
  * ones from a project's latest GitHub release. Outputs the results into various files.
  */
-internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
+internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
     /**
      * File containing the project's current computed artifact size metrics.
      */
@@ -46,6 +46,8 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         hasSignificantChangeFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
     }
 
+    private val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
+
     @TaskAction
     fun analyze() {
         val latestReleaseMetricsFile =
@@ -67,8 +69,8 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         S3Client.fromEnvironment().use { s3 ->
             s3.getObject(
                 GetObjectRequest {
-                    bucket = "artifact-size-metrics-aws-sdk-kotlin" // TODO: Point to artifact size metrics bucket
-                    key = "artifact-size-metrics.csv" // TODO: Point to artifact size metrics for latest release
+                    bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                    key = "${pluginConfig.projectRepositoryName}-latest-release.csv"
                 },
             ) { latestReleaseMetrics ->
                 file.writeText(
@@ -82,8 +84,6 @@ internal abstract class AnalyzeArtifactSizeMetricsTask : DefaultTask() {
         releaseMetrics: Map<String, Long>,
         currentMetrics: Map<String, Long>,
     ): ArtifactSizeMetricsAnalysis {
-        val pluginConfig = this.project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-
         val artifactNames = releaseMetrics.keys + currentMetrics.keys
         val artifactSizeMetrics = artifactNames.associateWith { artifact ->
             val current = currentMetrics[artifact] ?: 0
