@@ -24,9 +24,9 @@ To cut a new release:
 2. Push the tag up `git push origin x.y.z`.
 3. Go to the CodeBuild release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`).
 4. Start a build with overrides.
-5. Under source connect with your GitHub account.
-6. Specify the tag you created under `Source Version`.
-7. Start the build.
+5. Under `Source` connect your GitHub account (Under `Source` -> `Connection Status` you should see "You are connected to GitHub").
+7. Specify the tag you created under `Source Version`.
+8. Start the build.
 
 ## Projects
 
