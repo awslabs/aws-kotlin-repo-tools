@@ -14,7 +14,7 @@ import org.gradle.kotlin.dsl.withType
 
 private const val TASK_GROUP = "Verification"
 internal const val OUTPUT_PATH = "reports/metrics/"
-internal const val S3_ARTIFACT_SIZE_METRICS_BUCKET = "artifact-size-metrics" // Owned by: aws-kotlin-sdk+tools@amazon.com
+internal const val S3_ARTIFACT_SIZE_METRICS_BUCKET = "artifact-size-metrics" // Owned by: aws-kotlin-sdk+ci@amazon.com
 
 /**
  * Facilitates the collection and analysis of artifact size metrics via the `artifactSizeMetrics` and `analyzeArtifactSizeMetrics` gradle tasks.
