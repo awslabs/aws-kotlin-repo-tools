@@ -49,7 +49,12 @@ class GenerateSmithyBuildTaskTest {
 
         task.generateSmithyBuild()
         assertTrue(task.generatedOutput.get().asFile.exists())
-        val contents = task.generatedOutput.get().asFile.readText()
+        val contents = task
+            .generatedOutput
+            .get()
+            .asFile
+            .readText()
+            .replace("\r\n", "\n") // For windows
         val expected = """
             {
                 "version": "1.0",
