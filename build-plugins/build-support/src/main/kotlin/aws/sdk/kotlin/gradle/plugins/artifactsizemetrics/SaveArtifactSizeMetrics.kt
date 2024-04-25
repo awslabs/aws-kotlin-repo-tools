@@ -4,7 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
-import aws.sdk.kotlin.gradle.util.AwsSdkGradleException
+import aws.sdk.kotlin.gradle.util.stringPropertyNotNull
 import aws.sdk.kotlin.services.s3.S3Client
 import aws.sdk.kotlin.services.s3.putObject
 import aws.smithy.kotlin.runtime.content.ByteStream
@@ -33,10 +33,7 @@ internal abstract class SaveArtifactSizeMetrics : DefaultTask() {
 
     @TaskAction
     fun save() {
-        val releaseTag = project.findProperty("release")?.toString()?.also {
-            check(it.isNotEmpty()) { "The release property is set to empty \"-Prelease=\" (no value set). Please specify a value." }
-        } ?: throw AwsSdkGradleException("The release property is not set. Please set a value: \"-Prelease=YOUR_RELEASE_VALUE\"")
-
+        val releaseTag = project.stringPropertyNotNull("release")
         val artifactSizeMetrics = ByteStream.fromString(metricsFile.get().asFile.readText())
 
         runBlocking {
