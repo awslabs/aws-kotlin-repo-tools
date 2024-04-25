@@ -37,18 +37,20 @@ internal abstract class SaveArtifactSizeMetrics : DefaultTask() {
             check(it.isNotEmpty()) { "The release property is set to empty \"-Prelease=\" (no value set). Please specify a value." }
         } ?: throw AwsSdkGradleException("The release property is not set. Please set a value: \"-Prelease=YOUR_RELEASE_VALUE\"")
 
+        val artifactSizeMetrics = ByteStream.fromString(metricsFile.get().asFile.readText())
+
         runBlocking {
             S3Client.fromEnvironment().use { s3 ->
                 s3.putObject {
                     bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
                     key = "${pluginConfig.projectRepositoryName}-latest-release.csv"
-                    body = ByteStream.fromString(metricsFile.get().asFile.readText())
+                    body = artifactSizeMetrics
                 }
 
                 s3.putObject {
                     bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
                     key = "${pluginConfig.projectRepositoryName}-$releaseTag-release.csv"
-                    body = ByteStream.fromString(metricsFile.get().asFile.readText())
+                    body = artifactSizeMetrics
                 }
             }
         }
