@@ -65,4 +65,14 @@ public inline fun Project.verifyRootProject(lazyMessage: () -> Any) {
     }
 }
 
+/**
+ * Will access a project property as a String, only if it is not null or not empty.
+ * @throws AwsSdkGradleException If the property is empty or null
+ * @return The property as a String
+ */
+fun Project.stringPropertyNotNull(property: String): String =
+    findProperty(property)?.toString()?.also {
+        check(it.isNotEmpty()) { "The $property property is set to empty \"-P$property=\" (no value set). Please specify a value." }
+    } ?: throw AwsSdkGradleException("The $property property is not set. Please set a value: \"-P$property=YOUR_VALUE\"")
+
 class AwsSdkGradleException(message: String) : GradleException(message)

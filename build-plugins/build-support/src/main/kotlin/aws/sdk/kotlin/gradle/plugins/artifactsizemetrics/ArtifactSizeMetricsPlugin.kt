@@ -4,7 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
-import org.gradle.api.GradleException
+import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
@@ -22,9 +22,7 @@ internal const val S3_ARTIFACT_SIZE_METRICS_BUCKET = "artifact-size-metrics" // 
  */
 class ArtifactSizeMetricsPlugin : Plugin<Project> {
     override fun apply(target: Project) {
-        if (target != target.rootProject) {
-            throw GradleException("${this::class.java} can only be applied to the root project")
-        }
+        target.verifyRootProject { "${this::class.java} can only be applied to the root project" }
 
         target.extensions.create("artifactSizeMetrics", ArtifactSizeMetricsPluginConfig::class.java)
 
@@ -36,6 +34,7 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
         target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
         target.tasks.register<AnalyzeArtifactSizeMetrics>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
         target.tasks.register<PutArtifactSizeMetricsInCloudWatch>("putArtifactSizeMetricsInCloudWatch") { group = TASK_GROUP }
+        target.tasks.register<SaveArtifactSizeMetrics>("saveArtifactSizeMetrics") { group = TASK_GROUP }
     }
 }
 
