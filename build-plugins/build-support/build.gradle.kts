@@ -30,7 +30,7 @@ dependencies {
 gradlePlugin {
     plugins {
         create("artifact-size-metrics") {
-            id = "artifact-size-metrics"
+            id = "aws.sdk.kotlin.gradle.artifactsizemetrics"
             implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactsizemetrics.ArtifactSizeMetricsPlugin"
         }
     }
