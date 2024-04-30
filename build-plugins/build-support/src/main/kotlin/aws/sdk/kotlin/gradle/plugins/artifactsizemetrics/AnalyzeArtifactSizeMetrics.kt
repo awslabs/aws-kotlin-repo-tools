@@ -137,7 +137,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
 
         analysis.metrics
             .toList()
-            .sortedBy { it.second.percentage }.toMap()
+            .sortedByDescending { it.second.percentage }
+            .toMap()
             .forEach { metric ->
                 if (metric.value.delta.isNotaFluctuation()) {
                     val row = buildString {
@@ -152,7 +153,6 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
                         append("|")
                         append("%.2f".format(metric.value.percentage))
                         append("%")
-                        if (metric.value.requiresAttention()) append("⚠️")
                         appendLine("|")
                     }
 
