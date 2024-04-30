@@ -129,7 +129,7 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         var artifactRequiresAttention = false
 
         val ordinary = StringBuilder()
-            .appendLine("<details>") // See: https://tiny.amazon.com/zhuf9fhk/docsgithengetswritworkorga
+            .appendLine("<details>") // See: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections
             .appendLine("<summary>Changed in size</summary>")
             .appendLine()
             .append(tableHeader)
