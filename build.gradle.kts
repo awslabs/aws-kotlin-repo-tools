@@ -53,7 +53,7 @@ val ktlint by configurations.creating {
 }
 
 dependencies {
-    ktlint(libs.ktlint)
+    ktlint(libs.ktlint.cli)
     ktlint(project(":ktlint-rules"))
 }
 

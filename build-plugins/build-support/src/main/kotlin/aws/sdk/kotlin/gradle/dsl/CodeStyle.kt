@@ -8,7 +8,6 @@ import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Project
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 
@@ -25,19 +24,14 @@ fun Project.configureLinting(lintPaths: List<String>) {
         }
     }
 
-    // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
-    val ktlintVersion = "1.2.1"
-    dependencies {
-        ktlint("com.pinterest:ktlint:$ktlintVersion")
-    }
-
     // add the buildscript classpath which should pickup our custom ktlint-rules (via runtimeOnly dep on this plugin)
     // plus any custom rules added by consumer
-    val execKtlintClaspath = ktlint + buildscript.configurations.getByName("classpath")
+    val execKtlintClasspath = ktlint + buildscript.configurations.getByName("classpath")
+
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
         group = "Verification"
-        classpath = execKtlintClaspath
+        classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = lintPaths
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
@@ -46,7 +40,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
     tasks.register<JavaExec>("ktlintFormat") {
         description = "Auto fix Kotlin code style violations"
         group = "formatting"
-        classpath = execKtlintClaspath
+        classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = listOf("-F") + lintPaths
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
