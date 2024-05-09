@@ -26,7 +26,7 @@ fun Project.configureLinting(lintPaths: List<String>) {
     }
 
     // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
-    val ktlintVersion = "1.1.0"
+    val ktlintVersion = "1.2.1"
     dependencies {
         ktlint("com.pinterest:ktlint:$ktlintVersion")
     }
