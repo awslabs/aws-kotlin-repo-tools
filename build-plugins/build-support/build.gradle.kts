@@ -32,7 +32,14 @@ gradlePlugin {
         create("artifact-size-metrics") {
             id = "aws.sdk.kotlin.gradle.artifactsizemetrics"
             implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactsizemetrics.ArtifactSizeMetricsPlugin"
+            version = "100.0"
         }
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
     }
 }
 

@@ -4,11 +4,12 @@
  */
 package software.aws.ktlint.rules
 
-import com.pinterest.ktlint.core.Rule
-import com.pinterest.ktlint.core.ast.ElementType
+import com.pinterest.ktlint.rule.engine.core.api.ElementType
+import com.pinterest.ktlint.rule.engine.core.api.Rule
+import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
-class MultilineIfElseBlockRule : Rule("multiline-if-else-block") {
+class MultilineIfElseBlockRule : Rule(RuleId("multiline-if-else-block"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,
