@@ -55,10 +55,6 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
                     value = artifactSize
                     dimensions = listOf(
                         Dimension {
-                            name = "Version"
-                            value = "${pluginConfig.projectRepositoryName}-$releaseTag"
-                        },
-                        Dimension {
                             name = "Project"
                             value = pluginConfig.projectRepositoryName
                         },

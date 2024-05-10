@@ -91,7 +91,7 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
             val release = releaseMetrics[artifact] ?: 0
 
             val delta = current - release
-            val percentage = if (current == 0L || release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
+            val percentage = if (release == 0L) Double.NaN else delta.toDouble() / release.toDouble() * 100
 
             ArtifactSizeMetric(
                 current,
