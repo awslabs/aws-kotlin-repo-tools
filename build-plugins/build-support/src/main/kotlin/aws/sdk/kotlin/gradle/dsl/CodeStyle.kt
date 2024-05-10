@@ -27,13 +27,14 @@ fun Project.configureLinting(lintPaths: List<String>) {
     // add the buildscript classpath which should pickup our custom ktlint-rules (via runtimeOnly dep on this plugin)
     // plus any custom rules added by consumer
     val execKtlintClasspath = ktlint + buildscript.configurations.getByName("classpath").filter {
-        !it.path.contains("ch.qos.logback/logback-classic")
+        true
+//        !it.path.contains("ch.qos.logback/logback-classic") <----- Possible next step ?
     }
 
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
         group = "Verification"
-        classpath = execKtlintClasspath // FIXME: Classpath contains multiple SL4J providers
+        classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = lintPaths
         jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
