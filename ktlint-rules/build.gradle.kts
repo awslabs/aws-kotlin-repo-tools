@@ -18,6 +18,7 @@ kotlin {
             dependencies {
                 implementation(libs.ktlint.rule.engine.core)
                 implementation(libs.ktlint.cli.ruleset.core)
+                implementation(libs.ktlint.cli)
             }
         }
 
