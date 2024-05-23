@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     implementation(project(":build-plugins:build-support"))
-    compileOnly(kotlin("gradle-plugin", "1.9.20"))
+    compileOnly(kotlin("gradle-plugin", "2.0.0"))
     testImplementation(libs.junit.jupiter)
 }
 
