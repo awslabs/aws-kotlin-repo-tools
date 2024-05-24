@@ -43,7 +43,15 @@ class SmithyBuildPluginTest {
         }
 
         testProj.tasks.generateSmithyBuild.get().generateSmithyBuild()
-        val contents = testProj.tasks.generateSmithyBuild.get().generatedOutput.get().asFile.readText()
+        val contents = testProj
+            .tasks
+            .generateSmithyBuild
+            .get()
+            .generatedOutput
+            .get()
+            .asFile
+            .readText()
+            .replace("\r\n", "\n") // For Windows
         val expected = """
             {
                 "version": "1.0",

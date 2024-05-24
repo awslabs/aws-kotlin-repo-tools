@@ -2,7 +2,7 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-package aws.sdk.kotlin.gradle.plugins.artifactmetrics
+package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
@@ -15,7 +15,7 @@ import org.gradle.kotlin.dsl.getByName
  * Gradle task that collects artifact size metrics for configured projects and closures.
  * Outputs the results to a CSV file.
  */
-internal abstract class CollectArtifactSizeMetricsTask : DefaultTask() {
+internal abstract class CollectArtifactSizeMetrics : DefaultTask() {
     /**
      * The file where the artifact size metrics will be stored, defaults to /build/reports/metrics/artifact-size-metrics.csv
      */

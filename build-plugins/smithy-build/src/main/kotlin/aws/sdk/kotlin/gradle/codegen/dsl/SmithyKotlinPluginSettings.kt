@@ -14,7 +14,7 @@ import java.util.*
  * Container for `smithy-kotlin` plugin settings
  * See https://github.com/awslabs/smithy-kotlin/blob/main/codegen/smithy-kotlin-codegen/src/main/kotlin/software/amazon/smithy/kotlin/codegen/KotlinSettings.kt
  */
-class SmithyKotlinApiSettings : ToNode {
+open class SmithyKotlinApiSettings : ToNode {
     var visibility: String? = null
     var nullabilityCheckMode: String? = null
     var defaultValueSerializationMode: String? = null
@@ -55,7 +55,7 @@ class SmithyKotlinApiSettings : ToNode {
         "SmithyKotlinApiSettings(visibility=$visibility, nullabilityCheckMode=$nullabilityCheckMode, defaultValueSerializationMode=$defaultValueSerializationMode, enableEndpointAuthProvider=$enableEndpointAuthProvider)"
 }
 
-class SmithyKotlinBuildSettings : ToNode {
+open class SmithyKotlinBuildSettings : ToNode {
     var generateFullProject: Boolean? = null
     var generateDefaultBuildFiles: Boolean? = null
     var optInAnnotations: List<String>? = null
@@ -96,7 +96,7 @@ class SmithyKotlinBuildSettings : ToNode {
         "SmithyKotlinBuildSettings(generateFullProject=$generateFullProject, generateDefaultBuildFiles=$generateDefaultBuildFiles, optInAnnotations=$optInAnnotations)"
 }
 
-class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
+open class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
     override val pluginName: String = "kotlin-codegen"
 
     var serviceShapeId: String? = null

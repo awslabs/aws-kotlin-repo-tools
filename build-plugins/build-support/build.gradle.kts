@@ -23,15 +23,15 @@ dependencies {
     implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
     implementation("aws.sdk.kotlin:s3:1.1.+")
+    implementation("aws.sdk.kotlin:cloudwatch:1.1.+")
     testImplementation(libs.junit.jupiter)
 }
 
 gradlePlugin {
     plugins {
         create("artifact-size-metrics") {
-            id = "artifact-size-metrics"
-            implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactmetrics.ArtifactSizeMetricsPlugin"
-            version = 1.0
+            id = "aws.sdk.kotlin.gradle.artifactsizemetrics"
+            implementationClass = "aws.sdk.kotlin.gradle.plugins.artifactsizemetrics.ArtifactSizeMetricsPlugin"
         }
     }
 }
