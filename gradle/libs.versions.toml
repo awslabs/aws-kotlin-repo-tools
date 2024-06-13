@@ -1,6 +1,6 @@
 [versions]
 ktlint = "0.48.1"
-smithy-version = "1.42.0"
+smithy-version = "1.49.0"
 smithy-gradle-plugin-version = "0.9.0"
 junit-version = "5.10.1"
 
