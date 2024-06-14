@@ -28,7 +28,14 @@ To cut a new release:
 7. Specify the tag you created under `Source Version`.
 8. Start the build.
 
-## Projects
+## Development
+
+### Local development
+To use a local version of the plugin in downstream projects (such as `smithy-kotlin` or `aws-sdk-kotlin`):
+1. Run `./gradlew -Prelease.version=<YOUR_SNAPSHOT_VERSION> publishToMavenLocal`
+2. Consume the snapshot plugin version in the projects 
+
+### Project Structure
 
 * `:build-plugins:build-support`   - common build support (publishing, linting, utils, etc)
 * `:build-plugins:kmp-conventions` - Plugin that applies common conventions for KMP projects (source sets, targets, etc)
