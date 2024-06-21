@@ -82,7 +82,6 @@ fun Project.configureKmpTargets() {
                         withMingw()
                     }
                 }
-
             }
 
             if (hasDesktop) {
