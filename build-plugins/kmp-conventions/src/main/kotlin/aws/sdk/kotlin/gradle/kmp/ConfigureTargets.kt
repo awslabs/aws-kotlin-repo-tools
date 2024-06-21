@@ -68,12 +68,12 @@ fun Project.configureKmpTargets() {
         // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
         kmpExt.applyDefaultHierarchyTemplate {
             if (hasJvmAndNative) {
-//                common {
+                common {
                     group("jvmAndNative") {
                         withJvm()
                         withNative()
                     }
-//                }
+                }
             }
 
             if (hasWindows) {
