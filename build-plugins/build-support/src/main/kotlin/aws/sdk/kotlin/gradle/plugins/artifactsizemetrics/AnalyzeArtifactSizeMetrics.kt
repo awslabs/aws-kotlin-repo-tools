@@ -103,8 +103,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
 
         val changeHappened = artifactSizeMetrics.values.any { it.delta.isNotaFluctuation() }
         val significantChange = artifactSizeMetrics.values.any {
-            (it.percentage > pluginConfig.significantChangeThresholdPercentage) || // Increase in size above threshold
-                (it.latestReleaseSize == 0L) // New artifact
+            // Increase in size above threshold or new artifact
+            (it.percentage > pluginConfig.significantChangeThresholdPercentage) || (it.latestReleaseSize == 0L)
         }
 
         return ArtifactSizeMetricsAnalysis(artifactSizeMetrics, significantChange, changeHappened)

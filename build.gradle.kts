@@ -44,15 +44,14 @@ fun propertyOrEnv(propName: String, envName: String): String? {
     return findProperty(propName) as? String ?: env[envName]
 }
 
-// chicken and egg problem, we can't use the kotlinter gradle plugin here AND use our custom rules
-val ktlint by configurations.creating {
-    attributes {
-        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-    }
-}
+val ktlint by configurations.creating
 
 dependencies {
-    ktlint(libs.ktlint)
+    ktlint(libs.ktlint.cli) {
+        attributes {
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+        }
+    }
     ktlint(project(":ktlint-rules"))
 }
 
@@ -61,19 +60,18 @@ val lintPaths = listOf(
 )
 
 tasks.register<JavaExec>("ktlint") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Check Kotlin code style."
-    group = "Verification"
-    classpath = configurations.getByName("ktlint")
+    classpath = ktlint
     mainClass.set("com.pinterest.ktlint.Main")
     args = lintPaths
-    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
 }
 
 tasks.register<JavaExec>("ktlintFormat") {
+    group = LifecycleBasePlugin.VERIFICATION_GROUP
     description = "Auto fix Kotlin code style violations"
-    group = "formatting"
-    classpath = configurations.getByName("ktlint")
+    classpath = ktlint
     mainClass.set("com.pinterest.ktlint.Main")
     args = listOf("-F") + lintPaths
-    jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+    jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
 }

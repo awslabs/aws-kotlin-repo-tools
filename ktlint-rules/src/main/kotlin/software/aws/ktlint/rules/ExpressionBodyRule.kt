@@ -4,13 +4,14 @@
  */
 package software.aws.ktlint.rules
 
-import com.pinterest.ktlint.core.Rule
+import com.pinterest.ktlint.rule.engine.core.api.Rule
+import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.psi.KtBlockExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtReturnExpression
 
-class ExpressionBodyRule : Rule("expression-body") {
+class ExpressionBodyRule : Rule(RuleId("expression-body"), About()) {
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,

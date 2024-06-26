@@ -8,9 +8,8 @@ import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Project
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.*
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
  * Configure lint rules for the project
@@ -19,36 +18,35 @@ import org.gradle.kotlin.dsl.register
 fun Project.configureLinting(lintPaths: List<String>) {
     verifyRootProject { "Kotlin SDK lint configuration is expected to be configured on the root project" }
 
-    val ktlint = configurations.create("ktlint") {
-        attributes {
-            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-        }
-    }
+    val ktlint by configurations.creating
 
-    // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
-    val ktlintVersion = "0.48.1"
     dependencies {
-        ktlint("com.pinterest:ktlint:$ktlintVersion")
+        val ktlintVersion = "1.3.0"
+        ktlint("com.pinterest.ktlint:ktlint-cli:$ktlintVersion") {
+            attributes {
+                attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+            }
+        }
     }
 
     // add the buildscript classpath which should pickup our custom ktlint-rules (via runtimeOnly dep on this plugin)
     // plus any custom rules added by consumer
-    val execKtlintClaspath = ktlint + buildscript.configurations.getByName("classpath")
+    val execKtlintClasspath = ktlint + buildscript.configurations.getByName("classpath")
+
     tasks.register<JavaExec>("ktlint") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Check Kotlin code style."
-        group = "Verification"
-        classpath = execKtlintClaspath
+        classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = lintPaths
-        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
     }
 
     tasks.register<JavaExec>("ktlintFormat") {
+        group = LifecycleBasePlugin.VERIFICATION_GROUP
         description = "Auto fix Kotlin code style violations"
-        group = "formatting"
-        classpath = execKtlintClaspath
+        classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = listOf("-F") + lintPaths
-        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
     }
 }

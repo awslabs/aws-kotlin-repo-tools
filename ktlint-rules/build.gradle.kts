@@ -16,7 +16,7 @@ kotlin {
     sourceSets {
         main {
             dependencies {
-                implementation(libs.ktlint.core)
+                implementation(libs.ktlint.cli.ruleset.core)
             }
         }
 

@@ -4,10 +4,11 @@
  */
 package software.aws.ktlint.rules
 
-import com.pinterest.ktlint.core.RuleProvider
-import com.pinterest.ktlint.core.RuleSetProviderV2
+import com.pinterest.ktlint.cli.ruleset.core.api.RuleSetProviderV3
+import com.pinterest.ktlint.rule.engine.core.api.RuleProvider
+import com.pinterest.ktlint.rule.engine.core.api.RuleSetId
 
-class CustomRuleSetProvider : RuleSetProviderV2("custom-ktlint-rules", NO_ABOUT) {
+class CustomRuleSetProvider : RuleSetProviderV3(RuleSetId("custom-ktlint-rules")) {
     override fun getRuleProviders() = setOf(
         RuleProvider { CopyrightHeaderRule() },
         RuleProvider { ExpressionBodyRule() },
