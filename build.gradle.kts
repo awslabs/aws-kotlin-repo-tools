@@ -48,12 +48,10 @@ fun propertyOrEnv(propName: String, envName: String): String? {
 val ktlint by configurations.creating {
     attributes {
         attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
-        attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
     }
 }
 
 dependencies {
-    ktlint(libs.ktlint.cli)
     ktlint(project(":ktlint-rules"))
 }
 

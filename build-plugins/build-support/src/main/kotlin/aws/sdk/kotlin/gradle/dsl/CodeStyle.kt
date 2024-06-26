@@ -8,6 +8,7 @@ import aws.sdk.kotlin.gradle.util.verifyRootProject
 import org.gradle.api.Project
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.tasks.JavaExec
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 
@@ -24,12 +25,15 @@ fun Project.configureLinting(lintPaths: List<String>) {
         }
     }
 
+    // TODO - is there anyway to align this with the version from libs.versions.toml in this project/repo
+    val ktlintVersion = "1.3.0"
+    dependencies {
+        ktlint("com.pinterest.ktlint:ktlint-cli:$ktlintVersion")
+    }
+
     // add the buildscript classpath which should pickup our custom ktlint-rules (via runtimeOnly dep on this plugin)
     // plus any custom rules added by consumer
-    val execKtlintClasspath = ktlint + buildscript.configurations.getByName("classpath").filter {
-        true
-//        !it.path.contains("ch.qos.logback/logback-classic") <----- Possible next step ?
-    }
+    val execKtlintClasspath = ktlint + buildscript.configurations.getByName("classpath")
 
     tasks.register<JavaExec>("ktlint") {
         description = "Check Kotlin code style."
