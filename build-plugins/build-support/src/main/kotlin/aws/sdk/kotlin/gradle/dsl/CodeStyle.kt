@@ -47,6 +47,6 @@ fun Project.configureLinting(lintPaths: List<String>) {
         classpath = execKtlintClasspath
         mainClass.set("com.pinterest.ktlint.Main")
         args = listOf("-F") + lintPaths
-        jvmArgs("--add-opens", "java.base/java.lang=ALL-UNNAMED")
+        jvmArgs("--add-opens=java.base/java.lang=ALL-UNNAMED")
     }
 }
