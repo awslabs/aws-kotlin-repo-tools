@@ -184,5 +184,5 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     // Validate publication name is allowed to be published
     shouldPublish = shouldPublish && ALLOWED_PUBLICATIONS.any { publication.name.equals(it, ignoreCase = true) }
 
-    return shouldPublish.also { println("${project.name} isAvailableForPublication: $it")}
+    return shouldPublish
 }
