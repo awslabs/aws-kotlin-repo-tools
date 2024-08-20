@@ -10,7 +10,6 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
@@ -34,6 +33,8 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "android", // aws-crt-kotlin
     "codegen",
     "codegen-testutils",
+    "pluginMaven",
+    "dynamodb-mapper-schema-generatorPluginMarkerMaven",
 )
 
 /**
@@ -51,13 +52,21 @@ fun Project.skipPublishing() {
 fun Project.configurePublishing(repoName: String) {
     val project = this
     apply(plugin = "maven-publish")
-    apply(plugin = "signing")
 
-    // FIXME: create a real "javadoc" JAR from Dokka output
-    val javadocJar = tasks.register<Jar>("emptyJar") {
-        archiveClassifier.set("javadoc")
-        from()
-    }
+
+    /**
+     * FIXME Temporarily disabled javadoc JAR creation because of this error when publishing plugin:
+     *
+     *  Execution failed for task ':hll:dynamodb-mapper:dynamodb-mapper-schema-generator-plugin:publishPluginMavenPublicationToMavenLocal'.
+     *  > Failed to publish publication 'pluginMaven' to repository 'mavenLocal'
+     *     > Invalid publication 'pluginMaven': multiple artifacts with the identical extension and classifier ('jar', 'javadoc').
+     */
+
+//    // FIXME: create a real "javadoc" JAR from Dokka output
+//    val javadocJar = tasks.register<Jar>("emptyJar") {
+//        archiveClassifier.set("javadoc")
+//        from()
+//    }
 
     extensions.configure<PublishingExtension> {
         repositories {
@@ -93,12 +102,14 @@ fun Project.configurePublishing(repoName: String) {
                         url.set("https://github.com/awslabs/$repoName")
                     }
 
-                    artifact(javadocJar)
+//                    artifact(javadocJar)
                 }
             }
         }
 
         if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
+            apply(plugin = "signing")
+
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
                     project.property(SIGNING_KEY_PROP) as String,
@@ -173,5 +184,5 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     // Validate publication name is allowed to be published
     shouldPublish = shouldPublish && ALLOWED_PUBLICATIONS.any { publication.name.equals(it, ignoreCase = true) }
 
-    return shouldPublish
+    return shouldPublish.also { println("${project.name} isAvailableForPublication: $it")}
 }
