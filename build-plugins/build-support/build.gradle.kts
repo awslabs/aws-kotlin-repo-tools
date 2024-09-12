@@ -25,6 +25,8 @@ dependencies {
     implementation("aws.sdk.kotlin:s3:1.1.+")
     implementation("aws.sdk.kotlin:cloudwatch:1.1.+")
     testImplementation(libs.junit.jupiter)
+    compileOnly(libs.dokka.base)
+    compileOnly(libs.dokka.core)
 }
 
 gradlePlugin {
