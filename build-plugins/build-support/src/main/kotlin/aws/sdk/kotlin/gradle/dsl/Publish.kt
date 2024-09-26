@@ -40,7 +40,6 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "dynamodb-mapper-codegen",
     "dynamodb-mapper-schema-generator-plugin",
     "dynamodb-mapper-schema-codegen",
-    "pluginMaven",
 )
 
 /**
