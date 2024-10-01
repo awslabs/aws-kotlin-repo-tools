@@ -34,6 +34,12 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "android", // aws-crt-kotlin
     "codegen",
     "codegen-testutils",
+
+    // aws-sdk-kotlin:hll
+    "hll-codegen",
+    "dynamodb-mapper-codegen",
+    "dynamodb-mapper-schema-generator-plugin",
+    "dynamodb-mapper-schema-codegen",
 )
 
 /**
@@ -51,7 +57,6 @@ fun Project.skipPublishing() {
 fun Project.configurePublishing(repoName: String) {
     val project = this
     apply(plugin = "maven-publish")
-    apply(plugin = "signing")
 
     // FIXME: create a real "javadoc" JAR from Dokka output
     val javadocJar = tasks.register<Jar>("emptyJar") {
@@ -99,6 +104,7 @@ fun Project.configurePublishing(repoName: String) {
         }
 
         if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
+            apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
                     project.property(SIGNING_KEY_PROP) as String,
@@ -119,7 +125,7 @@ fun Project.configurePublishing(repoName: String) {
         onlyIf {
             isAvailableForPublication(project, publication).also {
                 if (!it) {
-                    logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}")
+                    logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
                 }
             }
         }
