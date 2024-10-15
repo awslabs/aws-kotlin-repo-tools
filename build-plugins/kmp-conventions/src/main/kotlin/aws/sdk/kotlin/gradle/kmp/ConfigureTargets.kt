@@ -133,11 +133,6 @@ fun Project.configureCommon() {
 fun Project.configureJvm() {
     kotlin {
         jvm()
-        sourceSets.named("jvmMain") {
-            dependencies {
-                api(kotlin("stdlib"))
-            }
-        }
 
         sourceSets.named("jvmTest") {
             dependencies {
