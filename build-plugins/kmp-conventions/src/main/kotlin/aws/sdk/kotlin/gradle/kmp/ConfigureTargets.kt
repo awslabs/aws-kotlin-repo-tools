@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.kmp
 
+import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
@@ -45,7 +46,7 @@ val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "win
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-public val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs
+public val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
@@ -64,7 +65,8 @@ fun Project.configureKmpTargets() {
             return@withPlugin
         }
 
-        // configure the target hierarchy, this does not actually enable the targets, just their relationships
+        // extend the default KMP target hierarchy
+        // this does not actually enable the targets, just their relationships
         // see https://kotlinlang.org/docs/multiplatform-hierarchy.html#see-the-full-hierarchy-template
         kmpExt.applyDefaultHierarchyTemplate {
             if (hasJvmAndNative) {
@@ -95,7 +97,7 @@ fun Project.configureKmpTargets() {
             }
         }
 
-        // enable targets
+        // enable the targets
         configureCommon()
 
         if (hasJvm && JVM_ENABLED) {
@@ -103,16 +105,20 @@ fun Project.configureKmpTargets() {
         }
 
         // FIXME Configure JS
-        // FIXME Configure Apple
-        // FIXME Configure Windows
 
-        withIf(hasLinux && NATIVE_ENABLED, kmpExt) {
-            configureLinux()
-        }
-
-        withIf(hasDesktop && NATIVE_ENABLED, kmpExt) {
-            configureLinux()
-            // FIXME Configure desktop
+        if (NATIVE_ENABLED) {
+            if (hasApple) {
+                kmpExt.apply { configureApple() }
+            }
+            if (hasWindows) {
+                kmpExt.apply { configureWindows() }
+            }
+            if (hasLinux) {
+                kmpExt.apply { configureLinux() }
+            }
+            if (hasDesktop) {
+                kmpExt.apply { configureWindows() }
+            }
         }
 
         kmpExt.configureSourceSetsConvention()
@@ -155,14 +161,25 @@ fun Project.configureJvm() {
 
 fun Project.configureLinux() {
     kotlin {
-        linuxX64 {
-            // FIXME enable tests once the target is fully implemented
-            tasks.named("linuxX64Test") {
-                enabled = false
-            }
-        }
-        // FIXME - Okio missing arm64 target support
-        // linuxArm64()
+        linuxX64()
+        linuxArm64()  // FIXME - Okio missing arm64 target support
+    }
+}
+
+fun Project.configureApple() {
+    kotlin {
+        macosX64()
+        macosArm64()
+        iosSimulatorArm64()
+        iosArm64()
+        iosX64()
+    }
+}
+
+fun Project.configureWindows() {
+    kotlin {
+        // FIXME Set up Docker files and CMake tasks for Windows
+//        mingwX64()
     }
 }
 
@@ -179,8 +196,5 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
     }
 }
 
-internal inline fun <T> withIf(condition: Boolean, receiver: T, block: T.() -> Unit) {
-    if (condition) {
-        receiver.block()
-    }
-}
+val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
+val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
