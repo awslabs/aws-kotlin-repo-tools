@@ -162,7 +162,7 @@ fun Project.configureJvm() {
 fun Project.configureLinux() {
     kotlin {
         linuxX64()
-        linuxArm64()  // FIXME - Okio missing arm64 target support
+        linuxArm64() // FIXME - Okio missing arm64 target support
     }
 }
 
