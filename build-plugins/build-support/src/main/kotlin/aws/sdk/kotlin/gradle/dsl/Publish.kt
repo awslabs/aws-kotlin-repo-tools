@@ -27,11 +27,16 @@ private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 private val ALLOWED_PUBLICATIONS = listOf(
     "common",
     "jvm",
-    "metadata",
     "kotlinMultiplatform",
+    "iosX64",
+    "linuxArm64",
+    "linuxX64",
+    "macosArm64",
+    "macosX64",
+
+    "metadata",
     "bom",
     "versionCatalog",
-    "android", // aws-crt-kotlin
     "codegen",
     "codegen-testutils",
 

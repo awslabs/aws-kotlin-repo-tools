@@ -117,7 +117,11 @@ fun Project.configureKmpTargets() {
                 kmpExt.apply { configureLinux() }
             }
             if (hasDesktop) {
-                kmpExt.apply { configureWindows() }
+                kmpExt.apply {
+                    configureLinux()
+                    configureMacos()
+                    configureWindows()
+                }
             }
         }
 
@@ -168,11 +172,17 @@ fun Project.configureLinux() {
 
 fun Project.configureApple() {
     kotlin {
-        macosX64()
-        macosArm64()
+        configureMacos()
         iosSimulatorArm64()
         iosArm64()
         iosX64()
+    }
+}
+
+fun Project.configureMacos() {
+    kotlin {
+        macosX64()
+        macosArm64()
     }
 }
 
