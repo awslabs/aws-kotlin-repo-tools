@@ -62,6 +62,7 @@ fun Project.configurePublishing(repoName: String) {
     // FIXME: create a real "javadoc" JAR from Dokka output
     val javadocJar = tasks.register<Jar>("emptyJar") {
         archiveClassifier.set("javadoc")
+        destinationDirectory.set(layout.buildDirectory.dir("libs"))
         from()
     }
 
