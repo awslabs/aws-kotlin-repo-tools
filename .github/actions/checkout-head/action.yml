@@ -44,7 +44,9 @@ runs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
         else
           baseref="main"
-          if [ -n "$GITHUB_BASE_REF" ]; then
+          if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "kn-main"; then
+            baseref="kn-main"
+          elif [ -n "$GITHUB_BASE_REF" ]; then
             echo "attempting GH base ref: $GITHUB_BASE_REF"
             if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$GITHUB_BASE_REF"; then
               baseref="$GITHUB_BASE_REF"
