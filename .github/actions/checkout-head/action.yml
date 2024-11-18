@@ -23,6 +23,10 @@ inputs:
       commands. The post-job step removes the PAT.
     default: ${{ github.token }}
     required: false
+  submodules:
+    description: 'Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules'.
+    default: 'false'
+    required: 'false'
 
 runs:
   using: composite
@@ -63,4 +67,4 @@ runs:
         repository: ${{ inputs.repository }}
         ref: ${{ steps.repo.outputs.ref }}
         token: ${{ inputs.token }}
-        submodules: 'recursive'
+        submodules: ${{ inputs.submodules }}
