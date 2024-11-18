@@ -24,7 +24,8 @@ inputs:
     default: ${{ github.token }}
     required: false
   submodules:
-    description: 'Whether to checkout submodules: `true` to checkout submodules or `recursive` to recursively checkout submodules'.
+    description: >
+      Whether to checkout submodules. `true` to checkout submodules or `recursive` to recursively checkout submodules
     default: 'false'
     required: 'false'
 
