@@ -63,3 +63,4 @@ runs:
         repository: ${{ inputs.repository }}
         ref: ${{ steps.repo.outputs.ref }}
         token: ${{ inputs.token }}
+        submodules: 'recursive'
