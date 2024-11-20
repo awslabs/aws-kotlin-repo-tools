@@ -77,11 +77,13 @@ fun Project.configurePublishing(repoName: String) {
         publications.all {
             if (this !is MavenPublication) return@all
 
+            val githubOrganization = if (repoName.equals("smithy-kotlin", ignoreCase = true)) "smithy-lang" else "awslabs"
+
             project.afterEvaluate {
                 pom {
                     name.set(project.name)
                     description.set(project.description)
-                    url.set("https://github.com/awslabs/$repoName")
+                    url.set("https://github.com/$githubOrganization/$repoName")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
@@ -95,9 +97,9 @@ fun Project.configurePublishing(repoName: String) {
                         }
                     }
                     scm {
-                        connection.set("scm:git:git://github.com/awslabs/$repoName.git")
-                        developerConnection.set("scm:git:ssh://github.com/awslabs/$repoName.git")
-                        url.set("https://github.com/awslabs/$repoName")
+                        connection.set("scm:git:git://github.com/$githubOrganization/$repoName.git")
+                        developerConnection.set("scm:git:ssh://github.com/$githubOrganization/$repoName.git")
+                        url.set("https://github.com/$githubOrganization/$repoName")
                     }
 
                     artifact(javadocJar)
