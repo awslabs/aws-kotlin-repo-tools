@@ -54,8 +54,9 @@ fun Project.skipPublishing() {
  * Configure publishing for this project. This applies the `maven-publish` and `signing` plugins and configures
  * the publications.
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
+ * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String) {
+fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
     val project = this
     apply(plugin = "maven-publish")
 
@@ -76,8 +77,6 @@ fun Project.configurePublishing(repoName: String) {
 
         publications.all {
             if (this !is MavenPublication) return@all
-
-            val githubOrganization = if (repoName.equals("smithy-kotlin", ignoreCase = true)) "smithy-lang" else "awslabs"
 
             project.afterEvaluate {
                 pom {
