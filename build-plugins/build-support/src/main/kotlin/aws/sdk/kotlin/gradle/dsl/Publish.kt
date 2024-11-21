@@ -54,8 +54,9 @@ fun Project.skipPublishing() {
  * Configure publishing for this project. This applies the `maven-publish` and `signing` plugins and configures
  * the publications.
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
+ * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String) {
+fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
     val project = this
     apply(plugin = "maven-publish")
 
@@ -81,7 +82,7 @@ fun Project.configurePublishing(repoName: String) {
                 pom {
                     name.set(project.name)
                     description.set(project.description)
-                    url.set("https://github.com/awslabs/$repoName")
+                    url.set("https://github.com/$githubOrganization/$repoName")
                     licenses {
                         license {
                             name.set("The Apache License, Version 2.0")
@@ -95,9 +96,9 @@ fun Project.configurePublishing(repoName: String) {
                         }
                     }
                     scm {
-                        connection.set("scm:git:git://github.com/awslabs/$repoName.git")
-                        developerConnection.set("scm:git:ssh://github.com/awslabs/$repoName.git")
-                        url.set("https://github.com/awslabs/$repoName")
+                        connection.set("scm:git:git://github.com/$githubOrganization/$repoName.git")
+                        developerConnection.set("scm:git:ssh://github.com/$githubOrganization/$repoName.git")
+                        url.set("https://github.com/$githubOrganization/$repoName")
                     }
 
                     artifact(javadocJar)
