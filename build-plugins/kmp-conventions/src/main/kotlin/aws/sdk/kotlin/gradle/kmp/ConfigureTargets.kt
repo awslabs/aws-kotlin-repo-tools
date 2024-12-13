@@ -6,11 +6,16 @@ package aws.sdk.kotlin.gradle.kmp
 
 import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.Project
+import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.Family
+import org.jetbrains.kotlin.konan.target.HostManager
 import java.io.File
 
 internal fun <T> Project.tryGetClass(className: String): Class<T>? {
@@ -208,3 +213,61 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
 
 val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
 val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
+
+/**
+ * Kotlin/Native Linux and Windows targets are generally enabled on all hosts since
+ * the Kotlin toolchain and backend compilers support cross compilation. We
+ * are using cinterop and have to compile CRT for those platforms which sometimes
+ * requires using docker which isn't always available in CI or setup in users environment.
+ *
+ * See [KT-30498](https://youtrack.jetbrains.com/issue/KT-30498)
+ */
+fun Project.disableCrossCompileTargets() {
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        configure<KotlinMultiplatformExtension> {
+            targets.withType<KotlinNativeTarget> {
+                val knTarget = this
+                when {
+                    HostManager.hostIsMac && (knTarget.isLinux || knTarget.isWindows) -> disable(knTarget)
+                    HostManager.hostIsLinux && knTarget.isApple -> disable(knTarget)
+                    HostManager.hostIsMingw && (knTarget.isLinux || knTarget.isApple) -> disable(knTarget)
+                }
+            }
+        }
+    }
+}
+
+private val KotlinNativeTarget.isLinux: Boolean
+    get() = konanTarget.family == Family.LINUX
+
+private val KotlinNativeTarget.isApple: Boolean
+    get() = konanTarget.family.isAppleFamily
+
+private val KotlinNativeTarget.isWindows: Boolean
+    get() = konanTarget.family == Family.MINGW
+
+
+internal fun Project.disable(knTarget: KotlinNativeTarget) {
+    logger.warn("disabling Kotlin/Native target: ${knTarget.name}")
+    knTarget.apply {
+        compilations.all {
+            cinterops.all {
+                tasks.named(interopProcessingTaskName).configure { enabled = false }
+            }
+            compileTaskProvider.configure { enabled = false }
+        }
+
+        binaries.all {
+            linkTaskProvider.configure { enabled = false }
+        }
+
+        mavenPublication {
+            tasks.withType<AbstractPublishToMaven>().configureEach {
+                onlyIf { publication != this@mavenPublication }
+            }
+            tasks.withType<GenerateModuleMetadata>().configureEach {
+                onlyIf { publication != this@mavenPublication }
+            }
+        }
+    }
+}
