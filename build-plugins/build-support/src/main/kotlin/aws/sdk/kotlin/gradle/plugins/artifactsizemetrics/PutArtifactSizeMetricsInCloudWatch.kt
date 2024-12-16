@@ -4,7 +4,6 @@
  */
 package aws.sdk.kotlin.gradle.plugins.artifactsizemetrics
 
-import aws.sdk.kotlin.gradle.util.stringPropertyNotNull
 import aws.sdk.kotlin.services.cloudwatch.CloudWatchClient
 import aws.sdk.kotlin.services.cloudwatch.model.Dimension
 import aws.sdk.kotlin.services.cloudwatch.model.MetricDatum
@@ -36,7 +35,6 @@ internal abstract class PutArtifactSizeMetricsInCloudWatch : DefaultTask() {
     fun put() {
         val currentTime = Instant.now()
         val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
-        val releaseTag = project.stringPropertyNotNull("release")
 
         val metrics = metricsFile
             .get()

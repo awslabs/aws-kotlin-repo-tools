@@ -74,8 +74,7 @@ class SmithyBuildPlugin : Plugin<Project> {
         registerCodegenTasks()
     }
 
-    private fun Project.installExtension() =
-        extensions.create(SMITHY_BUILD_EXTENSION_NAME, SmithyBuildExtension::class.java, project)
+    private fun Project.installExtension() = extensions.create(SMITHY_BUILD_EXTENSION_NAME, SmithyBuildExtension::class.java, project)
 
     private fun Project.registerCodegenTasks() {
         val generateSmithyBuild = tasks.register<GenerateSmithyBuild>(TASK_GENERATE_SMITHY_BUILD) {
@@ -102,8 +101,7 @@ class SmithyBuildPlugin : Plugin<Project> {
         tasks.register<SmithyBuildTask>(TASK_GENERATE_SMITHY_PROJECTIONS) {
             group = "codegen"
             dependsOn(generateSmithyBuild)
-            resolvedCliClasspath.set(codegenConfig)
-            runtimeClasspath.set(codegenConfig)
+            cliClasspath.set(codegenConfig)
             buildClasspath.set(codegenConfig)
             smithyBuildConfigs.set(project.files(generateSmithyBuild))
         }

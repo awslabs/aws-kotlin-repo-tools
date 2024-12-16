@@ -25,14 +25,13 @@ open class SmithyBuildExtension(private val project: Project) {
      * @param projectionName the name of the projection to get the output path for
      * @param pluginName the name of the plugin to get the output path for
      */
-    public fun getProjectionPath(projectionName: String, pluginName: String): Provider<Path> =
-        SmithyUtils.getProjectionOutputDirProperty(project).map {
-            // FIXME - smithy gradle plugin expects the input file to pass "isDirectory"
-            // but that flag is only true IFF the path exists AND is a directory
-            // see https://github.com/smithy-lang/smithy-gradle-plugin/issues/113
-            it.asFile.mkdirs()
-            SmithyUtils.getProjectionPluginPath(it.asFile, projectionName, pluginName)
-        }
+    public fun getProjectionPath(projectionName: String, pluginName: String): Provider<Path> = SmithyUtils.getProjectionOutputDirProperty(project).map {
+        // FIXME - smithy gradle plugin expects the input file to pass "isDirectory"
+        // but that flag is only true IFF the path exists AND is a directory
+        // see https://github.com/smithy-lang/smithy-gradle-plugin/issues/113
+        it.asFile.mkdirs()
+        SmithyUtils.getProjectionPluginPath(it.asFile, projectionName, pluginName)
+    }
 }
 
 // smithy-kotlin specific extensions
@@ -43,8 +42,7 @@ open class SmithyBuildExtension(private val project: Project) {
  *
  * @param projectionName the name of the projection to use
  */
-public fun SmithyBuildExtension.smithyKotlinProjectionPath(projectionName: String): Provider<Path> =
-    getProjectionPath(projectionName, "kotlin-codegen")
+public fun SmithyBuildExtension.smithyKotlinProjectionPath(projectionName: String): Provider<Path> = getProjectionPath(projectionName, "kotlin-codegen")
 
 /**
  * Get the default generated kotlin source directory for the `smithy-kotlin` plugin.
@@ -52,5 +50,4 @@ public fun SmithyBuildExtension.smithyKotlinProjectionPath(projectionName: Strin
  *
  * @param projectionName the name of the projection to use
  */
-public fun SmithyBuildExtension.smithyKotlinProjectionSrcDir(projectionName: String): Provider<Path> =
-    smithyKotlinProjectionPath(projectionName).map { it.resolve("src/main/kotlin") }
+public fun SmithyBuildExtension.smithyKotlinProjectionSrcDir(projectionName: String): Provider<Path> = smithyKotlinProjectionPath(projectionName).map { it.resolve("src/main/kotlin") }

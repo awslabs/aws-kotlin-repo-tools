@@ -45,8 +45,7 @@ public fun Project.localProperties(): Map<String, Any> {
  * * property from extras
  * @return property if it exists or null
  */
-public fun Project.prop(name: String): Any? =
-    properties[name] ?: localProperties()[name] ?: extra.getOrNull(name)
+public fun Project.prop(name: String): Any? = properties[name] ?: localProperties()[name] ?: extra.getOrNull(name)
 
 inline fun <reified T> Project.typedProp(name: String): T? {
     val any = prop(name)
@@ -70,9 +69,8 @@ public inline fun Project.verifyRootProject(lazyMessage: () -> Any) {
  * @throws AwsSdkGradleException If the property is empty or null
  * @return The property as a String
  */
-fun Project.stringPropertyNotNull(property: String): String =
-    findProperty(property)?.toString()?.also {
-        check(it.isNotEmpty()) { "The $property property is set to empty \"-P$property=\" (no value set). Please specify a value." }
-    } ?: throw AwsSdkGradleException("The $property property is not set. Please set a value: \"-P$property=YOUR_VALUE\"")
+fun Project.stringPropertyNotNull(property: String): String = findProperty(property)?.toString()?.also {
+    check(it.isNotEmpty()) { "The $property property is set to empty \"-P$property=\" (no value set). Please specify a value." }
+} ?: throw AwsSdkGradleException("The $property property is not set. Please set a value: \"-P$property=YOUR_VALUE\"")
 
 class AwsSdkGradleException(message: String) : GradleException(message)

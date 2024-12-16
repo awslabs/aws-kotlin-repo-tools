@@ -67,13 +67,12 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
         }
     }
 
-    private suspend fun S3Client.getObjectAsText(objectKey: String) =
-        getObject(
-            GetObjectRequest {
-                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                key = objectKey
-            },
-        ) { it.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $objectKey is missing a body") }
+    private suspend fun S3Client.getObjectAsText(objectKey: String) = getObject(
+        GetObjectRequest {
+            bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+            key = objectKey
+        },
+    ) { it.body?.decodeToString() ?: throw AwsSdkGradleException("Metrics file $objectKey is missing a body") }
 
     private fun combine(metricsFiles: List<String>) = buildString {
         appendLine("Artifact, Size")
