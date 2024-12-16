@@ -30,9 +30,8 @@ class MultilineIfElseBlockRule : Rule(RuleId("multiline-if-else-block"), About()
     /**
      * Determines if this node is an `else if` block.
      */
-    private fun ASTNode.isElseIfBlock() =
-        elementType == ElementType.ELSE &&
-            firstChildNode?.elementType == ElementType.IF
+    private fun ASTNode.isElseIfBlock() = elementType == ElementType.ELSE &&
+        firstChildNode?.elementType == ElementType.IF
 
     /**
      * Determines if this node is on the same source file line number as its parent.

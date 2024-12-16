@@ -38,12 +38,11 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
     }
 }
 
-private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetrics> =
-    tasks.register<CollectArtifactSizeMetrics>("artifactSizeMetrics") {
-        group = TASK_GROUP
-        onlyIf { tasks.findByName("jvmJar") != null }
-        dependsOn(tasks.withType<Jar>())
-    }
+private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetrics> = tasks.register<CollectArtifactSizeMetrics>("artifactSizeMetrics") {
+    group = TASK_GROUP
+    onlyIf { tasks.findByName("jvmJar") != null }
+    dependsOn(tasks.withType<Jar>())
+}
 
 private fun Project.registerRootProjectArtifactSizeMetricsTask(
     subProjects: List<TaskProvider<CollectArtifactSizeMetrics>>,
