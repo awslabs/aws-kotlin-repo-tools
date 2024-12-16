@@ -101,6 +101,7 @@ class SmithyBuildPlugin : Plugin<Project> {
         tasks.register<SmithyBuildTask>(TASK_GENERATE_SMITHY_PROJECTIONS) {
             group = "codegen"
             dependsOn(generateSmithyBuild)
+            cliClasspath.set(codegenConfig)
             buildClasspath.set(codegenConfig)
             smithyBuildConfigs.set(project.files(generateSmithyBuild))
         }
