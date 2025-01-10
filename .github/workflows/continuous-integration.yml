@@ -27,6 +27,8 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: Configure Gradle
+      uses: .github/actions/custom-gradle-distribution-url
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -44,6 +46,8 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: Configure Gradle
+      uses: .github/actions/custom-gradle-distribution-url
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -53,6 +57,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+      - name: Configure Gradle
+        uses: .github/actions/custom-gradle-distribution-url
       - name: Build and Test ${{ env.PACKAGE_NAME }}
         run: |
           ./gradlew build
