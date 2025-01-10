@@ -28,7 +28,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Configure Gradle
-      uses: .github/actions/custom-gradle-distribution-url
+      uses: .github/actions/aws-kotlin-repo-tools-custom-gradle-distribution-url
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -47,7 +47,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Configure Gradle
-      uses: .github/actions/custom-gradle-distribution-url
+      uses: .github/actions/aws-kotlin-repo-tools-custom-gradle-distribution-url
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -58,7 +58,7 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
       - name: Configure Gradle
-        uses: .github/actions/custom-gradle-distribution-url
+        uses: .github/actions/aws-kotlin-repo-tools-custom-gradle-distribution-url
       - name: Build and Test ${{ env.PACKAGE_NAME }}
         run: |
           ./gradlew build
