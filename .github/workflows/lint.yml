@@ -19,7 +19,9 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v2
     - name: Configure Gradle
-      uses: .github/actions/aws-kotlin-repo-tools-custom-gradle-distribution-url
+      run: |
+        # Keep gradle version in sync with aws-kotlin-repo-tools/gradle/wrapper/gradle-wrapper.properties
+        gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-8.12-bin.zip
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint
