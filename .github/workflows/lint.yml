@@ -18,12 +18,6 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
-      with:
-        path: 'temp'
-    - name: Configure Gradle
-      uses: ./temp/.github/actions/configure-gradle
-      with:
-        working-directory: 'temp'
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint
