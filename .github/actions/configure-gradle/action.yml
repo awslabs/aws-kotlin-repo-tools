@@ -9,7 +9,7 @@ runs:
   using: composite
   steps:
     - name: Configure custom Gradle distribution URL
-      shell: zsh
+      shell: bash
       run: |
         cd ${{ inputs.working-directory }}
         gradleVersion=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
