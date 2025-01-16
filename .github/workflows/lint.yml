@@ -20,8 +20,9 @@ jobs:
       uses: actions/checkout@v2
     - name: Configure Gradle
       run: |
-        # Keep gradle version in sync with aws-kotlin-repo-tools/gradle/wrapper/gradle-wrapper.properties
-        gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-8.12-bin.zip
+        gradleVersion=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
+        echo Configuring custom Gradle distribution URL with version: $gradleVersion
+        gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint
