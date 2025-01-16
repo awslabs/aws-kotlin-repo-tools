@@ -8,8 +8,7 @@ runs:
     - name: Install AWS CLI
       shell: bash
       run: |
-        sudo apt-get update
-        sudo apt-get install -y awscli
+        sudo snap install aws-cli --classic
     - name: Set up kat
       shell: bash
       run: |
