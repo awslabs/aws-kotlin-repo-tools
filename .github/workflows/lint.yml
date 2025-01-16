@@ -18,11 +18,6 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
-    - name: Configure Gradle
-      run: |
-        gradleVersion=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
-        echo Configuring custom Gradle distribution URL with version: $gradleVersion
-        gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint

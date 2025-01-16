@@ -27,8 +27,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - name: Configure Gradle
-      uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -46,8 +44,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-    - name: Configure Gradle
-      uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -57,8 +53,6 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-      - name: Configure Gradle
-        uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@mainp
       - name: Build and Test ${{ env.PACKAGE_NAME }}
         run: |
           ./gradlew build
