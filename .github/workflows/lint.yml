@@ -21,7 +21,7 @@ jobs:
       with:
         path: 'temp'
     - name: Configure Gradle
-      uses: .github/actions/configure-gradle
+      uses: ./temp/.github/actions/configure-gradle
       with:
         working-directory: 'temp'
     - name: Lint ${{ env.PACKAGE_NAME }}
