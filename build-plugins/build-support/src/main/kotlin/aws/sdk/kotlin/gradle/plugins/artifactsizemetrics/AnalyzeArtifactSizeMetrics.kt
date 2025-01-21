@@ -174,8 +174,7 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         if (artifactOrdinaryChange) appendLine(ordinary)
     }
 
-    private fun ArtifactSizeMetric.requiresAttention() =
-        this.percentage > pluginConfig.significantChangeThresholdPercentage || this.percentage.isNaN()
+    private fun ArtifactSizeMetric.requiresAttention() = this.percentage > pluginConfig.significantChangeThresholdPercentage || this.percentage.isNaN()
 
     private data class ArtifactSizeMetric(
         val currentSize: Long,

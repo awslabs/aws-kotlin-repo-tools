@@ -36,8 +36,7 @@ internal fun ObjectNode.Builder.withNullableMember(key: String, member: Boolean?
     return withMember(key, member)
 }
 
-internal fun <T : ToNode> ObjectNode.Builder.withNullableMember(key: String, member: T?): ObjectNode.Builder =
-    withOptionalMember(key, Optional.ofNullable(member))
+internal fun <T : ToNode> ObjectNode.Builder.withNullableMember(key: String, member: T?): ObjectNode.Builder = withOptionalMember(key, Optional.ofNullable(member))
 
 internal fun ObjectNode.Builder.withArrayMember(key: String, member: List<String>): ObjectNode.Builder = apply {
     val arrNode = member.map { Node.from(it) }.let { ArrayNode.fromNodes(it) }

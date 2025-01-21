@@ -1,7 +1,7 @@
 [versions]
-ktlint = "1.3.0"
-smithy-version = "1.42.0"
-smithy-gradle-plugin-version = "0.9.0"
+ktlint = "1.5.0"
+smithy-version = "1.53.0"
+smithy-gradle-plugin-version = "1.1.0"
 junit-version = "5.10.1"
 
 [libraries]
@@ -11,7 +11,7 @@ ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-co
 ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
 nexusPublishPlugin = { module = "io.github.gradle-nexus:publish-plugin", version = "1.3.0" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
-smithy-gradle-base-plugin = { module = "software.amazon.smithy:smithy-base-plugin", version.ref = "smithy-gradle-plugin-version" }
+smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-base", version.ref = "smithy-gradle-plugin-version" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-version" }
 

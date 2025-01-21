@@ -51,8 +51,7 @@ open class SmithyKotlinApiSettings : ToNode {
         return result
     }
 
-    override fun toString(): String =
-        "SmithyKotlinApiSettings(visibility=$visibility, nullabilityCheckMode=$nullabilityCheckMode, defaultValueSerializationMode=$defaultValueSerializationMode, enableEndpointAuthProvider=$enableEndpointAuthProvider)"
+    override fun toString(): String = "SmithyKotlinApiSettings(visibility=$visibility, nullabilityCheckMode=$nullabilityCheckMode, defaultValueSerializationMode=$defaultValueSerializationMode, enableEndpointAuthProvider=$enableEndpointAuthProvider)"
 }
 
 open class SmithyKotlinBuildSettings : ToNode {
@@ -92,8 +91,7 @@ open class SmithyKotlinBuildSettings : ToNode {
         return result
     }
 
-    override fun toString(): String =
-        "SmithyKotlinBuildSettings(generateFullProject=$generateFullProject, generateDefaultBuildFiles=$generateDefaultBuildFiles, optInAnnotations=$optInAnnotations)"
+    override fun toString(): String = "SmithyKotlinBuildSettings(generateFullProject=$generateFullProject, generateDefaultBuildFiles=$generateDefaultBuildFiles, optInAnnotations=$optInAnnotations)"
 }
 
 open class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
@@ -160,8 +158,7 @@ open class SmithyKotlinPluginSettings : SmithyBuildPluginSettings {
         return obj.build()
     }
 
-    override fun toString(): String =
-        "SmithyKotlinPluginSettings(pluginName='$pluginName', serviceShapeId=$serviceShapeId, packageName=$packageName, packageVersion=$packageVersion, packageDescription=$packageDescription, sdkId=$sdkId, buildSettings=$buildSettings, apiSettings=$apiSettings)"
+    override fun toString(): String = "SmithyKotlinPluginSettings(pluginName='$pluginName', serviceShapeId=$serviceShapeId, packageName=$packageName, packageVersion=$packageVersion, packageDescription=$packageDescription, sdkId=$sdkId, buildSettings=$buildSettings, apiSettings=$apiSettings)"
 }
 
 fun SmithyProjection.smithyKotlinPlugin(configure: SmithyKotlinPluginSettings.() -> Unit) {
