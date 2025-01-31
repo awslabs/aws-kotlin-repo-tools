@@ -246,7 +246,6 @@ private val KotlinNativeTarget.isApple: Boolean
 private val KotlinNativeTarget.isWindows: Boolean
     get() = konanTarget.family == Family.MINGW
 
-
 internal fun Project.disable(knTarget: KotlinNativeTarget) {
     logger.warn("disabling Kotlin/Native target: ${knTarget.name}")
     knTarget.apply {
