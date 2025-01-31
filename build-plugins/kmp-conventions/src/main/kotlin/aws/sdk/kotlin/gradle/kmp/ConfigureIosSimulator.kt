@@ -13,7 +13,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 /**
  * Disables standalone mode in simulator tests since it causes issues with TLS.
  * This means we need to manage the simulator state ourselves (booting, shutting down).
- * FIXME: https://youtrack.jetbrains.com/issue/KT-38317
+ * https://youtrack.jetbrains.com/issue/KT-38317
  */
 public fun Project.configureIosSimulatorTasks() {
     val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 15"
