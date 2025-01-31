@@ -40,7 +40,7 @@ public fun Project.configureIosSimulatorTasks() {
 
         doLast {
             val result = executionResult.get()
-            if (result.exitValue != 405) {
+            if (result.exitValue != 405) { // ignore "simulator already shutdown" errors
                 result.assertNormalExitValue()
             }
         }
