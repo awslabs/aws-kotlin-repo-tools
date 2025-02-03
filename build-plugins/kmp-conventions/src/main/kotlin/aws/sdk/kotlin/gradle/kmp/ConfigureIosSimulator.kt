@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.kmp
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.withType
@@ -16,11 +17,13 @@ import org.jetbrains.kotlin.konan.target.HostManager
  * https://youtrack.jetbrains.com/issue/KT-38317
  */
 public fun Project.configureIosSimulatorTasks() {
-    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 15"
+    if (this != rootProject) { throw GradleException("This function should only be called from the root project.") }
+    if (!HostManager.hostIsMac) return
 
+    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 15"
     val xcrun = "/usr/bin/xcrun"
 
-    tasks.register("bootIosSimulatorDevice", Exec::class.java) {
+    val bootTask = rootProject.tasks.maybeCreate("bootIosSimulatorDevice", Exec::class.java).apply {
         isIgnoreExitValue = true
         commandLine(xcrun, "simctl", "boot", simulatorDeviceName)
 
@@ -33,9 +36,8 @@ public fun Project.configureIosSimulatorTasks() {
         }
     }
 
-    tasks.register("shutdownIosSimulatorDevice", Exec::class.java) {
+    val shutdownTask = rootProject.tasks.maybeCreate("shutdownIosSimulatorDevice", Exec::class.java).apply {
         isIgnoreExitValue = true
-        mustRunAfter(tasks.withType<KotlinNativeSimulatorTest>())
         commandLine(xcrun, "simctl", "shutdown", simulatorDeviceName)
 
         doLast {
@@ -47,15 +49,13 @@ public fun Project.configureIosSimulatorTasks() {
         }
     }
 
-    tasks.withType<KotlinNativeSimulatorTest>().configureEach {
-        if (!HostManager.hostIsMac) {
-            return@configureEach
+    allprojects {
+        val simulatorTasks = tasks.withType<KotlinNativeSimulatorTest>()
+        simulatorTasks.configureEach {
+            dependsOn(bootTask)
+            standalone.set(false)
+            device.set(simulatorDeviceName)
         }
-
-        dependsOn("bootIosSimulatorDevice")
-        finalizedBy("shutdownIosSimulatorDevice")
-
-        standalone.set(false)
-        device.set(simulatorDeviceName)
+        shutdownTask.mustRunAfter(simulatorTasks)
     }
 }
