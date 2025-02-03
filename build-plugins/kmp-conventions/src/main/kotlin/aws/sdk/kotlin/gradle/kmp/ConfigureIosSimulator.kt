@@ -17,7 +17,9 @@ import org.jetbrains.kotlin.konan.target.HostManager
  * https://youtrack.jetbrains.com/issue/KT-38317
  */
 public fun Project.configureIosSimulatorTasks() {
-    if (this != rootProject) { throw GradleException("This function should only be called from the root project.") }
+    if (this != rootProject) {
+        throw GradleException("This function should only be called from the root project.")
+    }
     if (!HostManager.hostIsMac) return
 
     val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 15"
