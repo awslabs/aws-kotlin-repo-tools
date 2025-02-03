@@ -27,7 +27,7 @@ public fun Project.configureIosSimulatorTasks() {
         doLast {
             val result = executionResult.get()
             val code = result.exitValue
-            if (code != 148 && code != 149) { // ignore "simulator already running" errors
+            if (code != 148 && code != 149 && code != 405) { // ignore "simulator already running" errors
                 result.assertNormalExitValue()
             }
         }
