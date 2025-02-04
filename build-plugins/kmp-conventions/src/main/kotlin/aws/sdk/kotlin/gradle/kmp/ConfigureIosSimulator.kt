@@ -4,7 +4,6 @@
  */
 package aws.sdk.kotlin.gradle.kmp
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.withType
