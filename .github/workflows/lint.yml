@@ -18,6 +18,8 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
+    - name: Run ls
+      run: ls & pwd
     - name: Configure Gradle
       uses: ./aws-kotlin-repo-tools/.github/actions/configure-gradle
     - name: Lint ${{ env.PACKAGE_NAME }}
