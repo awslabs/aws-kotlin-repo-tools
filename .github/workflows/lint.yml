@@ -21,7 +21,7 @@ jobs:
     - name: Run ls
       run: ls & pwd
     - name: Configure Gradle
-      uses: ./aws-kotlin-repo-tools/.github/actions/configure-gradle
+      uses: ./.github/actions/configure-gradle
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint
