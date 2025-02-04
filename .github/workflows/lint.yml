@@ -19,7 +19,7 @@ jobs:
     - name: Checkout sources
       uses: actions/checkout@v2
     - name: Configure Gradle
-      uses: .github/actions/configure-gradle
+      uses: ./aws-kotlin-repo-tools/.github/actions/configure-gradle
     - name: Lint ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew ktlint
