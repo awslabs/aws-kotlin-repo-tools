@@ -65,7 +65,7 @@ runs:
           echo -n "$(trim "$PROCESSED")"
         }
 
-        NAMESPACE="--namespace "${{ inputs.namespace }}""
+        NAMESPACE="--namespace \"${{ inputs.namespace }}\""
         DIMENSIONS="$(format "--dimension" "${{ inputs.dimensions }}")"
         METRICS="$(format "--metric" "${{ inputs.metrics }}")"
         CMD="kat $NAMESPACE $DIMENSIONS $METRICS"
