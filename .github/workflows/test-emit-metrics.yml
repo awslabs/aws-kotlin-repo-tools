@@ -5,6 +5,9 @@ on:
     branches:
       - feat-emit-metrics-action
 
+permissions:
+  id-token: write
+
 jobs:
   emit-a-metric:
     runs-on: ubuntu-latest
