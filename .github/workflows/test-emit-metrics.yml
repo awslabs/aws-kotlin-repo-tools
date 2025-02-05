@@ -1,0 +1,26 @@
+name: Test the emit-metrics action
+on:
+  workflow_dispatch:
+
+jobs:
+  emit-a-metric:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up kat tool
+        uses: ./.github/actions/setup-kat
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TEST_CI_AWS_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Emit some test metrics
+        uses: ./.github/actions/emit-metrics
+        with:
+          namespace: Test Namespace (ignore me)
+          dimensions: |
+            Artifact=foo-artifact
+            Platform=Kotlin/JVM
+            Variant=External
+          metrics: |
+            BuildTime:4.532:Seconds
+            BuildSucceeded:1:Count
