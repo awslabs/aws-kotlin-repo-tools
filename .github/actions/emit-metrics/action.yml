@@ -68,7 +68,7 @@ runs:
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
         DIMENSIONS="$(format "--dimension" "${{ inputs.dimensions }}")"
         METRICS="$(format "--metric" "${{ inputs.metrics }}")"
-        CMD="kat $NAMESPACE $DIMENSIONS $METRICS"
+        CMD="kat metrics emit $NAMESPACE $DIMENSIONS $METRICS"
 
         echo "Executing command \"$CMD\""
         eval "$CMD"
