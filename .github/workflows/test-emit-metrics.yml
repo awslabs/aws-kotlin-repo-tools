@@ -9,6 +9,8 @@ jobs:
   emit-a-metric:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
       - name: Set up kat tool
         uses: ./.github/actions/setup-kat
       - name: Configure AWS Credentials
