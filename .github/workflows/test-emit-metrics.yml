@@ -1,6 +1,9 @@
 name: Test the emit-metrics action
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feat-emit-metrics-action
 
 jobs:
   emit-a-metric:
