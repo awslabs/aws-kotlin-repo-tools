@@ -60,7 +60,7 @@ runs:
           PROCESSED=""
           IFS=$'\n'; ARR=($2); unset IFS
           for ITEM in "${ARR[@]}"; do
-            PROCESSED="$PROCESSED $1 $(trim "$INPUT")"
+            PROCESSED="$PROCESSED $1 $(trim "$ITEM")"
           done
           echo -n "$(trim "$PROCESSED")"
         }
@@ -69,13 +69,13 @@ runs:
         ${{ inputs.dimensions }}
         END_OF_DIMENSIONS
         )
-        echo "RAW_DIMENSIONS: $RAW_DIMENSIONS"
+        echo "RAW_DIMENSIONS: \"$RAW_DIMENSIONS\""
 
         RAW_METRICS=$(cat <<'END_OF_METRICS'
         ${{ inputs.metrics }}
         END_OF_METRICS
         )
-        echo "RAW_METRICS: $RAW_METRICS"
+        echo "RAW_METRICS: \"$RAW_METRICS\""
 
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
         DIMENSIONS="$(format "--dimension" "$RAW_DIMENSIONS")"
