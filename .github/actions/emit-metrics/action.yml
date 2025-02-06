@@ -65,13 +65,15 @@ runs:
           echo -n "$(trim "$PROCESSED")"
         }
 
-        RAW_DIMENSIONS=$(cat << END_OF_DIMENSIONS
+        RAW_DIMENSIONS=$(cat <<'END_OF_DIMENSIONS'
         ${{ inputs.dimensions }}
-        END_OF_DIMENSIONS )
+        END_OF_DIMENSIONS
+        )
 
-        RAW_METRICS=$(cat << END_OF_METRICS
+        RAW_METRICS=$(cat <<'END_OF_METRICS'
         ${{ inputs.metrics }}
-        END_OF_METRICS )
+        END_OF_METRICS
+        )
 
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
         DIMENSIONS="$(format "--dimension" "$RAW_DIMENSIONS")"
