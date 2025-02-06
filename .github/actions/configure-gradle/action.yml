@@ -13,10 +13,11 @@ runs:
       run: |
         cd ${{ inputs.working-directory }}
         
-        gradleVersion=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
+        GRADLE_VERSION=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
+        CUSTOM_URL="https://d2pjps8lqszrgq.cloudfront.net/gradle-$GRADLE_VERSION-bin.zip"
         
-        echo Configuring custom Gradle distribution URL with version: $gradleVersion
-        echo Setting distribution URL to: https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
+        echo Configuring custom Gradle distribution URL with version: $GRADLE_VERSION
+        echo Setting distribution URL to: $CUSTOM_URL
         
         # Detect OS and set appropriate sed option
         if sed --version 2>/dev/null | grep -q "GNU sed"; then
@@ -27,5 +28,5 @@ runs:
         
         # Replace the line containing "distributionUrl" with the new distributionUrl
         $SED_CMD "/distributionUrl/c\\
-        distributionUrl=https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip\\
+        distributionUrl=$CUSTOM_URL\\
         " ./gradle/wrapper/gradle-wrapper.properties
