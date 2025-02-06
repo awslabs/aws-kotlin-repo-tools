@@ -55,9 +55,9 @@ jobs:
         shell: bash
         run: |
           if [ "${{ steps.expected-failure.outcome }}" = "failure" ]; then
-            echo Saw expected failure from attempting to emit metrics when kat isn't installed.
+            echo "Saw expected failure from attempting to emit metrics when kat isn't installed."
             exit 0
           else
-            echo Expected failure from previous step!
+            echo "Expected failure from previous step!"
             exit 1
           fi
