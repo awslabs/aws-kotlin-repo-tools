@@ -1,5 +1,5 @@
 name: Emit Metrics
-description: Emit metrics from another workflow/action using the kat tool
+description: Emit metrics using the kat tool
 inputs:
   namespace:
     description: The CloudWatch namespace in which to emit metrics
@@ -40,6 +40,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Verify kat exists
+      shell: bash
+      run: which kat || ( echo Cannot find kat installation. Did you forget to run setup-kat first? && exit 1 )
     - name: Emit Metrics
       shell: bash
       run: |
