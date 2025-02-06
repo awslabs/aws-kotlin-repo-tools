@@ -38,7 +38,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
-      - name: Fail to emit some test metrics
+      - id: expected-failure
+        name: Fail to emit some test metrics
         uses: ./.github/actions/emit-metrics
         continue-on-error: true
         with:
@@ -51,9 +52,12 @@ jobs:
             BuildTime:4.532:Seconds
             BuildSucceeded:1:Count
       - name: Handle expected failure
-        if: ${{ failure() }}
         shell: bash
         run: |
-          echo Saw expected failure from attempting to emit metrics when kat isn't installed.
-          echo All good now!
-          exit 0
+          if [[ ${{ steps.expected-failure.outcome }} == "failure" ]]; then
+            echo Saw expected failure from attempting to emit metrics when kat isn't installed.
+            exit 0
+          else
+            echo Expected failure from previous step!
+            exit 1
+          fi
