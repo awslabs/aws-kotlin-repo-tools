@@ -12,7 +12,12 @@ runs:
       shell: bash
       run: |
         cd ${{ inputs.working-directory }}
+        
         gradleVersion=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
+        
         echo Configuring custom Gradle distribution URL with version: $gradleVersion
-        echo gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
-        gradle wrapper --gradle-distribution-url https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
+        echo Setting distribution URL to: https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
+        
+        sed -i "/distributionUrl/c\\
+        distributionUrl=https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip\\
+        " ./gradle/wrapper/gradle-wrapper.properties
