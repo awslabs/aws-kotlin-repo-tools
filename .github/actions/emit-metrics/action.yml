@@ -69,11 +69,13 @@ runs:
         ${{ inputs.dimensions }}
         END_OF_DIMENSIONS
         )
+        echo "RAW_DIMENSIONS: $RAW_DIMENSIONS"
 
         RAW_METRICS=$(cat <<'END_OF_METRICS'
         ${{ inputs.metrics }}
         END_OF_METRICS
         )
+        echo "RAW_METRICS: $RAW_METRICS"
 
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
         DIMENSIONS="$(format "--dimension" "$RAW_DIMENSIONS")"
