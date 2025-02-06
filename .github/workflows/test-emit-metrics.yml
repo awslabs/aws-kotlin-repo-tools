@@ -38,6 +38,13 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TEST_CI_AWS_ROLE_ARN }}
+          aws-region: us-west-2
+      - name: Set up kat tool
+        uses: ./.github/actions/setup-kat
       - id: expected-failure
         name: Fail to emit some test metrics
         uses: ./.github/actions/emit-metrics
