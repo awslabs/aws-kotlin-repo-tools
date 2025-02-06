@@ -65,9 +65,16 @@ runs:
           echo -n "$(trim "$PROCESSED")"
         }
 
+        RAW_DIMENSIONS=$(cat << END_OF_DIMENSIONS
+          ${{ inputs.dimensions }}
+          END_OF_DIMENSIONS )
+        RAW_METRICS=$(cat << END_OF_METRICS
+          ${{ inputs.metrics }}
+          END_OF_METRICS )
+
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
-        DIMENSIONS="$(format "--dimension" "${{ inputs.dimensions }}")"
-        METRICS="$(format "--metric" "${{ inputs.metrics }}")"
+        DIMENSIONS="$(format "--dimension" "$RAW_DIMENSIONS")"
+        METRICS="$(format "--metric" "$RAW_METRICS")"
         CMD="kat metrics emit $NAMESPACE $DIMENSIONS $METRICS"
 
         echo "Executing command \"$CMD\""
