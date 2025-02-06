@@ -18,6 +18,13 @@ runs:
         echo Configuring custom Gradle distribution URL with version: $gradleVersion
         echo Setting distribution URL to: https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
         
-        sed -i "/distributionUrl/c\\
+        # Detect OS and set appropriate sed option
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+        SED_OPTS=(-i '')  # macOS (BSD sed) requires an empty string after -i
+        else
+        SED_OPTS=(-i)  # Linux (GNU sed) does not need an empty string
+        fi
+        
+        sed -i "${SED_OPTS[@]}" "/distributionUrl/c\\
         distributionUrl=https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip\\
         " ./gradle/wrapper/gradle-wrapper.properties
