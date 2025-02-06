@@ -19,12 +19,13 @@ runs:
         echo Setting distribution URL to: https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip
         
         # Detect OS and set appropriate sed option
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-        SED_OPTS=(-i '')  # macOS (BSD sed) requires an empty string after -i
+        if sed --version 2>/dev/null | grep -q "GNU sed"; then
+        SED_CMD="sed -i"  # GNU sed (Linux)
         else
-        SED_OPTS=(-i)  # Linux (GNU sed) does not need an empty string
+        SED_CMD="sed -i ''"  # BSD sed (macOS)
         fi
         
-        sed -i "${SED_OPTS[@]}" "/distributionUrl/c\\
+        # Replace the line containing "distributionUrl" with the new distributionUrl
+        $SED_CMD "/distributionUrl/c\\
         distributionUrl=https://d2pjps8lqszrgq.cloudfront.net/gradle-$gradleVersion-bin.zip\\
         " ./gradle/wrapper/gradle-wrapper.properties
