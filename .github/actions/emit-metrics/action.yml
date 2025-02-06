@@ -60,14 +60,14 @@ runs:
           PROCESSED=""
           IFS=$'\n'; ARR=($2); unset IFS
           for ITEM in "${ARR[@]}"; do
-            PROCESSED="$PROCESSED $1 $(trim "$ITEM")"
+            PROCESSED="$PROCESSED $1 \"$(trim "$ITEM")\""
           done
           echo -n "$(trim "$PROCESSED")"
         }
 
         NAMESPACE="--namespace \"${{ inputs.namespace }}\""
-        DIMENSIONS="$(format "--dimension" "\"${{ inputs.dimensions }}\"")"
-        METRICS="$(format "--metric" "\"${{ inputs.metrics }}\"")"
+        DIMENSIONS="$(format "--dimension" "${{ inputs.dimensions }}")"
+        METRICS="$(format "--metric" "${{ inputs.metrics }}")"
         CMD="kat metrics emit $NAMESPACE $DIMENSIONS $METRICS"
 
         echo "Executing command \"$CMD\""
