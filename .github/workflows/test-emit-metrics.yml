@@ -54,7 +54,7 @@ jobs:
       - name: Handle expected failure
         shell: bash
         run: |
-          if [[ ${{ steps.expected-failure.outcome }} == "failure" ]]; then
+          if [[ "${{ steps.expected-failure.outcome }}" == "failure" ]]; then
             echo Saw expected failure from attempting to emit metrics when kat isn't installed.
             exit 0
           else
