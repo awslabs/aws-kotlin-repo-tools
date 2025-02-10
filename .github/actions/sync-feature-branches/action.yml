@@ -1,0 +1,67 @@
+name: Sync feature branches
+description: Synchronizes feature branches with main
+inputs:
+  disabled-feature-branches:
+    # GH doesn't have list inputs so we're using a string
+    description: Feature branches for which syncing will be disabled, separated by comma (e.g. feat-1-main,feat-2-main)
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.CI_USER_PAT }}
+        fetch-depth: 0
+
+    - name: Set up Git
+      shell: bash
+      run: |
+        git config user.name aws-sdk-kotlin-ci
+        git config user.email "aws-kotlin-sdk-automation@amazon.com"
+
+    - name: Merge main into feature branches
+      shell: bash
+      run: |
+        echo "Parsing disabled feature branches"
+        unparsed_disabled_feature_branches="${{ inputs.disabled-feature-branches }}"
+        IFS=',' read -r -a disabled_feature_branches <<< "$unparsed_disabled_feature_branches"
+        for i in "${!disabled_feature_branches[@]}"; do
+          disabled_feature_branches[i]=$(echo "${disabled_feature_branches[i]}" | xargs)
+          echo "Found: $disabled_feature_branches[i]"
+        done
+        
+        git fetch --all
+        
+        echo "Iterating through feature branches"
+        for feature_branch in $(git branch -r --list "*-main"); do # TODO: ALL OF THESE WILL HAVE "origin/" in front of them
+          echo "Found: $feature_branch"
+        
+          for disabled_feature_branch in "${disabled_feature_branches[@]}"; do
+            if [[ "$feature_branch" == "$disabled_feature_branch" ]]; then
+              echo "Main will not be merged into $feature_branch because it was manually disabled"
+              continue
+            fi
+          done
+          
+          echo "Checking if $feature_branch is up to date with main"
+          git checkout $feature_branch
+          git fetch origin
+          commits_behind=$(git rev-list --left-right --count main...$feature_branch | awk '{print $1})
+          if [ "$commits_behind" -eq 0 ]; then
+            echo "$feature_branch is 0 commits behind main. Skipping merge"
+            continue
+          fi
+
+#          echo "Attempting to merge main into $feature_branch"
+#          git pull origin $branch
+#          git merge origin/main --no-ff
+#          if [ $? -ne 0 ]; then
+#            echo "Merge conflict detected! Creating a pull request..."
+#            gh pr create --base main --head "$BRANCH" --title "Merge main into $BRANCH" --body "This PR merges main into $BRANCH to resolve conflicts."
+#          else
+#            echo "Merge successful. No conflicts detected."
+#          fi
+#          echo "Pushing to origin"
+#          git push $feature_branch
