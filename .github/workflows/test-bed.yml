@@ -9,9 +9,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  ktlint:
+  test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
       - name: Run GH action
         uses: ./.github/actions/sync-feature-branches
         with:
