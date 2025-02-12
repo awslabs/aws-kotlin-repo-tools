@@ -1,0 +1,20 @@
+name: Testing new GH action
+on:
+  push:
+    branches:
+      - '**'
+      - '!main'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+      - name: Run GH action
+        uses: ./.github/actions/sync-feature-branches
+        with:
+          disabled-feature-branches: 'test-main'
