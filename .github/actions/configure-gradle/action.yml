@@ -13,7 +13,10 @@ runs:
       run: |
         cd ${{ inputs.working-directory }}
         
-        GRADLE_VERSION=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
+        ORIGINAL_URL=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties)
+        echo "ORIGINAL_URL=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_ENV
+        
+        GRADLE_VERSION=$(echo $ORIGINAL_URL | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
         CUSTOM_URL="https://d2pjps8lqszrgq.cloudfront.net/gradle-$GRADLE_VERSION-bin.zip"
         
         echo Configuring custom Gradle distribution URL with version: $GRADLE_VERSION

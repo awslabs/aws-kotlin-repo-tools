@@ -1,0 +1,21 @@
+name: De-configure Gradle
+description: De-configures Gradle for use in CI
+inputs:
+  working-directory:
+    description: The directory in which to run the action
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: De-configure custom Gradle distribution URL
+      shell: bash
+      run: |
+        cd ${{ inputs.working-directory }}
+        
+        echo Setting distribution URL to: $ORIGINAL_URL
+        
+        # Replace the line containing "distributionUrl" with the original distributionUrl
+        $SED_CMD "/distributionUrl/c\\
+        $ORIGINAL_URL\\
+        " ./gradle/wrapper/gradle-wrapper.properties
