@@ -14,7 +14,7 @@ runs:
         cd ${{ inputs.working-directory }}
         
         ORIGINAL_URL=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties)
-        echo "ORIGINAL_URL=$(grep "distributionUrl" ./gradle/wrapper/gradle-wrapper.properties)" >> $GITHUB_ENV
+        echo "ORIGINAL_URL=$ORIGINAL_URL" >> $GITHUB_ENV
         
         GRADLE_VERSION=$(echo $ORIGINAL_URL | sed -n 's|.*gradle-\([0-9.]*\)-bin.zip|\1|p')
         CUSTOM_URL="https://d2pjps8lqszrgq.cloudfront.net/gradle-$GRADLE_VERSION-bin.zip"
