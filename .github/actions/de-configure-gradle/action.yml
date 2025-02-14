@@ -1,5 +1,5 @@
-name: De-configure Gradle
-description: De-configures Gradle for use in CI
+name: Restore Gradle
+description: Restores Gradle configuration to its original state
 inputs:
   working-directory:
     description: The directory in which to run the action
@@ -8,7 +8,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: De-configure custom Gradle distribution URL
+    - name: Restore Gradle distribution URL
       shell: bash
       run: |
         cd ${{ inputs.working-directory }}
