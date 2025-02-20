@@ -128,7 +128,9 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
         onlyIf {
             isAvailableForPublication(project, publication).also {
                 if (!it) {
-                    logger.warn("Skipping publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
+                    logger.warn(
+                        "Skipping publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}",
+                    )
                 }
             }
         }

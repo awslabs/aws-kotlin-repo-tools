@@ -44,7 +44,11 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
     init {
         metricsFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-size-metrics.csv"))
         analysisFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "artifact-analysis.md"))
-        hasSignificantChangeFile.convention(project.layout.buildDirectory.file(OUTPUT_PATH + "has-significant-change.txt"))
+        hasSignificantChangeFile.convention(
+            project.layout.buildDirectory.file(
+                OUTPUT_PATH + "has-significant-change.txt",
+            ),
+        )
     }
 
     private val pluginConfig = project.rootProject.extensions.getByType(ArtifactSizeMetricsPluginConfig::class.java)
@@ -75,7 +79,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
                 },
             ) { latestReleaseMetrics ->
                 file.writeText(
-                    latestReleaseMetrics.body?.decodeToString() ?: throw GradleException("Metrics from latest release are empty"),
+                    latestReleaseMetrics.body?.decodeToString()
+                        ?: throw GradleException("Metrics from latest release are empty"),
                 )
             }
         }
@@ -129,7 +134,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         var artifactRequiresAttention = false
 
         val ordinary = StringBuilder()
-            .appendLine("<details>") // See: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections
+            // See: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections
+            .appendLine("<details>")
             .appendLine("<summary>Changed in size</summary>")
             .appendLine()
             .append(tableHeader)
@@ -145,9 +151,21 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
                         append("|")
                         append(metric.key)
                         append("|")
-                        if (metric.value.currentSize == 0L) append("(does not exist)") else append("%,d".format(metric.value.currentSize))
+                        if (metric.value.currentSize ==
+                            0L
+                        ) {
+                            append("(does not exist)")
+                        } else {
+                            append("%,d".format(metric.value.currentSize))
+                        }
                         append("|")
-                        if (metric.value.latestReleaseSize == 0L) append("(does not exist)") else append("%,d".format(metric.value.latestReleaseSize))
+                        if (metric.value.latestReleaseSize ==
+                            0L
+                        ) {
+                            append("(does not exist)")
+                        } else {
+                            append("%,d".format(metric.value.latestReleaseSize))
+                        }
                         append("|")
                         append("%,d".format(metric.value.delta))
                         append("|")
@@ -174,7 +192,8 @@ internal abstract class AnalyzeArtifactSizeMetrics : DefaultTask() {
         if (artifactOrdinaryChange) appendLine(ordinary)
     }
 
-    private fun ArtifactSizeMetric.requiresAttention() = this.percentage > pluginConfig.significantChangeThresholdPercentage || this.percentage.isNaN()
+    private fun ArtifactSizeMetric.requiresAttention() =
+        this.percentage > pluginConfig.significantChangeThresholdPercentage || this.percentage.isNaN()
 
     private data class ArtifactSizeMetric(
         val currentSize: Long,

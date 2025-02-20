@@ -60,7 +60,9 @@ fun Project.configureKmpTargets() {
     pluginManager.withPlugin("kotlin-multiplatform") {
         val kmpExt = extensions.findByType(kmpExtensionClass)
         if (kmpExt == null) {
-            logger.info("$name: skipping KMP configuration because multiplatform plugin has not been configured properly")
+            logger.info(
+                "$name: skipping KMP configuration because multiplatform plugin has not been configured properly",
+            )
             return@withPlugin
         }
 

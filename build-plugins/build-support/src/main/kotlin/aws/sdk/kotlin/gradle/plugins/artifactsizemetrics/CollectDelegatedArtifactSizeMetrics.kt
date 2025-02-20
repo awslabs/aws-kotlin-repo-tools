@@ -39,9 +39,13 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     fun collect() {
         val pullRequestNumber = project.findProperty("pullRequest")?.toString()?.takeIf { it.isNotEmpty() }
         val releaseTag = project.findProperty("release")?.toString()?.takeIf { it.isNotEmpty() }
-        val identifier = pullRequestNumber ?: releaseTag ?: throw AwsSdkGradleException("Please specify a pull request or release number")
+        val identifier =
+            pullRequestNumber ?: releaseTag
+                ?: throw AwsSdkGradleException("Please specify a pull request or release number")
 
-        val artifactSizeMetricsFileKeys = getFileKeys(identifier) ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
+        val artifactSizeMetricsFileKeys =
+            getFileKeys(identifier)
+                ?: throw AwsSdkGradleException("Unable to list objects from artifact size metrics bucket")
         val artifactSizeMetricsFiles = getFiles(artifactSizeMetricsFileKeys)
         val combined = combine(artifactSizeMetricsFiles)
 

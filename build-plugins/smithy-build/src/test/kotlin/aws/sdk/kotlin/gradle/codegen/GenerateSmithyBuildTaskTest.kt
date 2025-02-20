@@ -21,7 +21,10 @@ class GenerateSmithyBuildTaskTest {
     fun testDefaults() {
         val testProj = ProjectBuilder.builder().build()
         val task = testProj.tasks.create<GenerateSmithyBuild>("generateSmithyBuild")
-        assertEquals(task.generatedOutput.get().asFile.path, testProj.layout.buildDirectory.file("smithy-build.json").get().asFile.path)
+        assertEquals(
+            task.generatedOutput.get().asFile.path,
+            testProj.layout.buildDirectory.file("smithy-build.json").get().asFile.path,
+        )
     }
 
     @Test
