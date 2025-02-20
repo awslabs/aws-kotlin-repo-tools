@@ -31,18 +31,25 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
 
         target.registerRootProjectArtifactSizeMetricsTask(tasks)
 
-        target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
+        target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") {
+            group =
+                TASK_GROUP
+        }
         target.tasks.register<AnalyzeArtifactSizeMetrics>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
-        target.tasks.register<PutArtifactSizeMetricsInCloudWatch>("putArtifactSizeMetricsInCloudWatch") { group = TASK_GROUP }
+        target.tasks.register<PutArtifactSizeMetricsInCloudWatch>("putArtifactSizeMetricsInCloudWatch") {
+            group =
+                TASK_GROUP
+        }
         target.tasks.register<SaveArtifactSizeMetrics>("saveArtifactSizeMetrics") { group = TASK_GROUP }
     }
 }
 
-private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetrics> = tasks.register<CollectArtifactSizeMetrics>("artifactSizeMetrics") {
-    group = TASK_GROUP
-    onlyIf { tasks.findByName("jvmJar") != null }
-    dependsOn(tasks.withType<Jar>())
-}
+private fun Project.subprojectArtifactSizeMetricsTask(): TaskProvider<CollectArtifactSizeMetrics> =
+    tasks.register<CollectArtifactSizeMetrics>("artifactSizeMetrics") {
+        group = TASK_GROUP
+        onlyIf { tasks.findByName("jvmJar") != null }
+        dependsOn(tasks.withType<Jar>())
+    }
 
 private fun Project.registerRootProjectArtifactSizeMetricsTask(
     subProjects: List<TaskProvider<CollectArtifactSizeMetrics>>,
