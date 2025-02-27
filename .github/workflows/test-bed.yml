@@ -7,6 +7,11 @@ on:
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      disabled-feature-branches:
+        # GH doesn't have list inputs so we're using a string
+        description: Feature branches for which syncing will be disabled, separated by comma (e.g. feat-1-main,feat-2-main)
+        default: ""
 
 jobs:
   test:
