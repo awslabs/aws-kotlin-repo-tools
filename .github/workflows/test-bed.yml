@@ -12,9 +12,44 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
+      - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Run GH action
-        uses: ./.github/actions/sync-feature-branches
-        with:
-          disabled-feature-branches: 'test-main'
+
+      - name: Set up Git
+        shell: bash
+        run: |
+          git config user.name aws-sdk-kotlin-ci
+          git config user.email "aws-kotlin-sdk-automation@amazon.com"
+
+      - name: Merge main into feature branches
+        shell: bash
+        run: |
+          echo "Parsing disabled feature branches"
+          unparsed_disabled_feature_branches="${{ inputs.disabled-feature-branches }}"
+          IFS=',' read -r -a disabled_feature_branches <<< "$unparsed_disabled_feature_branches"
+          for i in "${!disabled_feature_branches[@]}"; do
+            disabled_feature_branches[i]=$(echo "${disabled_feature_branches[i]}" | xargs)
+            echo "Found: $disabled_feature_branches[i]"
+          done
+          
+          git fetch --all
+          
+          echo "Iterating through feature branches"
+          for feature_branch in $(git branch -r --list "*-main"); do # TODO: ALL OF THESE WILL HAVE "origin/" in front of them
+            echo "Found: $feature_branch"
+          
+            for disabled_feature_branch in "${disabled_feature_branches[@]}"; do
+              if [[ "$feature_branch" == "$disabled_feature_branch" ]]; then
+                echo "Main will not be merged into $feature_branch because it was manually disabled"
+                continue
+              fi
+            done
+          
+            echo "Checking if $feature_branch is up to date with main"
+            git checkout $feature_branch
+            git fetch origin
+            commits_behind=$(git rev-list --left-right --count main...$feature_branch | awk '{print $1})
+            if [ "$commits_behind" -eq 0 ]; then
+              echo "$feature_branch is 0 commits behind main. Skipping merge"
+              continue
+            fi
