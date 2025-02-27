@@ -12,7 +12,6 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.CI_USER_PAT }}
         fetch-depth: 0
 
     - name: Set up Git
