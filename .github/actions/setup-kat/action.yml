@@ -18,14 +18,15 @@ runs:
           echo "No versions of kat were found"
           exit 1
         fi
-        echo "Downloading kat version $kat_version"
+        echo "Downloading kat version $kat_version to $PWD"
         
-        aws s3 cp s3://kotlin-sdk-build-tools/kat-releases/$kat_version/kat-$kat_version.zip ./kat.zip
+        aws s3 cp s3://kotlin-sdk-build-tools/kat-releases/$kat_version/kat-$kat_version.zip ./kat.zip --no-progress
         
         echo "Unzipping kat tool"
         unzip -qq ./kat.zip -d kat
         
         kat_binary_path="$PWD/kat/kat-$kat_version/bin"
+        echo "Appending \"$kat_binary_path\" to path"
         export PATH="$kat_binary_path:$PATH"
         echo "$kat_binary_path" >> $GITHUB_PATH
 
