@@ -11,7 +11,7 @@ on:
       disabled-feature-branches:
         # GH doesn't have list inputs so we're using a string
         description: Feature branches for which syncing will be disabled, separated by comma (e.g. feat-1-main,feat-2-main)
-        default: ""
+        default: "feat-1-main"
 
 jobs:
   test:
@@ -40,7 +40,7 @@ jobs:
           git fetch --all
           
           echo "Iterating through feature branches"
-          for feature_branch in $(git branch -r --list "*-main"); do # TODO: ALL OF THESE WILL HAVE "origin/" in front of them
+          for feature_branch in $(git branch -r --list "*-main"); do
             echo "Found: $feature_branch"
           
             for disabled_feature_branch in "${disabled_feature_branches[@]}"; do
