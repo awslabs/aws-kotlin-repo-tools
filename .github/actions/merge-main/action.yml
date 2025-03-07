@@ -1,0 +1,22 @@
+name: Merge Main
+description: Merges main into feature branches (*-main)
+inputs:
+  exempt-branches:
+    description: Feature branches that are exempt from receiving merges from main (comma separated, no blank space)
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Git
+      shell: bash
+      run: |
+        git config user.name aws-sdk-kotlin-ci
+        git config user.email "aws-kotlin-sdk-automation@amazon.com"
+
+    - name: Run Script
+      shell: bash
+      run: |
+        .github/scripts/merge-main.sh ${{ inputs.exempt-branches }}

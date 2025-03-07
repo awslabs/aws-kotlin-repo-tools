@@ -1,0 +1,25 @@
+name: Merge main
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"  # At 07:00 UTC (00:00 PST, 03:00 EST), Monday through Friday
+  # TODO: REMOVE v
+  push:
+    branches:
+      - main
+      - '*-main'
+  pull_request:
+    branches:
+      - main
+      - '*-main'
+  # TODO: REMOVE ^
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure Gradle
+        uses: awslabs/aws-kotlin-repo-tools/.github/actions/merge-main@auto-merge
+        # TODO: Use main instead of feature branch ^
+        with:
+          exempt-branches: # Add any if required
