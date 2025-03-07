@@ -23,7 +23,7 @@ runs:
 
         echo "Creating directory for kat tool at $kat_dir"
         mkdir -p "$kat_dir"
-        pushd "$kat_dir"
+        cd "$kat_dir"
 
         echo "Downloading kat version $kat_version to $kat_dir"
         aws s3 cp s3://kotlin-sdk-build-tools/kat-releases/$kat_version/kat-$kat_version.zip ./kat.zip --no-progress
