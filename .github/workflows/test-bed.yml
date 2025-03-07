@@ -29,15 +29,21 @@ jobs:
       - name: Merge main into feature branches
         shell: bash
         run: |
-          echo "Parsing disabled feature branches"
           unparsed_disabled_feature_branches="${{ inputs.disabled-feature-branches }}"
+          echo "Unparsed disabled feature branches: $unparsed_disabled_feature_branches"
+          echo "Parsing disabled feature branches"
           IFS=',' read -r -a disabled_feature_branches <<< "$unparsed_disabled_feature_branches"
           for i in "${!disabled_feature_branches[@]}"; do
+            echo "Parsing branch ${disabled_feature_branches[i]}"
             disabled_feature_branches[i]=$(echo "${disabled_feature_branches[i]}" | xargs)
             echo "Found: $disabled_feature_branches[i]"
           done
           
+          echo "Done parsing feature branches"
+          
+          echo "Fetching all"
           git fetch --all
+          echo "Done fetching all"
           
           echo "Iterating through feature branches"
           for feature_branch in $(git branch -r --list "*-main"); do
