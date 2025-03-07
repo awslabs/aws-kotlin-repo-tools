@@ -6,6 +6,10 @@ on:
       - '!main'
   pull_request:
     branches: [ main ]
+    inputs:
+      disabled-feature-branches:
+        description: This is here for testing purposes only
+        default: "feat-1-main"
   workflow_dispatch:
     inputs:
       disabled-feature-branches:
