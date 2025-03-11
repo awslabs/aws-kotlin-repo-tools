@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -27,6 +27,8 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: Configure Gradle
+      uses: ./.github/actions/configure-gradle
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -36,7 +38,7 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -44,6 +46,8 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
+    - name: Configure Gradle
+      uses: ./.github/actions/configure-gradle
     - name: Build and Test ${{ env.PACKAGE_NAME }}
       run: |
         ./gradlew build
@@ -53,6 +57,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+      - name: Configure Gradle
+        uses: ./.github/actions/configure-gradle
       - name: Build and Test ${{ env.PACKAGE_NAME }}
         run: |
           ./gradlew build
