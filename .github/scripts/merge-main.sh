@@ -73,6 +73,7 @@ function merge_main() {
     if [ $? -eq 0 ]; then
       echo "...pushing to origin"
 #      git push origin "$branch"
+# TODO: Enable pushing to origin
     else
       echo "...merge failed"
       git merge --abort
