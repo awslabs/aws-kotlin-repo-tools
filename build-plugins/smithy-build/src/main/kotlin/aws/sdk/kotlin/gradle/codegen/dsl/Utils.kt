@@ -19,9 +19,13 @@ import java.util.*
  * Get the [SmithyBuildExtension] instance configured for the project
  */
 internal val Project.smithyBuildExtension: SmithyBuildExtension
-    get() = ((this as ExtensionAware).extensions[SMITHY_BUILD_EXTENSION_NAME] as? SmithyBuildExtension) ?: error("SmithyBuildPlugin has not been applied")
+    get() = ((this as ExtensionAware).extensions[SMITHY_BUILD_EXTENSION_NAME] as? SmithyBuildExtension)
+        ?: error("SmithyBuildPlugin has not been applied")
 
-internal fun ObjectNode.Builder.withObjectMember(key: String, block: ObjectNode.Builder.() -> Unit): ObjectNode.Builder {
+internal fun ObjectNode.Builder.withObjectMember(
+    key: String,
+    block: ObjectNode.Builder.() -> Unit,
+): ObjectNode.Builder {
     val builder = ObjectNode.objectNodeBuilder()
     builder.apply(block)
     return withMember(key, builder.build())
@@ -36,7 +40,8 @@ internal fun ObjectNode.Builder.withNullableMember(key: String, member: Boolean?
     return withMember(key, member)
 }
 
-internal fun <T : ToNode> ObjectNode.Builder.withNullableMember(key: String, member: T?): ObjectNode.Builder = withOptionalMember(key, Optional.ofNullable(member))
+internal fun <T : ToNode> ObjectNode.Builder.withNullableMember(key: String, member: T?): ObjectNode.Builder =
+    withOptionalMember(key, Optional.ofNullable(member))
 
 internal fun ObjectNode.Builder.withArrayMember(key: String, member: List<String>): ObjectNode.Builder = apply {
     val arrNode = member.map { Node.from(it) }.let { ArrayNode.fromNodes(it) }

@@ -18,14 +18,21 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 fun Project.configureLinting(lintPaths: List<String>) {
     verifyRootProject { "Kotlin SDK lint configuration is expected to be configured on the root project" }
 
+    val ktlintVersion = object {} // Can't use Project.javaClass because that's using the Gradle classloader
+        .javaClass
+        .getResource("ktlint-version.txt")
+        ?.readText()
+        ?: error("Missing ktlint-version.txt")
+
     val ktlint by configurations.creating
 
     dependencies {
-        val ktlintVersion = "1.3.0"
         ktlint("com.pinterest.ktlint:ktlint-cli:$ktlintVersion") {
             attributes {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
             }
+            // Ensure that kotlin-compiler-embeddable isn't included in the buildscript classpath in consuming modules
+            exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
         }
     }
 
