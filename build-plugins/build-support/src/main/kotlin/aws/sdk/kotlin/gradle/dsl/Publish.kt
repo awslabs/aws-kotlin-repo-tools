@@ -28,11 +28,6 @@ private val ALLOWED_PUBLICATIONS = listOf(
     "common",
     "jvm",
     "kotlinMultiplatform",
-    "iosX64",
-    "linuxArm64",
-    "linuxX64",
-    "macosArm64",
-    "macosX64",
 
     "metadata",
     "bom",
