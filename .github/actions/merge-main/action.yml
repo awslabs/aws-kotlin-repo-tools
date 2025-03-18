@@ -103,7 +103,7 @@ runs:
           done
           
           if [ "$failed" == "true" ]; then
-            exit -1
+            exit 1
           fi
         }
 
