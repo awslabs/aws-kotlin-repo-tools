@@ -86,19 +86,25 @@ runs:
             return
           fi
 
+          failed="false"
+
           for branch in "${branches[@]}"; do
             echo "...switching to branch: $branch"
             git switch "$branch"
             echo "...merging main"
-            git merge -m "misc: merge from main" origin/main
-            if [ $? -eq 0 ]; then
+            if git merge -m "misc: merge from main" origin/main; then
               echo "...pushing to origin"
               git push origin "$branch"
             else
               echo "...merge failed"
+              failed="true"
               git merge --abort
             fi
           done
+          
+          if [ "$failed" == "true" ]; then
+            exit 1
+          fi
         }
 
         merge_main
