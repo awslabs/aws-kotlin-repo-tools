@@ -86,6 +86,8 @@ runs:
             return
           fi
 
+          failed="false"
+
           for branch in "${branches[@]}"; do
             echo "...switching to branch: $branch"
             git switch "$branch"
@@ -95,9 +97,14 @@ runs:
               git push origin "$branch"
             else
               echo "...merge failed"
+              failed="true"
               git merge --abort
             fi
           done
+          
+          if [ "$failed" == "true" ]; then
+            exit -1
+          fi
         }
 
         merge_main
