@@ -74,7 +74,8 @@ class SmithyBuildPlugin : Plugin<Project> {
         registerCodegenTasks()
     }
 
-    private fun Project.installExtension() = extensions.create(SMITHY_BUILD_EXTENSION_NAME, SmithyBuildExtension::class.java, project)
+    private fun Project.installExtension() =
+        extensions.create(SMITHY_BUILD_EXTENSION_NAME, SmithyBuildExtension::class.java, project)
 
     private fun Project.registerCodegenTasks() {
         val generateSmithyBuild = tasks.register<GenerateSmithyBuild>(TASK_GENERATE_SMITHY_BUILD) {
