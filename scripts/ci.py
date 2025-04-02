@@ -60,7 +60,8 @@ def has_remote_branch(repo_dir, branch_name):
 
 def update_repo(repo_dir, branch_name):
     """
-    Attempt to update the repository to the given branch name
+    Attempt to update the repository to the given branch name, if it exists.
+    Otherwise tries the branch name set by `GITHUB_BASE_REF`, if it exists.
     """
     branch_name = branch_name.removeprefix(GIT_ORIGIN_REFIX)
     curr_branch = get_current_branch(repo_dir)
@@ -69,14 +70,18 @@ def update_repo(repo_dir, branch_name):
         vprint("branches match already, nothing to do")
         return
 
-    has_branch = has_remote_branch(repo_dir, branch_name)
-    if has_branch:
-        vprint(f"repo has target branch `{branch_name}`: {has_branch}...updating")
+    base_branch = os.environ.get("GITHUB_BASE_REF")
+
+    if has_remote_branch(repo_dir, branch_name):
+        vprint(f"repo has target branch {branch_name}...updating")
         pout = shell(f"git switch {branch_name}", cwd=repo_dir)
         vprint(pout.stdout.decode("utf-8"))
+    elif (base_branch != curr_branch) and has_remote_branch(repo_dir, base_branch):
+        vprint(f"repo does not have target branch {branch_name}, but has base branch {base_branch}...updating")
+        pout = shell(f"git switch {base_branch}", cwd=repo_dir)
+        vprint(pout.stdout.decode("utf-8"))
     else:
-        vprint(f"repo does not have target branch `{branch_name}`, leaving at {curr_branch}")
-
+        vprint(f"repo does not have target branch {branch_name} nor base_branch {base_branch}, leaving at {curr_branch}")
 
 def _get_branch_cmd(opts):
     branch = "main"
