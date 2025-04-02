@@ -73,7 +73,7 @@ def update_repo(repo_dir, branch_name):
     base_branch = os.environ.get("GITHUB_BASE_REF")
 
     if has_remote_branch(repo_dir, branch_name):
-        vprint(f"repo has target branch `{branch_name}`: {has_branch}...updating")
+        vprint(f"repo has target branch {branch_name}...updating")
         pout = shell(f"git switch {branch_name}", cwd=repo_dir)
         vprint(pout.stdout.decode("utf-8"))
     elif (base_branch != curr_branch) and has_remote_branch(repo_dir, base_branch):
@@ -81,7 +81,7 @@ def update_repo(repo_dir, branch_name):
         pout = shell(f"git switch {base_branch}", cwd=repo_dir)
         vprint(pout.stdout.decode("utf-8"))
     else:
-        vprint(f"repo does not have target branch {branch_name} nor base_branch ${base_branch}, leaving at {curr_branch}")
+        vprint(f"repo does not have target branch {branch_name} nor base_branch {base_branch}, leaving at {curr_branch}")
 
 def _get_branch_cmd(opts):
     branch = "main"
