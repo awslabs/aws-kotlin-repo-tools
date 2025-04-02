@@ -77,7 +77,7 @@ def update_repo(repo_dir, branch_name):
         pout = shell(f"git switch {branch_name}", cwd=repo_dir)
         vprint(pout.stdout.decode("utf-8"))
     elif (base_branch != curr_branch) and has_remote_branch(repo_dir, base_branch):
-        vprint(f"repo does not have target branch ${branch_name}, but has base branch {base_branch}...updating")
+        vprint(f"repo does not have target branch {branch_name}, but has base branch {base_branch}...updating")
         pout = shell(f"git switch {base_branch}", cwd=repo_dir)
         vprint(pout.stdout.decode("utf-8"))
     else:
