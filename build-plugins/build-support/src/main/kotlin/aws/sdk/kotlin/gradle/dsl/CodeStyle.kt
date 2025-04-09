@@ -26,6 +26,9 @@ fun Project.configureLinting(lintPaths: List<String>) {
             attributes {
                 attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
             }
+
+            // Ensure that kotlin-compiler-embeddable isn't included in the buildscript classpath in consuming modules
+            exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
         }
     }
 

@@ -19,7 +19,11 @@ repositories {
 
 dependencies {
     // make our custom lint rules available to the buildscript classpath
-    runtimeOnly(project(":ktlint-rules"))
+    runtimeOnly(project(":ktlint-rules")) {
+        // Ensure that kotlin-compiler-embeddable isn't included in the buildscript classpath in consuming modules
+        exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
+    }
+
     implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
     implementation("aws.sdk.kotlin:s3:1.1.+")
