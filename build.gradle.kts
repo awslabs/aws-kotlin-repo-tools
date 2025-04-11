@@ -49,9 +49,10 @@ val ktlint by configurations.creating
 dependencies {
     ktlint(libs.ktlint.cli) {
         attributes {
-            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
         }
     }
+
     ktlint(project(":ktlint-rules"))
 }
 
