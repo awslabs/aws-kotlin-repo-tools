@@ -49,11 +49,8 @@ val ktlint by configurations.creating
 dependencies {
     ktlint(libs.ktlint.cli) {
         attributes {
-            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.EXTERNAL))
+            attribute(Bundling.BUNDLING_ATTRIBUTE, objects.named(Bundling.SHADOWED))
         }
-
-        // Ensure that kotlin-compiler-embeddable isn't included in the buildscript classpath
-        exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
     }
 
     ktlint(project(":ktlint-rules"))
