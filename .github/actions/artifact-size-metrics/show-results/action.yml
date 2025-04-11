@@ -35,7 +35,8 @@ runs:
                     }
                   }
                 }
-              }`
+              }
+            }`
 
           const response = await github.graphql(getComments)
           const comments = response.repository.pullRequest.comments.nodes
