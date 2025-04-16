@@ -3,6 +3,8 @@ description: Merges main into feature branches (*-main)
 inputs:
   exempt-branches:
     description: Feature branches that are exempt from receiving merges from main (comma separated, no blank space)
+  ci-user-pat:
+    description: The CI user's personal access token to write to the repo
 
 runs:
   using: composite
@@ -11,6 +13,7 @@ runs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        token: ${{ inputs.ci-user-pat }}
 
     - name: Set up Git
       shell: bash
