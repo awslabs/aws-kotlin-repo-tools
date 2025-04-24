@@ -9,11 +9,11 @@ ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint
 ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-core", version.ref = "ktlint" }
 ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint" }
 ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
-nexusPublishPlugin = { module = "io.github.gradle-nexus:publish-plugin", version = "1.3.0" }
+nexusPublishPlugin = { module = "io.github.gradle-nexus:publish-plugin", version = "2.0.0" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
 smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-base", version.ref = "smithy-gradle-plugin-version" }
 
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-version" }
 
 [plugins]
-plugin-publish = { id = "com.gradle.plugin-publish", version = "1.2.1"}
+plugin-publish = { id = "com.gradle.plugin-publish", version = "2.0.0"}
