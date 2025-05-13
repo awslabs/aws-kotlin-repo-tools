@@ -55,6 +55,11 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
                 prefix = pluginConfig.bucketPrefixOverride ?: "[TEMP]${pluginConfig.projectRepositoryName}-$identifier-"
             }.contents?.map {
                 it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
+            } ?: s3.listObjects {
+                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                prefix = pluginConfig.bucketPrefixOverride ?: "[TEMP]private-${pluginConfig.projectRepositoryName}-staging-$identifier-"
+            }.contents?.map {
+                it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
             }
         }
     }
