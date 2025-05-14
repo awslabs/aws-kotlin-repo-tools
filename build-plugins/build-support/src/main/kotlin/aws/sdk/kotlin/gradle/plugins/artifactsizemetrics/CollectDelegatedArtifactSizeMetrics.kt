@@ -51,7 +51,7 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     private fun getFileKeys(identifier: String): List<String>? = runBlocking {
         val prefixes = pluginConfig.bucketPrefixOverride?.let { listOf(it) } ?: listOf(
             "[TEMP]${pluginConfig.projectRepositoryName}-$identifier-",
-            "[TEMP]private-${pluginConfig.projectRepositoryName}-staging-$identifier-",
+            "[TEMP]private-${pluginConfig.projectRepositoryName}-staging-$identifier-", // private repo metrics files have different prefix
         )
 
         return@runBlocking prefixes.firstNotNullOfOrNull { prefix ->
