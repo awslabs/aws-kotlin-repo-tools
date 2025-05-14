@@ -49,17 +49,19 @@ internal abstract class CollectDelegatedArtifactSizeMetrics : DefaultTask() {
     }
 
     private fun getFileKeys(identifier: String): List<String>? = runBlocking {
-        S3Client.fromEnvironment().use { s3 ->
-            return@runBlocking s3.listObjects {
-                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                prefix = pluginConfig.bucketPrefixOverride ?: "[TEMP]${pluginConfig.projectRepositoryName}-$identifier-"
-            }.contents?.map {
-                it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
-            } ?: s3.listObjects {
-                bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
-                prefix = pluginConfig.bucketPrefixOverride ?: "[TEMP]private-${pluginConfig.projectRepositoryName}-staging-$identifier-"
-            }.contents?.map {
-                it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
+        val prefixes = pluginConfig.bucketPrefixOverride?.let { listOf(it) } ?: listOf(
+            "[TEMP]${pluginConfig.projectRepositoryName}-$identifier-",
+            "[TEMP]private-${pluginConfig.projectRepositoryName}-staging-$identifier-",
+        )
+
+        return@runBlocking prefixes.firstNotNullOfOrNull { prefix ->
+            S3Client.fromEnvironment().use { s3 ->
+                s3.listObjects {
+                    bucket = S3_ARTIFACT_SIZE_METRICS_BUCKET
+                    this.prefix = prefix
+                }.contents?.map {
+                    it.key ?: throw AwsSdkGradleException("A file from the artifact size metrics bucket is missing a key")
+                }
             }
         }
     }
