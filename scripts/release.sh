@@ -15,7 +15,7 @@ echo "most recent tag: $VERSION (sha=$VERSION_COMMIT)"
 
 export RELEASE_S3_URL="s3://$RELEASE_BUCKET/releases"
 
-TEST_KEY="releases/aws/sdk/kotlin/build-plugins/$VERSION/build-plugins-$VERSION.jar"
+TEST_KEY="releases/aws/sdk/kotlin/gradle/build-support/$VERSION/build-support-$VERSION.jar"
 
 if aws s3api head-object --bucket $RELEASE_BUCKET --key $TEST_KEY; then
     echo "failing release; $VERSION already exists!"
