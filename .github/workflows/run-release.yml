@@ -27,6 +27,8 @@ jobs:
             exit 0
           fi
           
+          git --no-pager tag
+          git show 0.4.23
           CURRENT_VERSION=$(git describe --tags --abbrev=0)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
@@ -57,4 +59,6 @@ jobs:
 
       - name: Delete failed release tag
         if: ${{ failure() }}
-        run: git push --delete origin ${{ steps.resolve-version.outputs.NEW_VERSION }}
+        run: |
+          exit 0
+          git push --delete origin ${{ steps.resolve-version.outputs.NEW_VERSION }}
