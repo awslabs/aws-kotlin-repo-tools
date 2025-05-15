@@ -30,3 +30,5 @@ fi
 echo "releasing version $VERSION"
 
 ./gradlew -Prelease.version=$VERSION publishAllPublicationsToReleaseRepository
+
+
