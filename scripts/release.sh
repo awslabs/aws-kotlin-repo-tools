@@ -1,6 +1,7 @@
 #!/bin/bash
 
 [ -z "$RELEASE_BUCKET" ] && { echo "RELEASE_BUCKET environment variable not set"; exit 1; }
+[ -z "$PUBLISHING_ROLE_ARN" ] && { echo "PUBLISHING_ROLE_ARN environment variable not set"; exit 1; }
 
 VERSION=$(git describe --tags --abbrev=0)
 HEAD_COMMIT=$(git rev-parse HEAD)
@@ -13,6 +14,10 @@ fi
 
 echo "most recent tag: $VERSION (sha=$VERSION_COMMIT)"
 
+SESSION_CREDS=$(aws sts assume-role --role-arn $PUBLISHING_ROLE_ARN --role-session-name publish-aws-kotlin-repo-tools)
+export AWS_ACCESS_KEY_ID=$(echo "${SESSION_CREDS}" | jq -r '.Credentials.AccessKeyId')
+export AWS_SECRET_ACCESS_KEY=$(echo "${SESSION_CREDS}" | jq -r '.Credentials.SecretAccessKey')
+export AWS_SESSION_TOKEN=$(echo "${SESSION_CREDS}" | jq -r '.Credentials.SessionToken')
 export RELEASE_S3_URL="s3://$RELEASE_BUCKET/releases"
 
 TEST_KEY="releases/aws/sdk/kotlin/gradle/build-support/$VERSION/build-support-$VERSION.jar"
@@ -23,7 +28,8 @@ if aws s3api head-object --bucket $RELEASE_BUCKET --key $TEST_KEY; then
 fi
 
 echo "releasing version $VERSION"
+exit 1
 
-./gradlew -Prelease.version=$VERSION publishAllPublicationsToReleaseRepository
+#./gradlew -Prelease.version=$VERSION publishAllPublicationsToReleaseRepository
 
 

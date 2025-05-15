@@ -59,11 +59,11 @@ jobs:
           role-to-assume: ${{ secrets.PUBLISHING_ROLE_ARN }}
           aws-region: us-west-2
 
-      - name: Run release
-        env:
-          RELEASE_BUCKET: ${{ secrets.RELEASE_BUCKET }}
-        run: |
-          ./scripts/release.sh
+      - name: Run CodeBuild
+        uses: aws-actions/aws-codebuild-run-build@v1
+        with:
+          project-name: publish-aws-kotlin-repo-tools
+          source-version-override: ${{ steps.resolve-version.outputs.NEW_VERSION }}
 
       - name: Delete failed release tag
         if: ${{ failure() }}
