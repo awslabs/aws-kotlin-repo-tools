@@ -20,7 +20,7 @@ export AWS_SECRET_ACCESS_KEY=$(echo "${SESSION_CREDS}" | jq -r '.Credentials.Sec
 export AWS_SESSION_TOKEN=$(echo "${SESSION_CREDS}" | jq -r '.Credentials.SessionToken')
 export RELEASE_S3_URL="s3://$RELEASE_BUCKET/releases"
 
-TEST_KEY="releases/aws/sdk/kotlin/gradle/build-support/$VERSION/build-support-$VERSION.jar"
+TEST_KEY="releases/aws/sdk/kotlin/build-plugins/$VERSION/build-plugins-$VERSION.jar"
 
 if aws s3api head-object --bucket $RELEASE_BUCKET --key $TEST_KEY; then
     echo "failing release; $VERSION already exists!"
