@@ -47,6 +47,15 @@ jobs:
           git tag "$NEW_VERSION"
           git push origin "$NEW_VERSION"
 
+      - name: Configure Gradle
+        uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.PUBLISHING_ROLE_ARN }}
+          aws-region: us-west-2
+
       - name: Run release
         env:
           RELEASE_BUCKET: ${{ secrets.RELEASE_BUCKET }}
