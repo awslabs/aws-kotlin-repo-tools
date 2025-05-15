@@ -52,11 +52,9 @@ jobs:
           RELEASE_BUCKET: ${{ secrets.RELEASE_BUCKET }}
           PUBLISHING_ROLE_ARN: ${{ secrets.PUBLISHING_ROLE_ARN }}
         run: |
-          exit 1
           ./scripts/release.sh
 
       - name: Delete failed release tag
         if: ${{ failure() }}
         run: |
-          exit 0
           git push --delete origin ${{ steps.resolve-version.outputs.NEW_VERSION }}
