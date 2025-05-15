@@ -10,7 +10,7 @@ on:
         description: 'Optionally specify a custom release version (minor version bump e.g.)'
 
 jobs:
-  release-readiness:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -19,7 +19,7 @@ jobs:
       - name: Resolve version
         id: resolve-version
         run: |
-          if [ -n "${{ inputs.version-override }}" ]
+          if [ -n "${{ inputs.version-override }}" ]; then
             echo "NEW_VERSION=${{ inputs.version-override }}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
