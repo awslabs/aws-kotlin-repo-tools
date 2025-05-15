@@ -1,7 +1,7 @@
 #!/bin/bash
 
 [ -z "$RELEASE_BUCKET" ] && { echo "RELEASE_BUCKET environment variable not set"; exit 1; }
-[ -z "$PUBLISHING_ROLE_ARN" ] && { echo "PUBLISHING_ROLE_ARN environment variable not set"; exit 1; }
+[ -z "$PUBLISHING_ROLE_ARN" ] && { echo "PUBLISHING_ROLE_ARN environment variable not set"; exit 1; } # TODO: REMOVE
 
 VERSION=$(git describe --tags --abbrev=0)
 HEAD_COMMIT=$(git rev-parse HEAD)

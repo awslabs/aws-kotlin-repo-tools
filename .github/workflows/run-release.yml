@@ -1,13 +1,17 @@
 name: Release
 
 on:
-  pull_request:
+  pull_request: # TODO: REMOVE
   workflow_dispatch:
     inputs:
       version-override:
         type: string
         required: false
         description: 'Optionally specify a custom release version (minor version bump e.g.)'
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   release:
@@ -50,7 +54,7 @@ jobs:
       - name: Configure Gradle
         uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.PUBLISHING_ROLE_ARN }}
@@ -59,7 +63,7 @@ jobs:
       - name: Run release
         env:
           RELEASE_BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PUBLISHING_ROLE_ARN: ${{ secrets.PUBLISHING_ROLE_ARN }}
+          PUBLISHING_ROLE_ARN: ${{ secrets.PUBLISHING_ROLE_ARN }} # TODO: REMOVE
         run: |
           ./scripts/release.sh
 
