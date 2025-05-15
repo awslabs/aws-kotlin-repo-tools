@@ -63,7 +63,6 @@ jobs:
       - name: Run release
         env:
           RELEASE_BUCKET: ${{ secrets.RELEASE_BUCKET }}
-          PUBLISHING_ROLE_ARN: ${{ secrets.PUBLISHING_ROLE_ARN }} # TODO: REMOVE
         run: |
           ./scripts/release.sh
 
