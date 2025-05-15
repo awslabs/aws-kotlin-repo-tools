@@ -25,6 +25,7 @@ jobs:
           fi
           
           git fetch origin
+          git fetch --tags
           CURRENT_VERSION=$(git describe --tags --abbrev=0)
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
