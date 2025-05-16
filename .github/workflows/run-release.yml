@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request:
   workflow_dispatch:
     inputs:
       version-override:
@@ -63,7 +62,6 @@ jobs:
         run: |
           git tag "$NEW_VERSION"
           git push origin "$NEW_VERSION"
-          exit 1
 
       - name: Configure Gradle
         uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
