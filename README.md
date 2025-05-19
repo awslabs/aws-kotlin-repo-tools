@@ -20,13 +20,14 @@ version that is being released.
 
 To cut a new release:
 
-1. Create a new tag, e.g. `git tag x.y.z`.
-2. Push the tag up `git push origin x.y.z`.
-3. Go to the CodeBuild release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`).
-4. Start a build with overrides.
-5. Under `Source` connect your GitHub account (Under `Source` -> `Connection Status` you should see "You are connected to GitHub").
-7. Specify the tag you created under `Source Version`.
-8. Start the build.
+1. Go to this repos GitHub actions.
+2. Locate the release workflow.
+3. Specify whether the release will be of a kn variant (used for Kotlin Native development).
+4. If you're doing a minor or major version bump, specify the version override (including "-kn" if a kn variant).
+5. Run the workflow.
+
+The workflow will create a tag, push it to this repo and then start a 
+CodeBuild release job hosted in the shared tools account (e.g. `publish-aws-kotlin-repo-tools`).
 
 ## Development
 
