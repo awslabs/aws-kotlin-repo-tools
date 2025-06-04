@@ -6,15 +6,11 @@ package aws.sdk.kotlin.gradle.kmp
 
 import aws.sdk.kotlin.gradle.util.prop
 import org.gradle.api.Project
-import org.gradle.api.publish.maven.tasks.AbstractPublishToMaven
-import org.gradle.api.publish.tasks.GenerateModuleMetadata
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
-import org.jetbrains.kotlin.konan.target.Family
 import org.jetbrains.kotlin.konan.target.HostManager
 import java.io.File
 
@@ -51,7 +47,7 @@ val Project.hasWindows: Boolean get() = hasNative || files.any { it.name == "win
  * Test if a project follows the convention and needs configured for KMP (used in handful of spots where we have a
  * subproject that is just a container for other projects but isn't a KMP project itself).
  */
-public val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows
+val Project.needsKmpConfigured: Boolean get() = hasCommon || hasJvm || hasNative || hasJs || hasJvmAndNative || hasDesktop || hasLinux || hasApple || hasWindows
 
 @OptIn(ExperimentalKotlinGradlePluginApi::class)
 fun Project.configureKmpTargets() {
@@ -112,21 +108,14 @@ fun Project.configureKmpTargets() {
         // FIXME Configure JS
 
         if (NATIVE_ENABLED) {
-            if (hasApple) {
+            if ((hasApple || hasDesktop) && HostManager.hostIsMac) {
                 kmpExt.apply { configureApple() }
             }
-            if (hasWindows) {
+            if ((hasWindows || hasDesktop) && HostManager.hostIsMingw) {
                 kmpExt.apply { configureWindows() }
             }
-            if (hasLinux) {
+            if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
                 kmpExt.apply { configureLinux() }
-            }
-            if (hasDesktop) {
-                kmpExt.apply {
-                    configureLinux()
-                    configureMacos()
-                    configureWindows()
-                }
             }
         }
 
@@ -193,8 +182,7 @@ fun Project.configureMacos() {
 
 fun Project.configureWindows() {
     kotlin {
-        // FIXME Set up Docker files and CMake tasks for Windows
-//        mingwX64()
+        mingwX64()
     }
 }
 
@@ -213,60 +201,3 @@ fun KotlinMultiplatformExtension.configureSourceSetsConvention() {
 
 val Project.JVM_ENABLED get() = prop("aws.kotlin.jvm")?.let { it == "true" } ?: true
 val Project.NATIVE_ENABLED get() = prop("aws.kotlin.native")?.let { it == "true" } ?: true
-
-/**
- * Kotlin/Native Linux and Windows targets are generally enabled on all hosts since
- * the Kotlin toolchain and backend compilers support cross compilation. We
- * are using cinterop and have to compile CRT for those platforms which sometimes
- * requires using docker which isn't always available in CI or setup in users environment.
- *
- * See [KT-30498](https://youtrack.jetbrains.com/issue/KT-30498)
- */
-fun Project.disableCrossCompileTargets() {
-    plugins.withId("org.jetbrains.kotlin.multiplatform") {
-        configure<KotlinMultiplatformExtension> {
-            targets.withType<KotlinNativeTarget> {
-                val knTarget = this
-                when {
-                    HostManager.hostIsMac && (knTarget.isLinux || knTarget.isWindows) -> disable(knTarget)
-                    HostManager.hostIsLinux && knTarget.isApple -> disable(knTarget)
-                    HostManager.hostIsMingw && (knTarget.isLinux || knTarget.isApple) -> disable(knTarget)
-                }
-            }
-        }
-    }
-}
-
-private val KotlinNativeTarget.isLinux: Boolean
-    get() = konanTarget.family == Family.LINUX
-
-private val KotlinNativeTarget.isApple: Boolean
-    get() = konanTarget.family.isAppleFamily
-
-private val KotlinNativeTarget.isWindows: Boolean
-    get() = konanTarget.family == Family.MINGW
-
-internal fun Project.disable(knTarget: KotlinNativeTarget) {
-    logger.warn("disabling Kotlin/Native target: ${knTarget.name}")
-    knTarget.apply {
-        compilations.all {
-            cinterops.all {
-                tasks.named(interopProcessingTaskName).configure { enabled = false }
-            }
-            compileTaskProvider.configure { enabled = false }
-        }
-
-        binaries.all {
-            linkTaskProvider.configure { enabled = false }
-        }
-
-        mavenPublication {
-            tasks.withType<AbstractPublishToMaven>().configureEach {
-                onlyIf { publication != this@mavenPublication }
-            }
-            tasks.withType<GenerateModuleMetadata>().configureEach {
-                onlyIf { publication != this@mavenPublication }
-            }
-        }
-    }
-}
