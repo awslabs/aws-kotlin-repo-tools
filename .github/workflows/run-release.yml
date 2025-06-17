@@ -43,6 +43,7 @@ jobs:
           fi
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          echo "Curr patch: $PATCH"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
           PATCH_SUFFIX=${PATCH#$PATCH_NUMBER}
           echo "NEW_VERSION=$MAJOR.$MINOR.$((PATCH_NUMBER++))$SUFFIX" >> "$GITHUB_OUTPUT"
@@ -72,4 +73,4 @@ jobs:
       - name: Delete failed release tag
         if: ${{ failure() }}
         run: |
-          git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
+#          git push --delete origin ${{ steps.resolve-new-version.outputs.NEW_VERSION }}
