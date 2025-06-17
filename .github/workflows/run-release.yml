@@ -43,10 +43,10 @@ jobs:
           fi
           
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-          echo "Curr patch: $PATCH"
           PATCH_NUMBER=${PATCH%%[^0-9]*}
           PATCH_SUFFIX=${PATCH#$PATCH_NUMBER}
-          echo "NEW_VERSION=$MAJOR.$MINOR.$((PATCH_NUMBER++))$SUFFIX" >> "$GITHUB_OUTPUT"
+          NEW_PATCH_NUMBER=$((PATCH_NUMBER++))
+          echo "NEW_VERSION=$MAJOR.$MINOR.$NEW_PATCH_NUMBER$SUFFIX" >> "$GITHUB_OUTPUT"
 
       - name: Create new version tag
         env:
