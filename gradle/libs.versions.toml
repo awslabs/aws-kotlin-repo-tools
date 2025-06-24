@@ -10,6 +10,7 @@ ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-co
 ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint" }
 ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
 nexusPublishPlugin = { module = "io.github.gradle-nexus:publish-plugin", version = "2.0.0" }
+jReleaserPlugin = { module = "org.jreleaser:jreleaser-gradle-plugin", version = "1.18.0" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
 smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-base", version.ref = "smithy-gradle-plugin-version" }
 

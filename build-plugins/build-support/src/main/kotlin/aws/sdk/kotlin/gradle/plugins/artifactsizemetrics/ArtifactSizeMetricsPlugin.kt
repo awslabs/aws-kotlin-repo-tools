@@ -31,7 +31,7 @@ class ArtifactSizeMetricsPlugin : Plugin<Project> {
 
         target.registerRootProjectArtifactSizeMetricsTask(tasks)
 
-        target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
+//        target.tasks.register<CollectDelegatedArtifactSizeMetrics>("collectDelegatedArtifactSizeMetrics") { group = TASK_GROUP }
         target.tasks.register<AnalyzeArtifactSizeMetrics>("analyzeArtifactSizeMetrics") { group = TASK_GROUP }
         target.tasks.register<PutArtifactSizeMetricsInCloudWatch>("putArtifactSizeMetricsInCloudWatch") { group = TASK_GROUP }
         target.tasks.register<SaveArtifactSizeMetrics>("saveArtifactSizeMetrics") { group = TASK_GROUP }

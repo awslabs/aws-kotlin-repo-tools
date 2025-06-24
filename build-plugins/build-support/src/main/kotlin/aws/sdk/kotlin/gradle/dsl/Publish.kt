@@ -5,7 +5,7 @@
 package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.verifyRootProject
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
+import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -14,14 +14,19 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
-import java.time.Duration
+import org.jreleaser.model.Active
 
 private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
 private const val SKIP_PUBLISH_PROP = "skipPublish"
 private const val SIGNING_KEY_PROP = "signingKey"
 private const val SIGNING_PASSWORD_PROP = "signingPassword"
-private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
-private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
+
+private const val J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR = "JRELEASER_MAVENCENTRAL_USERNAME"
+private const val J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR = "JRELEASER_MAVENCENTRAL_TOKEN"
+private const val J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR = "JRELEASER_GPG_PUBLIC_KEY"
+private const val J_RELEASER_GPG_SECRET_KEY_ENV_VAR = "JRELEASER_GPG_SECRET_KEY"
+private const val J_RELEASER_GPG_PASSPHRASE_ENV_VAR = "JRELEASER_GPG_PASSPHRASE"
+private const val J_RELEASER_ENV_VAR = "JRELEASER_PROJECT_JAVA_GROUP_ID"
 
 // Names of publications that are allowed to be published
 private val ALLOWED_PUBLICATIONS = listOf(
@@ -56,7 +61,7 @@ fun Project.skipPublishing() {
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
  * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
+fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") { // TODO: USE ENV VARS NOW ?
     val project = this
     apply(plugin = "maven-publish")
 
@@ -136,35 +141,44 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 }
 
 /**
- * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
+ * Configure JReleaser publishing plugin. This (conditionally) enables the `org.jreleaser` plugin and configures it.
  */
-fun Project.configureNexus() {
-    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
-
-    val requiredProps = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
-    val doConfigure = requiredProps.all { project.hasProperty(it) }
-    if (!doConfigure) {
-        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
-        return
-    }
-
-    apply(plugin = "io.github.gradle-nexus.publish-plugin")
-    extensions.configure<NexusPublishExtension> {
-        val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
-        group = publishGroupName
-        packageGroup.set(publishGroupName)
-        repositories {
-            create("awsNexus") {
-                nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
-                snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
-                username.set(project.property(SONATYPE_USERNAME_PROP) as String)
-                password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
-            }
+fun Project.configureJReleaser() {
+    verifyRootProject { "JReleaser configuration must be applied to the root project only" }
+    listOf(
+        J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR,
+        J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR,
+        J_RELEASER_GPG_PASSPHRASE_ENV_VAR,
+        J_RELEASER_GPG_SECRET_KEY_ENV_VAR,
+        J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR,
+        J_RELEASER_ENV_VAR,
+        "JRELEASER_PROJECT_VERSION", // TODO: Keep ?
+    ).map { variable ->
+        if (System.getenv(variable) == null) {
+            logger.warn("Skipping JReleaser configuration, missing required env var: $variable")
+            true
+        } else {
+            false
         }
+    }.any { return }
 
-        transitionCheckOptions {
-            maxRetries.set(180)
-            delayBetween.set(Duration.ofSeconds(10))
+    apply(plugin = "org.jreleaser")
+    extensions.configure<JReleaserExtension> {
+        signing {
+            active = Active.ALWAYS
+            armored = true
+        }
+        deploy {
+            maven {
+                mavenCentral {
+                    create("maven-central") {
+                        active = Active.ALWAYS
+                        url = "https://central.sonatype.com/api/v1/publisher" // TODO: Use `gr jreleaserDeploy`
+//                        sign = true // TODO: Remove me if unnecessary
+                        stagingRepository("target/staging-deploy")
+                    }
+                }
+            }
         }
     }
 }
