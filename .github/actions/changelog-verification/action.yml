@@ -4,6 +4,9 @@ description: 'Verifies that a PR includes a valid changelog entry'
 runs:
   using: "composite"
   steps:
+    - name: Checkout sources
+      uses: actions/checkout@v2
+
     - name: Setup kat
       uses: awslabs/aws-kotlin-repo-tools/.github/actions/setup-kat@main
 
