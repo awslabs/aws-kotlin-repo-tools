@@ -19,6 +19,14 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
+
+    - name: Configure JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'corretto'
+        java-version: 17
+        cache: 'gradle'
+
     - uses: actions/cache@v4
       with:
         path: |
@@ -38,6 +46,14 @@ jobs:
     steps:
     - name: Checkout sources
       uses: actions/checkout@v2
+
+    - name: Configure JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'corretto'
+        java-version: 17
+        cache: 'gradle'
+
     - uses: actions/cache@v4
       with:
         path: |
@@ -57,6 +73,14 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      - name: Configure JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: 17
+          cache: 'gradle'
+
       - name: Configure Gradle
         uses: ./.github/actions/configure-gradle
       - name: Build and Test ${{ env.PACKAGE_NAME }}
