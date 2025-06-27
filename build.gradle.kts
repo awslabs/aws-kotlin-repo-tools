@@ -4,7 +4,6 @@
  */
 plugins {
     `maven-publish`
-    alias(libs.plugins.kotlin.jvm) apply false
 }
 
 val releaseVersion = findProperty("release.version") as? String
