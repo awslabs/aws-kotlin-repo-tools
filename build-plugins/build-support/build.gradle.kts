@@ -24,7 +24,6 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin", module = "kotlin-compiler-embeddable")
     }
 
-    implementation(libs.nexusPublishPlugin)
     implementation(libs.jReleaserPlugin)
     compileOnly(gradleApi())
     implementation(libs.aws.sdk.s3)

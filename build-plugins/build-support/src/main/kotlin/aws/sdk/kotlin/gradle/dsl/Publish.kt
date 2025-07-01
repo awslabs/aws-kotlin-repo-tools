@@ -5,7 +5,6 @@
 package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.verifyRootProject
-import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -14,6 +13,7 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
+import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 
 // Props
@@ -140,6 +140,19 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
                 }
             }
         }
+    }
+
+    /*
+    Creates a dummy JAR for version catalog publishing
+    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar to be present in the version catalog component
+    https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-plugin
+
+    Consuming published version catalogs with the dummy JAR still work
+    https://docs.gradle.org/current/userguide/version_catalogs.html#sec:importing-published-catalog
+     */
+    tasks.register<Jar>("versionCatalogJar") {
+        archiveBaseName.set("version-catalog")
+        from("gradle/libs.versions.toml")
     }
 }
 

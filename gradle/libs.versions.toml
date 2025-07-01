@@ -13,7 +13,7 @@ aws-sdk-s3 = { module = "aws.sdk.kotlin:s3", version.ref = "aws-sdk-version" }
 ktlint-cli = { module = "com.pinterest.ktlint:ktlint-cli", version.ref = "ktlint" }
 ktlint-cli-ruleset-core = { module = "com.pinterest.ktlint:ktlint-cli-ruleset-core", version.ref = "ktlint" }
 ktlint-test = {module = "com.pinterest.ktlint:ktlint-test", version.ref = "ktlint" }
-jReleaserPlugin = { module = "org.jreleaser:jreleaser-gradle-plugin", version = "jreleaser-plugin-version" }
+jReleaserPlugin = { module = "org.jreleaser:jreleaser-gradle-plugin", version.ref = "jreleaser-plugin-version" }
 smithy-model = { module = "software.amazon.smithy:smithy-model", version.ref = "smithy-version" }
 smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-base", version.ref = "smithy-gradle-plugin-version" }
 
