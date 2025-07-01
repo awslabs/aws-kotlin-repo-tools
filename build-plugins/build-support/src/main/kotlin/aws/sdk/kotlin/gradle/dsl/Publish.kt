@@ -16,13 +16,11 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.jreleaser.model.Active
 
-// TODO: Refactor all of this into env vars ?
+// Props
 private const val SKIP_PUBLISH_PROP = "skipPublish"
-private const val SIGNING_KEY_PROP = "signingKey"
-private const val SIGNING_PASSWORD_PROP = "signingPassword"
 
+// Env vars
 private const val J_RELEASER_STAGE_ENV_VAR = "JRELEASER_MAVENCENTRAL_STAGE"
-private const val J_RELEASER_VERSION_ENV_VAR = "JRELEASER_PROJECT_VERSION"
 private const val J_RELEASER_GROUP_ENV_VAR = "JRELEASER_PROJECT_JAVA_GROUP_ID"
 private const val J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR = "JRELEASER_MAVENCENTRAL_USERNAME"
 private const val J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR = "JRELEASER_MAVENCENTRAL_TOKEN"
@@ -63,7 +61,7 @@ fun Project.skipPublishing() {
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
  * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") { // TODO: USE ENV VARS NOW ?
+fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
     val project = this
     apply(plugin = "maven-publish")
 
@@ -113,12 +111,15 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
+        val gpgSecretKey = System.getenv(J_RELEASER_GPG_SECRET_KEY_ENV_VAR)
+        val gpgPassphrase = System.getenv(J_RELEASER_GPG_PASSPHRASE_ENV_VAR)
+
+        if (!gpgPassphrase.isNullOrBlank() && !gpgSecretKey.isNullOrBlank()) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
-                    project.property(SIGNING_KEY_PROP) as String,
-                    project.property(SIGNING_PASSWORD_PROP) as String,
+                    gpgSecretKey,
+                    gpgPassphrase,
                 )
                 sign(publications)
             }
@@ -147,28 +148,31 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
  */
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
+
+    var missingEnvVars = false
     listOf(
         J_RELEASER_STAGE_ENV_VAR,
-        J_RELEASER_VERSION_ENV_VAR,
         J_RELEASER_GROUP_ENV_VAR,
         J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR,
         J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR,
         J_RELEASER_GPG_PASSPHRASE_ENV_VAR,
         J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR,
         J_RELEASER_GPG_SECRET_KEY_ENV_VAR,
-    ).map { variable ->
-        if (System.getenv(variable) == null) {
-            logger.warn("Skipping JReleaser configuration, missing required env var: $variable")
-            true
-        } else {
-            false
+    ).forEach {
+        if (System.getenv(it).isNullOrBlank()) {
+            missingEnvVars = true
+            logger.warn("Skipping JReleaser configuration, missing or blank required env var: $it")
         }
-    }.any { return }
+    }
+    if (missingEnvVars) return
+
+    // Get SDK version from gradle.properties
+    val sdkVersion: String by project
 
     apply(plugin = "org.jreleaser")
     extensions.configure<JReleaserExtension> {
         project {
-            version = System.getenv(J_RELEASER_VERSION_ENV_VAR)
+            version = sdkVersion
         }
         signing {
             active = Active.ALWAYS
@@ -180,7 +184,7 @@ fun Project.configureJReleaser() {
                     create("maven-central") {
                         active = Active.ALWAYS
                         url = "https://central.sonatype.com/api/v1/publisher"
-                        stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString()) // TODO: Commonize between this and above
+                        stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                     }
                 }
             }
@@ -195,7 +199,7 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     if (project.extra.has(SKIP_PUBLISH_PROP)) shouldPublish = false
 
     // Validate publishGroupName
-    val publishGroupName = System.getenv(J_RELEASER_GROUP_ENV_VAR) // TODO: Check if env var is available ?
+    val publishGroupName = System.getenv(J_RELEASER_GROUP_ENV_VAR)
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
