@@ -26,8 +26,8 @@ dependencies {
 
     implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
-    implementation("aws.sdk.kotlin:s3:1.4.+")
-    implementation("aws.sdk.kotlin:cloudwatch:1.4.+")
+    implementation(libs.aws.sdk.s3)
+    implementation(libs.aws.sdk.cloudwatch)
     testImplementation(libs.junit.jupiter)
 }
 
