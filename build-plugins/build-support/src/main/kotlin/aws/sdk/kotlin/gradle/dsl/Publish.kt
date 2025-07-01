@@ -16,17 +16,19 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.jreleaser.model.Active
 
-private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
+// TODO: Refactor all of this into env vars ?
 private const val SKIP_PUBLISH_PROP = "skipPublish"
 private const val SIGNING_KEY_PROP = "signingKey"
 private const val SIGNING_PASSWORD_PROP = "signingPassword"
 
+private const val J_RELEASER_STAGE_ENV_VAR = "JRELEASER_MAVENCENTRAL_STAGE"
+private const val J_RELEASER_VERSION_ENV_VAR = "JRELEASER_PROJECT_VERSION"
+private const val J_RELEASER_GROUP_ENV_VAR = "JRELEASER_PROJECT_JAVA_GROUP_ID"
 private const val J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR = "JRELEASER_MAVENCENTRAL_USERNAME"
 private const val J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR = "JRELEASER_MAVENCENTRAL_TOKEN"
+private const val J_RELEASER_GPG_PASSPHRASE_ENV_VAR = "JRELEASER_GPG_PASSPHRASE"
 private const val J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR = "JRELEASER_GPG_PUBLIC_KEY"
 private const val J_RELEASER_GPG_SECRET_KEY_ENV_VAR = "JRELEASER_GPG_SECRET_KEY"
-private const val J_RELEASER_GPG_PASSPHRASE_ENV_VAR = "JRELEASER_GPG_PASSPHRASE"
-private const val J_RELEASER_ENV_VAR = "JRELEASER_PROJECT_JAVA_GROUP_ID"
 
 // Names of publications that are allowed to be published
 private val ALLOWED_PUBLICATIONS = listOf(
@@ -146,13 +148,14 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
     listOf(
+        J_RELEASER_STAGE_ENV_VAR,
+        J_RELEASER_VERSION_ENV_VAR,
+        J_RELEASER_GROUP_ENV_VAR,
         J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR,
         J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR,
         J_RELEASER_GPG_PASSPHRASE_ENV_VAR,
-        J_RELEASER_GPG_SECRET_KEY_ENV_VAR,
         J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR,
-        J_RELEASER_ENV_VAR,
-        "JRELEASER_PROJECT_VERSION", // TODO: Keep ?
+        J_RELEASER_GPG_SECRET_KEY_ENV_VAR,
     ).map { variable ->
         if (System.getenv(variable) == null) {
             logger.warn("Skipping JReleaser configuration, missing required env var: $variable")
@@ -164,6 +167,9 @@ fun Project.configureJReleaser() {
 
     apply(plugin = "org.jreleaser")
     extensions.configure<JReleaserExtension> {
+        project {
+            version = System.getenv(J_RELEASER_VERSION_ENV_VAR)
+        }
         signing {
             active = Active.ALWAYS
             armored = true
@@ -173,9 +179,8 @@ fun Project.configureJReleaser() {
                 mavenCentral {
                     create("maven-central") {
                         active = Active.ALWAYS
-                        url = "https://central.sonatype.com/api/v1/publisher" // TODO: Use `gr jreleaserDeploy`
-//                        sign = true // TODO: Remove me if unnecessary
-                        stagingRepository("target/staging-deploy")
+                        url = "https://central.sonatype.com/api/v1/publisher"
+                        stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString()) // TODO: Commonize between this and above
                     }
                 }
             }
@@ -190,7 +195,7 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     if (project.extra.has(SKIP_PUBLISH_PROP)) shouldPublish = false
 
     // Validate publishGroupName
-    val publishGroupName = project.findProperty(PUBLISH_GROUP_NAME_PROP) as? String
+    val publishGroupName = System.getenv(J_RELEASER_GROUP_ENV_VAR) // TODO: Check if env var is available ?
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
