@@ -1,5 +1,6 @@
 [versions]
 aws-sdk-version = "1.4.116"
+kotlin-version = "2.2.0"
 ktlint = "1.3.0"
 nexus-plugin-version = "2.0.0"
 publish-plugin-version = "1.3.1"
@@ -20,4 +21,5 @@ smithy-gradle-base-plugin = { module = "software.amazon.smithy.gradle:smithy-bas
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-version" }
 
 [plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
 plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "publish-plugin-version"}
