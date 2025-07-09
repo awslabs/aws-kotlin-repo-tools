@@ -16,20 +16,21 @@ import org.gradle.plugins.signing.SigningExtension
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 
-// Props
-private const val SKIP_PUBLISH_PROP = "skipPublish"
+private object SystemProperties {
+    const val SKIP_PUBLISHING = "skipPublish"
 
-// Env vars
-private const val J_RELEASER_STAGE_ENV_VAR = "JRELEASER_MAVENCENTRAL_STAGE"
-private const val J_RELEASER_GROUP_ENV_VAR = "JRELEASER_PROJECT_JAVA_GROUP_ID"
-private const val J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR = "JRELEASER_MAVENCENTRAL_USERNAME"
-private const val J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR = "JRELEASER_MAVENCENTRAL_TOKEN"
-private const val J_RELEASER_GPG_PASSPHRASE_ENV_VAR = "JRELEASER_GPG_PASSPHRASE"
-private const val J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR = "JRELEASER_GPG_PUBLIC_KEY"
-private const val J_RELEASER_GPG_SECRET_KEY_ENV_VAR = "JRELEASER_GPG_SECRET_KEY"
+    object JReleaser {
+        const val STAGE = "jreleaser.mavencentral.stage"
+        const val GROUP_ID = "jreleaser.project.java.group.id"
+        const val MAVEN_CENTRAL_USERNAME = "jreleaser.mavencentral.username"
+        const val MAVEN_CENTRAL_TOKEN = "jreleaser.mavencentral.token"
+        const val GPG_PASSPHRASE = "jreleaser.gpg.passphrase"
+        const val GPG_PUBLIC_KEY = "jreleaser.gpg.public.key"
+        const val GPG_SECRET_KEY = "jreleaser.gpg.secret.key"
+    }
+}
 
-// Names of publications that are allowed to be published
-private val ALLOWED_PUBLICATIONS = listOf(
+private val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
     "jvm",
     "metadata",
@@ -52,7 +53,7 @@ private val ALLOWED_PUBLICATIONS = listOf(
  * Mark this project as excluded from publishing
  */
 fun Project.skipPublishing() {
-    extra.set(SKIP_PUBLISH_PROP, true)
+    extra.set(SystemProperties.SKIP_PUBLISHING, true)
 }
 
 /**
@@ -111,15 +112,12 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val gpgSecretKey = System.getenv(J_RELEASER_GPG_SECRET_KEY_ENV_VAR)
-        val gpgPassphrase = System.getenv(J_RELEASER_GPG_PASSPHRASE_ENV_VAR)
-
-        if (!gpgPassphrase.isNullOrBlank() && !gpgSecretKey.isNullOrBlank()) {
+        if (project.hasProperty(SystemProperties.JReleaser.GPG_SECRET_KEY) && project.hasProperty(SystemProperties.JReleaser.GPG_PASSPHRASE)) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
-                    gpgSecretKey,
-                    gpgPassphrase,
+                    project.property(SystemProperties.JReleaser.GPG_SECRET_KEY) as String,
+                    project.property(SystemProperties.JReleaser.GPG_PASSPHRASE) as String,
                 )
                 sign(publications)
             }
@@ -143,8 +141,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
     }
 
     /*
-    Creates a dummy JAR for version catalog publishing
-    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar to be present in the version catalog component
+    Creates a dummy JAR for the version catalog
+    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar for publishing
     https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-plugin
 
     Consuming published version catalogs with the dummy JAR still work
@@ -152,7 +150,7 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
      */
     tasks.register<Jar>("versionCatalogJar") {
         archiveBaseName.set("version-catalog")
-        from("gradle/libs.versions.toml")
+        from("gradle/libs.versions.toml") // Could be anything
     }
 }
 
@@ -162,22 +160,22 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
 
-    var missingEnvVars = false
+    var missingSystemProperties = false
     listOf(
-        J_RELEASER_STAGE_ENV_VAR,
-        J_RELEASER_GROUP_ENV_VAR,
-        J_RELEASER_MAVEN_CENTRAL_USERNAME_ENV_VAR,
-        J_RELEASER_MAVEN_CENTRAL_TOKEN_ENV_VAR,
-        J_RELEASER_GPG_PASSPHRASE_ENV_VAR,
-        J_RELEASER_GPG_PUBLIC_KEY_ENV_VAR,
-        J_RELEASER_GPG_SECRET_KEY_ENV_VAR,
+        SystemProperties.JReleaser.STAGE,
+        SystemProperties.JReleaser.GROUP_ID,
+        SystemProperties.JReleaser.MAVEN_CENTRAL_USERNAME,
+        SystemProperties.JReleaser.MAVEN_CENTRAL_TOKEN,
+        SystemProperties.JReleaser.GPG_PASSPHRASE,
+        SystemProperties.JReleaser.GPG_PUBLIC_KEY,
+        SystemProperties.JReleaser.GPG_SECRET_KEY,
     ).forEach {
-        if (System.getenv(it).isNullOrBlank()) {
-            missingEnvVars = true
+        if (!project.hasProperty(it)) {
+            missingSystemProperties = true
             logger.warn("Skipping JReleaser configuration, missing or blank required env var: $it")
         }
     }
-    if (missingEnvVars) return
+    if (missingSystemProperties) return
 
     // Get SDK version from gradle.properties
     val sdkVersion: String by project
@@ -209,14 +207,14 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     var shouldPublish = true
 
     // Check SKIP_PUBLISH_PROP
-    if (project.extra.has(SKIP_PUBLISH_PROP)) shouldPublish = false
+    if (project.extra.has(SystemProperties.SKIP_PUBLISHING)) shouldPublish = false
 
     // Validate publishGroupName
-    val publishGroupName = System.getenv(J_RELEASER_GROUP_ENV_VAR)
+    val publishGroupName = System.getenv(SystemProperties.JReleaser.GROUP_ID)
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish && ALLOWED_PUBLICATIONS.any { publication.name.equals(it, ignoreCase = true) }
+    shouldPublish = shouldPublish && ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) }
 
     return shouldPublish
 }
