@@ -20,7 +20,6 @@ private object SystemProperties {
     const val SKIP_PUBLISHING = "skipPublish"
 
     object JReleaser {
-        const val STAGE = "jreleaser.mavencentral.stage"
         const val GROUP_ID = "jreleaser.project.java.group.id"
         const val MAVEN_CENTRAL_USERNAME = "jreleaser.mavencentral.username"
         const val MAVEN_CENTRAL_TOKEN = "jreleaser.mavencentral.token"
@@ -162,7 +161,6 @@ fun Project.configureJReleaser() {
 
     var missingSystemProperties = false
     listOf(
-        SystemProperties.JReleaser.STAGE,
         SystemProperties.JReleaser.GROUP_ID,
         SystemProperties.JReleaser.MAVEN_CENTRAL_USERNAME,
         SystemProperties.JReleaser.MAVEN_CENTRAL_TOKEN,
@@ -172,7 +170,7 @@ fun Project.configureJReleaser() {
     ).forEach {
         if (!project.hasProperty(it)) {
             missingSystemProperties = true
-            logger.warn("Skipping JReleaser configuration, missing or blank required env var: $it")
+            logger.warn("Skipping JReleaser configuration, missing required system property: $it")
         }
     }
     if (missingSystemProperties) return
