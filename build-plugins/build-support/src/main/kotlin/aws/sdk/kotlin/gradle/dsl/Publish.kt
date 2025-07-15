@@ -146,15 +146,12 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 
     /*
     Creates a placeholder JAR for the version catalog
-    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar for publishing
+    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar
     https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-plugin
-
-    Consuming published version catalogs with the dummy JAR still work
-    https://docs.gradle.org/current/userguide/version_catalogs.html#sec:importing-published-catalog
      */
     tasks.register<Jar>("versionCatalogJar") {
         archiveBaseName.set("version-catalog")
-        from("gradle/libs.versions.toml") // Could be anything
+        from("gradle/libs.versions.toml")
     }
 }
 
