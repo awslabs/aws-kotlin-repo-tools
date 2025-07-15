@@ -16,16 +16,18 @@ import org.gradle.plugins.signing.SigningExtension
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
 
-private object SystemProperties {
+private object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
+}
 
+private object EnvironmentVariables {
     object JReleaser {
-        const val GROUP_ID = "jreleaser.project.java.group.id"
-        const val MAVEN_CENTRAL_USERNAME = "jreleaser.mavencentral.username"
-        const val MAVEN_CENTRAL_TOKEN = "jreleaser.mavencentral.token"
-        const val GPG_PASSPHRASE = "jreleaser.gpg.passphrase"
-        const val GPG_PUBLIC_KEY = "jreleaser.gpg.public.key"
-        const val GPG_SECRET_KEY = "jreleaser.gpg.secret.key"
+        const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
+        const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
+        const val MAVEN_CENTRAL_TOKEN = "JRELEASER_MAVENCENTRAL_TOKEN"
+        const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
+        const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
+        const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
     }
 }
 
@@ -52,7 +54,7 @@ private val ALLOWED_PUBLICATION_NAMES = setOf(
  * Mark this project as excluded from publishing
  */
 fun Project.skipPublishing() {
-    extra.set(SystemProperties.SKIP_PUBLISHING, true)
+    extra.set(Properties.SKIP_PUBLISHING, true)
 }
 
 /**
@@ -111,12 +113,15 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        if (project.hasProperty(SystemProperties.JReleaser.GPG_SECRET_KEY) && project.hasProperty(SystemProperties.JReleaser.GPG_PASSPHRASE)) {
+        val secretKey = System.getenv(EnvironmentVariables.JReleaser.GPG_SECRET_KEY)
+        val passphrase = System.getenv(EnvironmentVariables.JReleaser.GPG_PASSPHRASE)
+
+        if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
-                    project.property(SystemProperties.JReleaser.GPG_SECRET_KEY) as String,
-                    project.property(SystemProperties.JReleaser.GPG_PASSPHRASE) as String,
+                    secretKey,
+                    passphrase,
                 )
                 sign(publications)
             }
@@ -140,7 +145,7 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
     }
 
     /*
-    Creates a dummy JAR for the version catalog
+    Creates a placeholder JAR for the version catalog
     The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar for publishing
     https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-plugin
 
@@ -159,21 +164,20 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
 
-    var missingSystemProperties = false
+    var missingVariables = false
     listOf(
-        SystemProperties.JReleaser.GROUP_ID,
-        SystemProperties.JReleaser.MAVEN_CENTRAL_USERNAME,
-        SystemProperties.JReleaser.MAVEN_CENTRAL_TOKEN,
-        SystemProperties.JReleaser.GPG_PASSPHRASE,
-        SystemProperties.JReleaser.GPG_PUBLIC_KEY,
-        SystemProperties.JReleaser.GPG_SECRET_KEY,
+        EnvironmentVariables.JReleaser.MAVEN_CENTRAL_USERNAME,
+        EnvironmentVariables.JReleaser.MAVEN_CENTRAL_TOKEN,
+        EnvironmentVariables.JReleaser.GPG_PASSPHRASE,
+        EnvironmentVariables.JReleaser.GPG_PUBLIC_KEY,
+        EnvironmentVariables.JReleaser.GPG_SECRET_KEY,
     ).forEach {
-        if (!project.hasProperty(it)) {
-            missingSystemProperties = true
-            logger.warn("Skipping JReleaser configuration, missing required system property: $it")
+        if (System.getenv(it).isNullOrBlank()) {
+            missingVariables = true
+            logger.warn("Skipping JReleaser configuration, missing required environment variable: $it")
         }
     }
-    if (missingSystemProperties) return
+    if (missingVariables) return
 
     // Get SDK version from gradle.properties
     val sdkVersion: String by project
@@ -205,10 +209,10 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     var shouldPublish = true
 
     // Check SKIP_PUBLISH_PROP
-    if (project.extra.has(SystemProperties.SKIP_PUBLISHING)) shouldPublish = false
+    if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
-    // Validate publishGroupName
-    val publishGroupName = System.getenv(SystemProperties.JReleaser.GROUP_ID)
+    // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
+    val publishGroupName = System.getenv(EnvironmentVariables.JReleaser.GROUP_ID)
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
