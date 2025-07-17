@@ -21,14 +21,12 @@ private object Properties {
 }
 
 private object EnvironmentVariables {
-    object JReleaser {
-        const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
-        const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
-        const val MAVEN_CENTRAL_TOKEN = "JRELEASER_MAVENCENTRAL_TOKEN"
-        const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
-        const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
-        const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
-    }
+    const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
+    const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
+    const val MAVEN_CENTRAL_TOKEN = "JRELEASER_MAVENCENTRAL_TOKEN"
+    const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
+    const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
+    const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
 }
 
 private val ALLOWED_PUBLICATION_NAMES = setOf(
@@ -113,8 +111,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val secretKey = System.getenv(EnvironmentVariables.JReleaser.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.JReleaser.GPG_PASSPHRASE)
+        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
+        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
 
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
@@ -153,11 +151,11 @@ fun Project.configureJReleaser() {
 
     var missingVariables = false
     listOf(
-        EnvironmentVariables.JReleaser.MAVEN_CENTRAL_USERNAME,
-        EnvironmentVariables.JReleaser.MAVEN_CENTRAL_TOKEN,
-        EnvironmentVariables.JReleaser.GPG_PASSPHRASE,
-        EnvironmentVariables.JReleaser.GPG_PUBLIC_KEY,
-        EnvironmentVariables.JReleaser.GPG_SECRET_KEY,
+        EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
+        EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
+        EnvironmentVariables.GPG_PASSPHRASE,
+        EnvironmentVariables.GPG_PUBLIC_KEY,
+        EnvironmentVariables.GPG_SECRET_KEY,
     ).forEach {
         if (System.getenv(it).isNullOrBlank()) {
             missingVariables = true
@@ -206,7 +204,7 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
     // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
-    val publishGroupName = System.getenv(EnvironmentVariables.JReleaser.GROUP_ID)
+    val publishGroupName = System.getenv(EnvironmentVariables.GROUP_ID)
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
