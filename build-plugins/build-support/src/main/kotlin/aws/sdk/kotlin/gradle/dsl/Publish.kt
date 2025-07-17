@@ -143,16 +143,6 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
     }
-
-    /*
-    Creates a placeholder JAR for the version catalog
-    The `version-catalog` plugin doesn't generate one because it isn't needed but JReleaser requires a jar
-    https://docs.gradle.org/current/userguide/version_catalogs.html#sec:version-catalog-plugin
-     */
-    tasks.register<Jar>("versionCatalogJar") {
-        archiveBaseName.set("version-catalog")
-        from("gradle/libs.versions.toml")
-    }
 }
 
 /**
@@ -195,6 +185,13 @@ fun Project.configureJReleaser() {
                         active = Active.ALWAYS
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
+                        artifacts {
+                            artifactOverride {
+                                artifactId = "version-catalog"
+                                jar = false
+                                verifyPom = false // jreleaser doesn't understand toml packaging
+                            }
+                        }
                     }
                 }
             }
