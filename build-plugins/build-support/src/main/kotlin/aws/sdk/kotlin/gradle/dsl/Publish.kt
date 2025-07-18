@@ -5,7 +5,6 @@
 package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.verifyRootProject
-import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -14,17 +13,23 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
-import java.time.Duration
+import org.jreleaser.gradle.plugin.JReleaserExtension
+import org.jreleaser.model.Active
 
-private const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
-private const val SKIP_PUBLISH_PROP = "skipPublish"
-private const val SIGNING_KEY_PROP = "signingKey"
-private const val SIGNING_PASSWORD_PROP = "signingPassword"
-private const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
-private const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
+private object Properties {
+    const val SKIP_PUBLISHING = "skipPublish"
+}
 
-// Names of publications that are allowed to be published
-private val ALLOWED_PUBLICATIONS = listOf(
+private object EnvironmentVariables {
+    const val GROUP_ID = "JRELEASER_PROJECT_JAVA_GROUP_ID"
+    const val MAVEN_CENTRAL_USERNAME = "JRELEASER_MAVENCENTRAL_USERNAME"
+    const val MAVEN_CENTRAL_TOKEN = "JRELEASER_MAVENCENTRAL_TOKEN"
+    const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
+    const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
+    const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
+}
+
+private val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
     "jvm",
     "metadata",
@@ -47,7 +52,7 @@ private val ALLOWED_PUBLICATIONS = listOf(
  * Mark this project as excluded from publishing
  */
 fun Project.skipPublishing() {
-    extra.set(SKIP_PUBLISH_PROP, true)
+    extra.set(Properties.SKIP_PUBLISHING, true)
 }
 
 /**
@@ -106,12 +111,15 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        if (project.hasProperty(SIGNING_KEY_PROP) && project.hasProperty(SIGNING_PASSWORD_PROP)) {
+        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
+        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+
+        if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
                 useInMemoryPgpKeys(
-                    project.property(SIGNING_KEY_PROP) as String,
-                    project.property(SIGNING_PASSWORD_PROP) as String,
+                    secretKey,
+                    passphrase,
                 )
                 sign(publications)
             }
@@ -136,38 +144,55 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 }
 
 /**
- * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
+ * Configure JReleaser publishing plugin. This (conditionally) enables the `org.jreleaser` plugin and configures it.
  */
-fun Project.configureNexus(
-    nexusUrl: String = "https://ossrh-staging-api.central.sonatype.com/service/local/",
-    snapshotRepositoryUrl: String = "https://central.sonatype.com/repository/maven-snapshots/",
-) {
-    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
+fun Project.configureJReleaser() {
+    verifyRootProject { "JReleaser configuration must be applied to the root project only" }
 
-    val requiredProps = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
-    val doConfigure = requiredProps.all { project.hasProperty(it) }
-    if (!doConfigure) {
-        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
-        return
-    }
-
-    apply(plugin = "io.github.gradle-nexus.publish-plugin")
-    extensions.configure<NexusPublishExtension> {
-        val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
-        group = publishGroupName
-        packageGroup.set(publishGroupName)
-        repositories {
-            create("awsNexus") {
-                this.nexusUrl.set(uri(nexusUrl))
-                this.snapshotRepositoryUrl.set(uri(snapshotRepositoryUrl))
-                username.set(project.property(SONATYPE_USERNAME_PROP) as String)
-                password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
-            }
+    var missingVariables = false
+    listOf(
+        EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
+        EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
+        EnvironmentVariables.GPG_PASSPHRASE,
+        EnvironmentVariables.GPG_PUBLIC_KEY,
+        EnvironmentVariables.GPG_SECRET_KEY,
+    ).forEach {
+        if (System.getenv(it).isNullOrBlank()) {
+            missingVariables = true
+            logger.warn("Skipping JReleaser configuration, missing required environment variable: $it")
         }
+    }
+    if (missingVariables) return
 
-        transitionCheckOptions {
-            maxRetries.set(180)
-            delayBetween.set(Duration.ofSeconds(10))
+    // Get SDK version from gradle.properties
+    val sdkVersion: String by project
+
+    apply(plugin = "org.jreleaser")
+    extensions.configure<JReleaserExtension> {
+        project {
+            version = sdkVersion
+        }
+        signing {
+            active = Active.ALWAYS
+            armored = true
+        }
+        deploy {
+            maven {
+                mavenCentral {
+                    create("maven-central") {
+                        active = Active.ALWAYS
+                        url = "https://central.sonatype.com/api/v1/publisher"
+                        stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
+                        artifacts {
+                            artifactOverride {
+                                artifactId = "version-catalog"
+                                jar = false
+                                verifyPom = false // jreleaser doesn't understand toml packaging
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -176,14 +201,14 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     var shouldPublish = true
 
     // Check SKIP_PUBLISH_PROP
-    if (project.extra.has(SKIP_PUBLISH_PROP)) shouldPublish = false
+    if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
-    // Validate publishGroupName
-    val publishGroupName = project.findProperty(PUBLISH_GROUP_NAME_PROP) as? String
+    // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
+    val publishGroupName = System.getenv(EnvironmentVariables.GROUP_ID)
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish && ALLOWED_PUBLICATIONS.any { publication.name.equals(it, ignoreCase = true) }
+    shouldPublish = shouldPublish && ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) }
 
     return shouldPublish
 }
