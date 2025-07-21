@@ -176,6 +176,9 @@ fun Project.configureJReleaser() {
             active = Active.ALWAYS
             armored = true
         }
+        announce {
+            active = Active.NEVER
+        }
         deploy {
             maven {
                 mavenCentral {
