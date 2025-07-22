@@ -172,10 +172,29 @@ fun Project.configureJReleaser() {
         project {
             version = sdkVersion
         }
+
         signing {
             active = Active.ALWAYS
             armored = true
         }
+
+        // Used for creating a tagged release, uploading files and generating changelogs.
+        // In the future we can set this up to push release tags to GitHub, but for now it's
+        // set up to do nothing.
+        // https://jreleaser.org/guide/latest/reference/release/index.html
+        release {
+            generic {
+                enabled = true
+                skipRelease = true
+            }
+        }
+
+        // Used to announce a release to configured announcers.
+        // https://jreleaser.org/guide/latest/reference/announce/index.html
+        announce {
+            active = Active.NEVER
+        }
+
         deploy {
             maven {
                 mavenCentral {
