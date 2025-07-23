@@ -117,8 +117,8 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY).takeIf { it.isNotBlank() } ?: findProperty("signing.key") as String?
+        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE).takeIf { it.isNotBlank() } ?: findProperty("signing.password") as String?
 
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
