@@ -18,7 +18,8 @@ import org.jetbrains.kotlin.konan.target.HostManager
 public fun Project.configureIosSimulatorTasks() {
     if (!HostManager.hostIsMac) return
 
-    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 15"
+    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 16"
+    println("Configuring iOS simulator with device $simulatorDeviceName")
     val xcrun = "/usr/bin/xcrun"
 
     val bootTask = rootProject.tasks.maybeCreate("bootIosSimulatorDevice", Exec::class.java).apply {
