@@ -215,6 +215,8 @@ fun Project.configureJReleaser() {
                                 verifyPom = false // jreleaser doesn't understand toml packaging
                             }
                         }
+                        maxRetries = 100
+                        retryDelay = 60 // seconds
                     }
                 }
             }
