@@ -73,7 +73,7 @@ fun Project.skipPublishing() {
 fun Project.configurePublishing(
     repoName: String,
     githubOrganization: String = "awslabs",
-    useNexusPublishPlugin: Boolean = false, // TODO:
+    useNexusPublishPlugin: Boolean = true,
 ) {
     val project = this
     apply(plugin = "maven-publish")
