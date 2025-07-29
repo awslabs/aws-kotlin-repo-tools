@@ -5,6 +5,7 @@
 package aws.sdk.kotlin.gradle.dsl
 
 import aws.sdk.kotlin.gradle.util.verifyRootProject
+import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
@@ -15,9 +16,17 @@ import org.gradle.plugins.signing.Sign
 import org.gradle.plugins.signing.SigningExtension
 import org.jreleaser.gradle.plugin.JReleaserExtension
 import org.jreleaser.model.Active
+import java.time.Duration
 
 private object Properties {
     const val SKIP_PUBLISHING = "skipPublish"
+
+    // Nexus publish plugin properties
+    const val PUBLISH_GROUP_NAME_PROP = "publishGroupName"
+    const val SIGNING_KEY_PROP = "signingKey"
+    const val SIGNING_PASSWORD_PROP = "signingPassword"
+    const val SONATYPE_USERNAME_PROP = "sonatypeUsername"
+    const val SONATYPE_PASSWORD_PROP = "sonatypePassword"
 }
 
 private object EnvironmentVariables {
@@ -61,7 +70,11 @@ fun Project.skipPublishing() {
  * @param repoName the repository name (e.g. `smithy-kotlin`, `aws-sdk-kotlin`, etc)
  * @param githubOrganization the name of the GitHub organization that [repoName] is located in
  */
-fun Project.configurePublishing(repoName: String, githubOrganization: String = "awslabs") {
+fun Project.configurePublishing(
+    repoName: String,
+    githubOrganization: String = "awslabs",
+    useNexusPublishPlugin: Boolean = false, // TODO:
+) {
     val project = this
     apply(plugin = "maven-publish")
 
@@ -111,8 +124,17 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
             }
         }
 
-        val secretKey = System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
-        val passphrase = System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+        val secretKey = if (useNexusPublishPlugin) {
+            project.property(Properties.SIGNING_KEY_PROP) as String
+        } else {
+            System.getenv(EnvironmentVariables.GPG_SECRET_KEY)
+        }
+
+        val passphrase = if (useNexusPublishPlugin) {
+            project.property(Properties.SIGNING_PASSWORD_PROP) as String
+        } else {
+            System.getenv(EnvironmentVariables.GPG_PASSPHRASE)
+        }
 
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
@@ -218,6 +240,46 @@ fun Project.configureJReleaser() {
     }
 }
 
+/**
+ * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
+ */
+fun Project.configureNexus(
+    nexusUrl: String = "https://ossrh-staging-api.central.sonatype.com/service/local/",
+    snapshotRepositoryUrl: String = "https://central.sonatype.com/repository/maven-snapshots/",
+) {
+    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
+
+    val requiredProps = listOf(
+        Properties.SONATYPE_USERNAME_PROP,
+        Properties.SONATYPE_PASSWORD_PROP,
+        Properties.PUBLISH_GROUP_NAME_PROP,
+    )
+    val doConfigure = requiredProps.all { project.hasProperty(it) }
+    if (!doConfigure) {
+        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
+        return
+    }
+
+    apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    extensions.configure<NexusPublishExtension> {
+        val publishGroupName = project.property(Properties.PUBLISH_GROUP_NAME_PROP) as String
+        group = publishGroupName
+        packageGroup.set(publishGroupName)
+        repositories {
+            create("awsNexus") {
+                this.nexusUrl.set(uri(nexusUrl))
+                this.snapshotRepositoryUrl.set(uri(snapshotRepositoryUrl))
+                username.set(project.property(Properties.SONATYPE_USERNAME_PROP) as String)
+                password.set(project.property(Properties.SONATYPE_PASSWORD_PROP) as String)
+            }
+        }
+
+        transitionCheckOptions {
+            maxRetries.set(180)
+            delayBetween.set(Duration.ofSeconds(10))
+        }
+    }
+}
 private fun isAvailableForPublication(project: Project, publication: MavenPublication): Boolean {
     var shouldPublish = true
 
