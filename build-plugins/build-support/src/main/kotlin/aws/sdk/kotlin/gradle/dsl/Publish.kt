@@ -165,7 +165,7 @@ fun Project.configureJReleaser() {
     ).forEach {
         if (System.getenv(it).isNullOrBlank()) {
             missingVariables = true
-            logger.warn("Skipping JReleaser configuration, missing required environment variable: $it")
+            logger.info("Skipping JReleaser configuration, missing required environment variable: $it")
         }
     }
     if (missingVariables) return
