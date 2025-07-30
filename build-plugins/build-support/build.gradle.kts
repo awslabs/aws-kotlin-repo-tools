@@ -25,6 +25,7 @@ dependencies {
     }
 
     implementation(libs.jReleaserPlugin)
+    implementation(libs.nexusPublishPlugin)
     compileOnly(gradleApi())
     implementation(libs.aws.sdk.s3)
     implementation(libs.aws.sdk.cloudwatch)
