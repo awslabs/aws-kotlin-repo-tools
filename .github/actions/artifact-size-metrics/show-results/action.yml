@@ -1,6 +1,10 @@
 name: Artifact Size Metrics - Show Results
 description: Posts a new artifact analysis comment on the PR
-
+inputs:
+  working-directory:
+    required: false
+    description: The working directory to use for reading the previously-generated report.
+    default: ''
 runs:
   using: "composite"
   steps:
@@ -8,6 +12,11 @@ runs:
       uses: actions/github-script@v7
       with:
         script: |
+          const workingDirectory = '${{ inputs.working-directory }}'
+          if (workingDirectory) {
+            process.chdir(workingDirectory)
+          }
+
           const fs = require('node:fs')
           const prNumber = context.issue.number ?? process.env.SDK_PR
 
