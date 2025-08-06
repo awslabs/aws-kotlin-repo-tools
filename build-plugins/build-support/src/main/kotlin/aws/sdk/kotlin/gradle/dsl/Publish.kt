@@ -144,6 +144,43 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
 }
 
 /**
+ * Configure nexus publishing plugin. This (conditionally) enables the `gradle-nexus.publish-plugin` and configures it.
+ */
+fun Project.configureNexus(
+    nexusUrl: String = "https://ossrh-staging-api.central.sonatype.com/service/local/",
+    snapshotRepositoryUrl: String = "https://central.sonatype.com/repository/maven-snapshots/",
+) {
+    verifyRootProject { "Kotlin SDK nexus configuration must be applied to the root project only" }
+
+    val requiredProps = listOf(SONATYPE_USERNAME_PROP, SONATYPE_PASSWORD_PROP, PUBLISH_GROUP_NAME_PROP)
+    val doConfigure = requiredProps.all { project.hasProperty(it) }
+    if (!doConfigure) {
+        logger.info("skipping nexus configuration, missing one or more required properties: $requiredProps")
+        return
+    }
+
+    apply(plugin = "io.github.gradle-nexus.publish-plugin")
+    extensions.configure<NexusPublishExtension> {
+        val publishGroupName = project.property(PUBLISH_GROUP_NAME_PROP) as String
+        group = publishGroupName
+        packageGroup.set(publishGroupName)
+        repositories {
+            create("awsNexus") {
+                this.nexusUrl.set(uri(nexusUrl))
+                this.snapshotRepositoryUrl.set(uri(snapshotRepositoryUrl))
+                username.set(project.property(SONATYPE_USERNAME_PROP) as String)
+                password.set(project.property(SONATYPE_PASSWORD_PROP) as String)
+            }
+        }
+
+        transitionCheckOptions {
+            maxRetries.set(180)
+            delayBetween.set(Duration.ofSeconds(10))
+        }
+    }
+}
+
+/**
  * Configure JReleaser publishing plugin. This (conditionally) enables the `org.jreleaser` plugin and configures it.
  */
 fun Project.configureJReleaser() {
