@@ -48,6 +48,7 @@ private val ALLOWED_PUBLICATION_NAMES = setOf(
     "linuxX64",
     "macosArm64",
     "macosX64",
+    "mingwX64",
 
     "metadata",
     "bom",
