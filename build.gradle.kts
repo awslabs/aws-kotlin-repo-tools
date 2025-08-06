@@ -13,6 +13,11 @@ if (releaseVersion == null) logger.warn("no release version set")
 val s3Url = propertyOrEnv("release.s3.url", "RELEASE_S3_URL")
 if (s3Url == null) logger.warn("S3 repository not configured, missing S3 url")
 
+allprojects {
+    // Enables running `./gradlew allDeps` to get a comprehensive list of dependencies for every subproject
+    tasks.register<DependencyReportTask>("allDeps") { }
+}
+
 subprojects {
     group = "aws.sdk.kotlin.gradle"
     version = releaseVersion ?: "0.0.1"
