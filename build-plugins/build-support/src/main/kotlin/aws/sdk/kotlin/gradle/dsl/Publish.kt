@@ -38,18 +38,10 @@ private object EnvironmentVariables {
     const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
 }
 
-private val ALLOWED_PUBLICATION_NAMES = setOf(
+internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "common",
     "jvm",
     "kotlinMultiplatform",
-    "iosArm64",
-    "iosX64",
-    "linuxArm64",
-    "linuxX64",
-    "macosArm64",
-    "macosX64",
-    "mingwX64",
-
     "metadata",
     "bom",
     "versionCatalog",
@@ -62,6 +54,22 @@ private val ALLOWED_PUBLICATION_NAMES = setOf(
     "dynamodb-mapper-schema-generator-plugin",
     "dynamodb-mapper-schema-codegen",
     "dynamodb-mapper-schema-generatorPluginMarkerMaven",
+)
+
+internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
+    "iosArm64",
+    "iosX64",
+    "linuxArm64",
+    "linuxX64",
+    "macosArm64",
+    "macosX64",
+    "mingwX64",
+)
+
+// TODO Refactor to support project names _or_ publication group names.
+// aws-crt-kotlin is not published with a group name, so we need to check project names instead.
+private val KOTLIN_NATIVE_PROJECT_NAMES = setOf(
+    "aws-crt-kotlin",
 )
 
 /**
@@ -367,7 +375,7 @@ fun Project.configureJReleaser() {
     }
 }
 
-private fun isAvailableForPublication(project: Project, publication: MavenPublication): Boolean {
+internal fun isAvailableForPublication(project: Project, publication: MavenPublication): Boolean {
     var shouldPublish = true
 
     // Check SKIP_PUBLISH_PROP
@@ -378,7 +386,10 @@ private fun isAvailableForPublication(project: Project, publication: MavenPublic
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish && ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) }
+    shouldPublish = shouldPublish && (
+        ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } || // standard publication
+        (KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && KOTLIN_NATIVE_PROJECT_NAMES.any { project.name.equals(it, ignoreCase = true) }) // Kotlin/Native publication
+    )
 
     return shouldPublish
 }

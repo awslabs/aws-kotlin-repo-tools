@@ -29,7 +29,8 @@ dependencies {
     compileOnly(gradleApi())
     implementation(libs.aws.sdk.s3)
     implementation(libs.aws.sdk.cloudwatch)
-    testImplementation(libs.junit.jupiter)
+    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 gradlePlugin {
