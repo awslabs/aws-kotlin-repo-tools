@@ -386,10 +386,12 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
     shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
 
     // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish && (
-        ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } || // standard publication
-        (KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && KOTLIN_NATIVE_PROJECT_NAMES.any { project.name.equals(it, ignoreCase = true) }) // Kotlin/Native publication
-    )
+    shouldPublish = shouldPublish &&
+        (
+            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } ||
+                // standard publication
+                (KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && KOTLIN_NATIVE_PROJECT_NAMES.any { project.name.equals(it, ignoreCase = true) }) // Kotlin/Native publication
+            )
 
     return shouldPublish
 }

@@ -4,11 +4,11 @@
  */
 package aws.sdk.kotlin.gradle.dsl
 
-import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.testfixtures.ProjectBuilder
+import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
