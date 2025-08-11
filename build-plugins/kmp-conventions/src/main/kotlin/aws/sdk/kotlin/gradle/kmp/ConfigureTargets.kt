@@ -115,7 +115,11 @@ fun Project.configureKmpTargets() {
                 kmpExt.apply { configureWindows() }
             }
             if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
-                kmpExt.apply { configureLinux() }
+                if (group == "aws.sdk.kotlin.crt") { // TODO Remove special-casing once K/N is released across the entire project
+                    kmpExt.apply { configureLinux() }
+                } else {
+                    kmpExt.apply { configureDummyLinux() }
+                }
             }
         }
 
@@ -160,7 +164,22 @@ fun Project.configureJvm() {
 fun Project.configureLinux() {
     kotlin {
         linuxX64()
-        linuxArm64() // FIXME - Okio missing arm64 target support
+        linuxArm64() // FIXME - Okio missing arm64 target support. Added as experimental in https://square.github.io/okio/changelog/#version-360
+    }
+}
+
+/**
+ * Dummy configuration for projects which need to declare Linux but not actually use them.
+ * This is useful for projects that do not have any native targets but still need to be a KMP build (Dokka in particular).
+ */
+fun Project.configureDummyLinux() {
+    kotlin {
+        linuxX64 {
+            // FIXME enable tests once the target is fully implemented
+            tasks.named("linuxX64Test") {
+                enabled = false
+            }
+        }
     }
 }
 
