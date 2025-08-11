@@ -160,7 +160,22 @@ fun Project.configureJvm() {
 fun Project.configureLinux() {
     kotlin {
         linuxX64()
-        linuxArm64() // FIXME - Okio missing arm64 target support
+        linuxArm64() // FIXME - Okio missing arm64 target support. Added as experimental in https://square.github.io/okio/changelog/#version-360
+    }
+}
+
+/**
+ * Dummy configuration for Linux which declares but does not actually configure any targets.
+ * This is useful for projects that do not have any native targets but still need to be a KMP build (Dokka in particular).
+ */
+fun Project.configureDummyLinux() {
+    kotlin {
+        linuxX64 {
+            // FIXME enable tests once the target is fully implemented
+            tasks.named("linuxX64Test") {
+                enabled = false
+            }
+        }
     }
 }
 
