@@ -10,6 +10,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.konan.target.HostManager
 
+private val DEFAULT_SIMULATOR_DEVICE_NAME = "iPhone 16"
+
 /**
  * Disables standalone mode in simulator tests since it causes issues with TLS.
  * This means we need to manage the simulator state ourselves (booting, shutting down).
@@ -18,7 +20,7 @@ import org.jetbrains.kotlin.konan.target.HostManager
 public fun Project.configureIosSimulatorTasks() {
     if (!HostManager.hostIsMac) return
 
-    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: "iPhone 16"
+    val simulatorDeviceName = project.findProperty("iosSimulatorDevice") as? String ?: DEFAULT_SIMULATOR_DEVICE_NAME
     val xcrun = "/usr/bin/xcrun"
 
     val bootTask = rootProject.tasks.maybeCreate("bootIosSimulatorDevice", Exec::class.java).apply {
