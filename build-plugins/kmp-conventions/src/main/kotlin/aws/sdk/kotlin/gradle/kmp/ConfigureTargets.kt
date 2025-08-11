@@ -115,7 +115,11 @@ fun Project.configureKmpTargets() {
                 kmpExt.apply { configureWindows() }
             }
             if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
-                kmpExt.apply { configureLinux() }
+                if (group == "aws.sdk.kotlin.crt") {
+                    kmpExt.apply { configureLinux() }
+                } else {
+                    kmpExt.apply { configureDummyLinux() }
+                }
             }
         }
 
@@ -165,7 +169,7 @@ fun Project.configureLinux() {
 }
 
 /**
- * Dummy configuration for Linux which declares but does not actually configure any targets.
+ * Dummy configuration for projects which need to declare Linux but not actually use them.
  * This is useful for projects that do not have any native targets but still need to be a KMP build (Dokka in particular).
  */
 fun Project.configureDummyLinux() {
