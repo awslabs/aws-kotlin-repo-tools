@@ -23,6 +23,11 @@ inputs:
       commands. The post-job step removes the PAT.
     default: ${{ github.token }}
     required: false
+  submodules:
+    description: >
+      Whether to checkout submodules. `true` to checkout submodules or `recursive` to recursively checkout submodules
+    default: 'false'
+    required: 'false'
 
 runs:
   using: composite
@@ -44,7 +49,9 @@ runs:
           echo "ref=$ref" >> "$GITHUB_OUTPUT"
         else
           baseref="main"
-          if [ -n "$GITHUB_BASE_REF" ]; then
+          if [[ "$ref" == kn-* ]] && git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "kn-main"; then
+            baseref="kn-main"
+          elif [ -n "$GITHUB_BASE_REF" ]; then
             echo "attempting GH base ref: $GITHUB_BASE_REF"
             if git ls-remote --exit-code --heads "https://github.com/$REPOSITORY.git" "$GITHUB_BASE_REF"; then
               baseref="$GITHUB_BASE_REF"
@@ -61,3 +68,4 @@ runs:
         repository: ${{ inputs.repository }}
         ref: ${{ steps.repo.outputs.ref }}
         token: ${{ inputs.token }}
+        submodules: ${{ inputs.submodules }}
