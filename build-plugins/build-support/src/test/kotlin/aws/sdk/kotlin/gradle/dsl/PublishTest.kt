@@ -38,7 +38,7 @@ class PublishTest {
                     version = "1.2.3"
                     artifactId = "aws-crt-kotlin"
                 }
-                assertTrue(isAvailableForPublication(project, nativeRuntimePublication))
+                assertFalse(isAvailableForPublication(project, nativeRuntimePublication))
             }
         }
     }
