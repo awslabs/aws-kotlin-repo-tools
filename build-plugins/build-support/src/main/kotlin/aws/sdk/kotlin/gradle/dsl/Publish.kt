@@ -68,7 +68,7 @@ internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
 
 // TODO Refactor to support project names _or_ publication group names.
 // aws-crt-kotlin is not published with a group name, so we need to check project names instead.
-private val KOTLIN_NATIVE_PROJECT_NAMES = setOf(
+private val KOTLIN_NATIVE_PROJECT_NAMES = setOf<String>(
     // "aws-crt-kotlin", // TODO Re-enable when ready to publish aws-crt-kotlin Kotlin/Native artifacts
 )
 
