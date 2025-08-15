@@ -95,7 +95,6 @@ class SmithyBuildPlugin : Plugin<Project> {
         listOf(
             "smithyCli",
             "smithyBuild",
-            "runtimeClasspath",
         ).map(configurations::maybeCreate)
 
         tasks.register<SmithyBuildTask>(TASK_GENERATE_SMITHY_PROJECTIONS) {
