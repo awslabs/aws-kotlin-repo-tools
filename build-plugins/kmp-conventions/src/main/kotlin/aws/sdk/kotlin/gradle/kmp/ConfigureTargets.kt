@@ -33,7 +33,7 @@ val Project.hasCommon: Boolean get() = files.any {
 
 // always configured with common
 val Project.hasJvm: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "jvm" }
-val Project.hasNative: Boolean get() = hasCommon || files.any { it.name == "native" }
+val Project.hasNative: Boolean get() = hasCommon || hasJvmAndNative || files.any { it.name == "native" }
 val Project.hasJs: Boolean get() = hasCommon || files.any { it.name == "js" }
 val Project.hasJvmAndNative: Boolean get() = hasCommon || files.any { it.name == "jvmAndNative" }
 
