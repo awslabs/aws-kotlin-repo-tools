@@ -19,7 +19,7 @@ repositories {
 dependencies {
     implementation(libs.smithy.model)
     implementation(libs.smithy.gradle.base.plugin)
-    testImplementation(libs.junit.jupiter)
+    testImplementation(kotlin("test"))
 }
 
 gradlePlugin {

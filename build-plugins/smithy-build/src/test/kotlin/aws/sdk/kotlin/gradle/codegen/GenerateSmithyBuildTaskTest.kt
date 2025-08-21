@@ -10,11 +10,10 @@ import aws.sdk.kotlin.gradle.codegen.tasks.GenerateSmithyBuild
 import aws.sdk.kotlin.gradle.codegen.tasks.json
 import org.gradle.kotlin.dsl.create
 import org.gradle.testfixtures.ProjectBuilder
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import software.amazon.smithy.model.node.Node
-import java.io.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class GenerateSmithyBuildTaskTest {
     @Test
