@@ -397,7 +397,8 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
     // Validate publication name is allowed to be published
     shouldPublish = shouldPublish &&
         (
-            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } || // standard publication
+            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } ||
+                // standard publication
                 (ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && (overrideGroupNameValidation || ALLOWED_KOTLIN_NATIVE_GROUP_NAMES.any { publication.groupId.equals(it, ignoreCase = true) })) // Kotlin/Native publication
             )
 
