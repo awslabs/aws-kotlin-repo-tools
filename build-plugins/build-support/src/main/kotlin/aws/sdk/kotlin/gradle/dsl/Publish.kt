@@ -76,7 +76,7 @@ private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
 
 // Optional override to the above set.
 // Used to support local development where you want to run publishToMavenLocal in smithy-kotlin, aws-sdk-kotlin.
-internal const val OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION = "aws.kotlin.native.overridePublication"
+internal const val OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION = "aws.kotlin.native.allowPublication"
 
 /**
  * Mark this project as excluded from publishing
