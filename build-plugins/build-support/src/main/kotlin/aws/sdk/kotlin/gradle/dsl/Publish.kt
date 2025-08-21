@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.dsl
 
+import aws.sdk.kotlin.gradle.util.getOrNull
 import aws.sdk.kotlin.gradle.util.verifyRootProject
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Project
@@ -56,9 +57,11 @@ internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "dynamodb-mapper-schema-generatorPluginMarkerMaven",
 )
 
-internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
+internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
     "iosArm64",
+    "iosSimulatorArm64",
     "iosX64",
+
     "linuxArm64",
     "linuxX64",
     "macosArm64",
@@ -66,11 +69,14 @@ internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
     "mingwX64",
 )
 
-// TODO Refactor to support project names _or_ publication group names.
-// aws-crt-kotlin is not published with a group name, so we need to check project names instead.
-private val KOTLIN_NATIVE_PROJECT_NAMES = setOf(
-    "aws-crt-kotlin",
+// Group names which are allowed to publish K/N artifacts
+private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
+    "aws.sdk.kotlin.crt",
 )
+
+// Optional override to the above set.
+// Used to support local development where you want to run publishToMavenLocal in smithy-kotlin, aws-sdk-kotlin.
+internal const val OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION = "aws.kotlin.native.overridePublication"
 
 /**
  * Mark this project as excluded from publishing
@@ -381,16 +387,18 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
     // Check SKIP_PUBLISH_PROP
     if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
-    // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
+    // Only publish publications with the configured group from JReleaser, or everything if JReleaser group is not configured
     val publishGroupName = System.getenv(EnvironmentVariables.GROUP_ID)
-    shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
+    shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.equals(publishGroupName, ignoreCase = true))
+
+    val overrideGroupNameValidation = project.extra.getOrNull<String>(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION) == "true"
+    if (overrideGroupNameValidation) println("Overriding group name validation for Kotlin/Native publications")
 
     // Validate publication name is allowed to be published
     shouldPublish = shouldPublish &&
         (
-            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } ||
-                // standard publication
-                (KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && KOTLIN_NATIVE_PROJECT_NAMES.any { project.name.equals(it, ignoreCase = true) }) // Kotlin/Native publication
+            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } || // standard publication
+                (ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && (overrideGroupNameValidation || ALLOWED_KOTLIN_NATIVE_GROUP_NAMES.any { publication.groupId.equals(it, ignoreCase = true) })) // Kotlin/Native publication
             )
 
     return shouldPublish
