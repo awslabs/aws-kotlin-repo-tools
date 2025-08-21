@@ -2,6 +2,8 @@
  * Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     `maven-publish`
     alias(libs.plugins.kotlin.jvm) apply false
@@ -16,6 +18,11 @@ if (s3Url == null) logger.warn("S3 repository not configured, missing S3 url")
 allprojects {
     // Enables running `./gradlew allDeps` to get a comprehensive list of dependencies for every subproject
     tasks.register<DependencyReportTask>("allDeps") { }
+    tasks.withType<KotlinCompile> {
+        compilerOptions {
+            allWarningsAsErrors = true
+        }
+    }
 }
 
 subprojects {
