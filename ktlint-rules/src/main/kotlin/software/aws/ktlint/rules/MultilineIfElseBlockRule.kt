@@ -10,7 +10,6 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 
 class MultilineIfElseBlockRule : Rule(RuleId("multiline-if-else-block"), About()) {
-    @Deprecated("Marked for removal in Ktlint 2.0. Please implement interface RuleAutocorrectApproveHandler.")
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,

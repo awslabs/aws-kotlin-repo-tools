@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtReturnExpression
 
 class ExpressionBodyRule : Rule(RuleId("expression-body"), About()) {
-    @Deprecated("Marked for removal in Ktlint 2.0. Please implement interface RuleAutocorrectApproveHandler.")
     override fun beforeVisitChildNodes(
         node: ASTNode,
         autoCorrect: Boolean,

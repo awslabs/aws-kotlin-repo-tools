@@ -8,7 +8,7 @@ import aws.sdk.kotlin.gradle.codegen.dsl.SmithyBuildPluginSettings
 import aws.sdk.kotlin.gradle.codegen.dsl.SmithyProjection
 import aws.sdk.kotlin.gradle.codegen.tasks.GenerateSmithyBuild
 import aws.sdk.kotlin.gradle.codegen.tasks.json
-import org.gradle.kotlin.dsl.register
+import org.gradle.kotlin.dsl.create
 import org.gradle.testfixtures.ProjectBuilder
 import software.amazon.smithy.model.node.Node
 import kotlin.test.Test
@@ -19,7 +19,7 @@ class GenerateSmithyBuildTaskTest {
     @Test
     fun testDefaults() {
         val testProj = ProjectBuilder.builder().build()
-        val task = testProj.tasks.register<GenerateSmithyBuild>("generateSmithyBuild").get()
+        val task = testProj.tasks.create<GenerateSmithyBuild>("generateSmithyBuild")
         assertEquals(task.generatedOutput.get().asFile.path, testProj.layout.buildDirectory.file("smithy-build.json").get().asFile.path)
     }
 
@@ -42,9 +42,9 @@ class GenerateSmithyBuildTaskTest {
                 plugins["plugin1"] = testPlugin
             },
         )
-        val task = testProj.tasks.register<GenerateSmithyBuild>("generateSmithyBuild") {
+        val task = testProj.tasks.create<GenerateSmithyBuild>("generateSmithyBuild") {
             smithyBuildConfig.set(smithyProjections.json)
-        }.get()
+        }
 
         task.generateSmithyBuild()
         assertTrue(task.generatedOutput.get().asFile.exists())
