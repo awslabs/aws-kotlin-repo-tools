@@ -384,14 +384,17 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
 
     // Allow overriding K/N publications for local development
     val overrideGroupNameValidation = project.extra.getOrNull<String>(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION) == "true"
-    if (overrideGroupNameValidation) println("Overriding group name validation for Kotlin/Native publications")
 
     // Validate publication name
     if (publication.name in ALLOWED_PUBLICATION_NAMES) {
         // Standard publication
     } else if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
         // Kotlin/Native publication
-        shouldPublish = shouldPublish && (overrideGroupNameValidation || publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES)
+        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+            println("Overriding K/N publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
+        } else {
+            shouldPublish = shouldPublish && publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES
+        }
     } else {
         shouldPublish = false
     }
