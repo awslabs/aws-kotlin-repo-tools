@@ -370,7 +370,6 @@ fun Project.configureJReleaser() {
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
-                            verifyPom = false // Sonatype already verifies POMs, and JReleaser's validator is not compatible with TOML or klib types.
                             artifactOverride {
                                 artifactId = "version-catalog"
                                 jar = false // Version catalogs don't produce a JAR
