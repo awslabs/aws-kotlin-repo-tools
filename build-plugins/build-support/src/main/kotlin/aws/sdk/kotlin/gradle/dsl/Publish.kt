@@ -319,18 +319,27 @@ fun Project.configureJReleaser() {
         EnvironmentVariables.GENERIC_TOKEN,
     )
 
-    if (!requiredVariables.all { System.getenv(it).isNotBlank() }) {
-        logger.info("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
+    if (!requiredVariables.all { !System.getenv(it).isNullOrBlank() }) {
+        logger.warn("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
         return
     }
 
-    // Get SDK version from gradle.properties
-    val sdkVersion: String by project
+    // Collect a set of native artifact IDs from every project
+    val nativeArtifactIds = providers.provider {
+        allprojects.flatMap {
+            it.extensions.findByType(PublishingExtension::class.java)
+                ?.publications
+                ?.withType(MavenPublication::class.java)
+                ?.filter { it.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES }
+                ?.map { it.artifactId }
+                ?: emptySet()
+        }.toSet()
+    }
 
     apply(plugin = "org.jreleaser")
     extensions.configure<JReleaserExtension> {
         project {
-            version = sdkVersion
+            version = providers.gradleProperty("sdkVersion").get()
         }
 
         // FIXME We're currently signing the artifacts twice. Once using the logic in configurePublishing above,
@@ -365,27 +374,22 @@ fun Project.configureJReleaser() {
                             artifactOverride {
                                 artifactId = "version-catalog"
                                 jar = false // Version catalogs don't produce a JAR
-                                verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tags: `Unknown packaging: toml`
+                                verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
+                            }
+                            gradle.projectsEvaluated {
+                                nativeArtifactIds.get().forEach {
+                                    artifactOverride {
+                                        artifactId = it
+                                        jar = false // Native artifacts produce klibs, not JARs
+                                        verifyPom = false // JReleaser fails when processing <packaging>klib</packaging> tag: `Unknown packaging: klib`
+                                    }
+                                }
+                                logger.info("Configured JReleaser artifact overrides for the following artifacts: ${nativeArtifactIds.get().joinToString()}")
                             }
                         }
                         maxRetries = 100
                         retryDelay = 60 // seconds
                     }
-                }
-            }
-        }
-    }
-}
-
-internal fun Project.configureJReleaserKotlinNativeOverrides() {
-    val nativePublications = tasks.withType<AbstractPublishToMaven>().filter {
-        it.publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES
-    }
-    extensions.configure<JReleaserExtension> {
-        deploy {
-            maven {
-                mavenCentral {
-
                 }
             }
         }
