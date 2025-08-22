@@ -37,6 +37,7 @@ private object EnvironmentVariables {
     const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
     const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
     const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
+    const val GENERIC_TOKEN = "JRELEASER_GENERIC_TOKEN"
 }
 
 internal val ALLOWED_PUBLICATION_NAMES = setOf(
@@ -243,10 +244,7 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
-                useInMemoryPgpKeys(
-                    secretKey,
-                    passphrase,
-                )
+                useInMemoryPgpKeys(secretKey, passphrase)
                 sign(publications)
             }
 
@@ -312,20 +310,19 @@ fun Project.configureNexus(
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
 
-    var missingVariables = false
-    listOf(
+    val requiredVariables = listOf(
         EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
         EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
         EnvironmentVariables.GPG_PASSPHRASE,
         EnvironmentVariables.GPG_PUBLIC_KEY,
         EnvironmentVariables.GPG_SECRET_KEY,
-    ).forEach {
-        if (System.getenv(it).isNullOrBlank()) {
-            missingVariables = true
-            logger.info("Skipping JReleaser configuration, missing required environment variable: $it")
-        }
+        EnvironmentVariables.GENERIC_TOKEN,
+    )
+
+    if (!requiredVariables.all { System.getenv(it).isNotBlank() }) {
+        println("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
+        return
     }
-    if (missingVariables) return
 
     // Get SDK version from gradle.properties
     val sdkVersion: String by project
@@ -336,23 +333,22 @@ fun Project.configureJReleaser() {
             version = sdkVersion
         }
 
+        // FIXME We're currently signing the artifacts twice. Once using the logic in configurePublishing above,
+        // and the second time during JReleaser's signing stage.
         signing {
             active = Active.ALWAYS
             armored = true
         }
 
-        // Used for creating a tagged release, uploading files and generating changelogs.
-        // In the future we can set this up to push release tags to GitHub, but for now it's
-        // set up to do nothing.
-        // https://jreleaser.org/guide/latest/reference/release/index.html
+        // JReleaser requires a releaser to be configured even though we don't use it.
+        // https://github.com/jreleaser/jreleaser/discussions/1725#discussioncomment-10674529
         release {
             generic {
-                enabled = true
                 skipRelease = true
             }
         }
 
-        // Used to announce a release to configured announcers.
+        // We don't announce our releases anywhere
         // https://jreleaser.org/guide/latest/reference/announce/index.html
         announce {
             active = Active.NEVER
@@ -362,14 +358,13 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
-                        active = Active.ALWAYS
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
                             artifactOverride {
                                 artifactId = "version-catalog"
-                                jar = false
-                                verifyPom = false // jreleaser doesn't understand toml packaging
+                                jar = false // Version catalogs don't produce a JAR
+                                verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tags: `Unknown packaging: toml`
                             }
                         }
                         maxRetries = 100
@@ -387,20 +382,19 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
     // Check SKIP_PUBLISH_PROP
     if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
-    // Only publish publications with the configured group from JReleaser, or everything if JReleaser group is not configured
-    val publishGroupName = System.getenv(EnvironmentVariables.GROUP_ID)
-    shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.equals(publishGroupName, ignoreCase = true))
-
+    // Allow overriding K/N publications for local development
     val overrideGroupNameValidation = project.extra.getOrNull<String>(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION) == "true"
     if (overrideGroupNameValidation) println("Overriding group name validation for Kotlin/Native publications")
 
-    // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish &&
-        (
-            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } ||
-                // standard publication
-                (ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && (overrideGroupNameValidation || ALLOWED_KOTLIN_NATIVE_GROUP_NAMES.any { publication.groupId.equals(it, ignoreCase = true) })) // Kotlin/Native publication
-            )
+    // Validate publication name
+    if (publication.name in ALLOWED_PUBLICATION_NAMES) {
+        // Standard publication
+    } else if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+        // Kotlin/Native publication
+        shouldPublish = shouldPublish && (overrideGroupNameValidation || publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES)
+    } else {
+        shouldPublish = false
+    }
 
     return shouldPublish
 }
