@@ -320,7 +320,7 @@ fun Project.configureJReleaser() {
     )
 
     if (!requiredVariables.all { System.getenv(it).isNotBlank() }) {
-        println("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
+        logger.info("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
         return
     }
 
@@ -361,6 +361,7 @@ fun Project.configureJReleaser() {
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
+                            verifyPom = false // Sonatype already verifies POMs, and JReleaser's validator is not compatible with TOML or klib types.
                             artifactOverride {
                                 artifactId = "version-catalog"
                                 jar = false // Version catalogs don't produce a JAR
@@ -370,6 +371,21 @@ fun Project.configureJReleaser() {
                         maxRetries = 100
                         retryDelay = 60 // seconds
                     }
+                }
+            }
+        }
+    }
+}
+
+internal fun Project.configureJReleaserKotlinNativeOverrides() {
+    val nativePublications = tasks.withType<AbstractPublishToMaven>().filter {
+        it.publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES
+    }
+    extensions.configure<JReleaserExtension> {
+        deploy {
+            maven {
+                mavenCentral {
+
                 }
             }
         }
