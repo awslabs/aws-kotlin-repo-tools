@@ -4,6 +4,7 @@
  */
 package aws.sdk.kotlin.gradle.dsl
 
+import aws.sdk.kotlin.gradle.util.getOrNull
 import aws.sdk.kotlin.gradle.util.verifyRootProject
 import io.github.gradlenexus.publishplugin.NexusPublishExtension
 import org.gradle.api.Project
@@ -36,6 +37,7 @@ private object EnvironmentVariables {
     const val GPG_PASSPHRASE = "JRELEASER_GPG_PASSPHRASE"
     const val GPG_PUBLIC_KEY = "JRELEASER_GPG_PUBLIC_KEY"
     const val GPG_SECRET_KEY = "JRELEASER_GPG_SECRET_KEY"
+    const val GENERIC_TOKEN = "JRELEASER_GENERIC_TOKEN"
 }
 
 internal val ALLOWED_PUBLICATION_NAMES = setOf(
@@ -56,9 +58,11 @@ internal val ALLOWED_PUBLICATION_NAMES = setOf(
     "dynamodb-mapper-schema-generatorPluginMarkerMaven",
 )
 
-internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
+internal val ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
     "iosArm64",
+    "iosSimulatorArm64",
     "iosX64",
+
     "linuxArm64",
     "linuxX64",
     "macosArm64",
@@ -66,11 +70,14 @@ internal val KOTLIN_NATIVE_PUBLICATION_NAMES = setOf(
     "mingwX64",
 )
 
-// TODO Refactor to support project names _or_ publication group names.
-// aws-crt-kotlin is not published with a group name, so we need to check project names instead.
-private val KOTLIN_NATIVE_PROJECT_NAMES = setOf(
-    "aws-crt-kotlin",
+// Group names which are allowed to publish K/N artifacts
+private val ALLOWED_KOTLIN_NATIVE_GROUP_NAMES = setOf(
+    "aws.sdk.kotlin.crt",
 )
+
+// Optional override to the above set.
+// Used to support local development where you want to run publishToMavenLocal in smithy-kotlin, aws-sdk-kotlin.
+internal const val OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION = "aws.kotlin.native.allowPublication"
 
 /**
  * Mark this project as excluded from publishing
@@ -237,10 +244,7 @@ fun Project.configurePublishing(repoName: String, githubOrganization: String = "
         if (!secretKey.isNullOrBlank() && !passphrase.isNullOrBlank()) {
             apply(plugin = "signing")
             extensions.configure<SigningExtension> {
-                useInMemoryPgpKeys(
-                    secretKey,
-                    passphrase,
-                )
+                useInMemoryPgpKeys(secretKey, passphrase)
                 sign(publications)
             }
 
@@ -306,47 +310,54 @@ fun Project.configureNexus(
 fun Project.configureJReleaser() {
     verifyRootProject { "JReleaser configuration must be applied to the root project only" }
 
-    var missingVariables = false
-    listOf(
+    val requiredVariables = listOf(
         EnvironmentVariables.MAVEN_CENTRAL_USERNAME,
         EnvironmentVariables.MAVEN_CENTRAL_TOKEN,
         EnvironmentVariables.GPG_PASSPHRASE,
         EnvironmentVariables.GPG_PUBLIC_KEY,
         EnvironmentVariables.GPG_SECRET_KEY,
-    ).forEach {
-        if (System.getenv(it).isNullOrBlank()) {
-            missingVariables = true
-            logger.info("Skipping JReleaser configuration, missing required environment variable: $it")
-        }
-    }
-    if (missingVariables) return
+        EnvironmentVariables.GENERIC_TOKEN,
+    )
 
-    // Get SDK version from gradle.properties
-    val sdkVersion: String by project
+    if (!requiredVariables.all { !System.getenv(it).isNullOrBlank() }) {
+        logger.warn("Skipping JReleaser configuration, missing one or more required environment variables: ${requiredVariables.joinToString()}")
+        return
+    }
+
+    // Collect a set of native artifact IDs from every project
+    val nativeArtifactIds = providers.provider {
+        allprojects.flatMap {
+            it.extensions.findByType(PublishingExtension::class.java)
+                ?.publications
+                ?.withType(MavenPublication::class.java)
+                ?.filter { it.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES }
+                ?.map { it.artifactId }
+                ?: emptySet()
+        }.toSet()
+    }
 
     apply(plugin = "org.jreleaser")
     extensions.configure<JReleaserExtension> {
         project {
-            version = sdkVersion
+            version = providers.gradleProperty("sdkVersion").get()
         }
 
+        // FIXME We're currently signing the artifacts twice. Once using the logic in configurePublishing above,
+        // and the second time during JReleaser's signing stage.
         signing {
             active = Active.ALWAYS
             armored = true
         }
 
-        // Used for creating a tagged release, uploading files and generating changelogs.
-        // In the future we can set this up to push release tags to GitHub, but for now it's
-        // set up to do nothing.
-        // https://jreleaser.org/guide/latest/reference/release/index.html
+        // JReleaser requires a releaser to be configured even though we don't use it.
+        // https://github.com/jreleaser/jreleaser/discussions/1725#discussioncomment-10674529
         release {
             generic {
-                enabled = true
                 skipRelease = true
             }
         }
 
-        // Used to announce a release to configured announcers.
+        // We don't announce our releases anywhere
         // https://jreleaser.org/guide/latest/reference/announce/index.html
         announce {
             active = Active.NEVER
@@ -356,14 +367,23 @@ fun Project.configureJReleaser() {
             maven {
                 mavenCentral {
                     create("maven-central") {
-                        active = Active.ALWAYS
                         url = "https://central.sonatype.com/api/v1/publisher"
                         stagingRepository(rootProject.layout.buildDirectory.dir("m2").get().toString())
                         artifacts {
                             artifactOverride {
                                 artifactId = "version-catalog"
-                                jar = false
-                                verifyPom = false // jreleaser doesn't understand toml packaging
+                                jar = false // Version catalogs don't produce a JAR
+                                verifyPom = false // JReleaser fails when processing <packaging>toml</packaging> tag: `Unknown packaging: toml`
+                            }
+                            gradle.projectsEvaluated {
+                                nativeArtifactIds.get().forEach {
+                                    artifactOverride {
+                                        artifactId = it
+                                        jar = false // Native artifacts produce klibs, not JARs
+                                        verifyPom = false // JReleaser fails when processing <packaging>klib</packaging> tag: `Unknown packaging: klib`
+                                    }
+                                }
+                                logger.info("Configured JReleaser artifact overrides for the following artifacts: ${nativeArtifactIds.get().joinToString()}")
                             }
                         }
                         maxRetries = 100
@@ -381,17 +401,22 @@ internal fun isAvailableForPublication(project: Project, publication: MavenPubli
     // Check SKIP_PUBLISH_PROP
     if (project.extra.has(Properties.SKIP_PUBLISHING)) shouldPublish = false
 
-    // Only publish publications with the configured group from JReleaser or everything if JReleaser group is not configured
-    val publishGroupName = System.getenv(EnvironmentVariables.GROUP_ID)
-    shouldPublish = shouldPublish && (publishGroupName == null || publication.groupId.startsWith(publishGroupName))
+    // Allow overriding K/N publications for local development
+    val overrideGroupNameValidation = project.extra.getOrNull<String>(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION) == "true"
 
-    // Validate publication name is allowed to be published
-    shouldPublish = shouldPublish &&
-        (
-            ALLOWED_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } ||
-                // standard publication
-                (KOTLIN_NATIVE_PUBLICATION_NAMES.any { publication.name.equals(it, ignoreCase = true) } && KOTLIN_NATIVE_PROJECT_NAMES.any { project.name.equals(it, ignoreCase = true) }) // Kotlin/Native publication
-            )
+    // Validate publication name
+    if (publication.name in ALLOWED_PUBLICATION_NAMES) {
+        // Standard publication
+    } else if (publication.name in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+        // Kotlin/Native publication
+        if (overrideGroupNameValidation && publication.groupId !in ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES) {
+            println("Overriding K/N publication, project=${project.name}; publication=${publication.name}; group=${publication.groupId}")
+        } else {
+            shouldPublish = shouldPublish && publication.groupId in ALLOWED_KOTLIN_NATIVE_GROUP_NAMES
+        }
+    } else {
+        shouldPublish = false
+    }
 
     return shouldPublish
 }

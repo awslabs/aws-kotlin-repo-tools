@@ -7,6 +7,7 @@ package aws.sdk.kotlin.gradle.dsl
 import kotlinx.coroutines.test.runTest
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.internal.extensions.core.extra
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -32,7 +33,7 @@ class PublishTest {
                 assertTrue(isAvailableForPublication(project, jvmRuntimePublication))
             }
 
-            KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
+            ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
                 val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
                     groupId = "aws.sdk.kotlin.crt"
                     version = "1.2.3"
@@ -62,7 +63,7 @@ class PublishTest {
                 assertTrue(isAvailableForPublication(project, jvmRuntimePublication))
             }
 
-            KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
+            ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
                 val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
                     groupId = "aws.sdk.kotlin"
                     version = "1.2.3"
@@ -92,7 +93,69 @@ class PublishTest {
                 assertTrue(isAvailableForPublication(project, jvmRuntimePublication))
             }
 
-            KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
+            ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
+                val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
+                    groupId = "aws.smithy.kotlin"
+                    version = "1.2.3"
+                    artifactId = "runtime"
+                }
+                assertFalse(isAvailableForPublication(project, nativeRuntimePublication))
+            }
+        }
+    }
+
+    @Test
+    fun `users can override smithy-kotlin publication`() = runTest {
+        val project = ProjectBuilder.builder().withName("aws-smithy-kotlin").build()
+        project.group = "aws.smithy.kotlin"
+        project.version = "1.2.3"
+        project.extra.set(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION, "true")
+
+        project.configurePublishing("smithy-kotlin", "smithy-lang")
+
+        val publishing = project.extensions.getByType(PublishingExtension::class.java)
+        publishing.publications {
+            ALLOWED_PUBLICATION_NAMES.forEach {
+                val jvmRuntimePublication = create(it, MavenPublication::class.java).apply {
+                    groupId = "aws.smithy.kotlin"
+                    version = "1.2.3"
+                    artifactId = "runtime"
+                }
+                assertTrue(isAvailableForPublication(project, jvmRuntimePublication))
+            }
+
+            ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
+                val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
+                    groupId = "aws.smithy.kotlin"
+                    version = "1.2.3"
+                    artifactId = "runtime"
+                }
+                assertTrue(isAvailableForPublication(project, nativeRuntimePublication))
+            }
+        }
+    }
+
+    @Test
+    fun `override only works when set to true`() = runTest {
+        val project = ProjectBuilder.builder().withName("aws-smithy-kotlin").build()
+        project.group = "aws.smithy.kotlin"
+        project.version = "1.2.3"
+        project.extra.set(OVERRIDE_KOTLIN_NATIVE_GROUP_NAME_VALIDATION, "this is not true")
+
+        project.configurePublishing("smithy-kotlin", "smithy-lang")
+
+        val publishing = project.extensions.getByType(PublishingExtension::class.java)
+        publishing.publications {
+            ALLOWED_PUBLICATION_NAMES.forEach {
+                val jvmRuntimePublication = create(it, MavenPublication::class.java).apply {
+                    groupId = "aws.smithy.kotlin"
+                    version = "1.2.3"
+                    artifactId = "runtime"
+                }
+                assertTrue(isAvailableForPublication(project, jvmRuntimePublication))
+            }
+
+            ALLOWED_KOTLIN_NATIVE_PUBLICATION_NAMES.forEach {
                 val nativeRuntimePublication = create(it, MavenPublication::class.java).apply {
                     groupId = "aws.smithy.kotlin"
                     version = "1.2.3"
