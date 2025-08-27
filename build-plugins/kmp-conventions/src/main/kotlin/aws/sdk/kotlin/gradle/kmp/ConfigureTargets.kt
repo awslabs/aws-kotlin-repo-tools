@@ -109,10 +109,19 @@ fun Project.configureKmpTargets() {
 
         if (NATIVE_ENABLED) {
             if ((hasApple || hasDesktop) && HostManager.hostIsMac) {
-                kmpExt.apply { configureApple() }
+                if (group == "aws.sdk.kotlin.crt") {
+                    kmpExt.apply { configureApple() }
+                } else {
+                    println("Skipping configuration of Apple targets for unsupported project: $group")
+                }
             }
             if ((hasWindows || hasDesktop) && HostManager.hostIsMingw) {
-                kmpExt.apply { configureWindows() }
+                if (group == "aws.sdk.kotlin.crt") {
+                    kmpExt.apply { configureWindows() }
+                } else {
+                    println("Skipping configuration of Windows target for unsupported project: $group")
+                }
+
             }
             if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
                 if (group == "aws.sdk.kotlin.crt") { // TODO Remove special-casing once K/N is released across the entire project
