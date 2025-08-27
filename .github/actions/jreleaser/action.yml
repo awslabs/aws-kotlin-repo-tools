@@ -1,0 +1,29 @@
+# TODO: Delete this action when we migrate off JReleaser for all our releases
+
+name: JReleaser check
+description: Smoke tests that checks our jreleaser release command works
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure Gradle
+      uses: awslabs/aws-kotlin-repo-tools/.github/actions/configure-gradle@main
+
+    - name: Test jreleaserFullRelease
+      shell: bash
+      run: |
+        JRELEASER_PROJECT_JAVA_GROUP_ID="com.sonatype.central.testing.amazon"
+        JRELEASER_MAVENCENTRAL_STAGE="UPLOAD"
+        
+        JRELEASER_MAVENCENTRAL_USERNAME="foobar"
+        JRELEASER_MAVENCENTRAL_TOKEN="foobar"
+        
+        JRELEASER_GENERIC_TOKEN="foobar"
+        
+        JRELEASER_GPG_PASSPHRASE="foobar"
+        JRELEASER_GPG_PUBLIC_KEY="foobar"
+        JRELEASER_GPG_SECRET_KEY="foobar"
+        
+        ./gradlew jreleaserFullRelease --dryrun
