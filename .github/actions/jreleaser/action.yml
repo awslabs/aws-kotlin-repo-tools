@@ -26,4 +26,4 @@ runs:
         export JRELEASER_GPG_PUBLIC_KEY="foobar"
         export JRELEASER_GPG_SECRET_KEY="foobar"
         
-        ./gradlew jreleaserFullRelease --dryrun
+        ./gradlew jreleaserFullRelease --dryrun -Pjreleaser.signing=false
