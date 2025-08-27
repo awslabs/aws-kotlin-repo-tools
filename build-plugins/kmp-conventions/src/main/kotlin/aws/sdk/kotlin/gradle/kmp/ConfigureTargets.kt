@@ -121,7 +121,6 @@ fun Project.configureKmpTargets() {
                 } else {
                     println("Skipping configuration of Windows target for unsupported project: $group")
                 }
-
             }
             if ((hasLinux || hasDesktop) && HostManager.hostIsLinux) {
                 if (group == "aws.sdk.kotlin.crt") { // TODO Remove special-casing once K/N is released across the entire project
